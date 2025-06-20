@@ -1,0 +1,18 @@
+[
+  {
+    "nombre": "Orco",
+    "salud": 60,
+    "ataque": 12,
+    "defensa": 5,
+    "loot1": "Pocion Milagrosa",
+    "loot2": "Sopladora"
+  },
+  {
+    "nombre": "Goblin",
+    "salud": 40,
+    "ataque": 8,
+    "defensa": 3,
+    "loot1": "Pocion Milagrosa",
+    "loot2": "Aire siniestro"
+  }
+]

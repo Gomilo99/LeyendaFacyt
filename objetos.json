@@ -1,0 +1,32 @@
+[
+    {
+        "tipo": "Arma",
+        "nombre": "Espada Gallo",
+        "descripcion": "Una espada forjada bajo inflacion y ajustes de precio",
+        "dano": 10
+    },
+    {
+        "tipo": "Arma",
+        "nombre": "Sopladora",
+        "descripcion": "Cuando se empuña se siente un aire de superioridad",
+        "dano": 14
+    },
+    {
+        "tipo": "Arma",
+        "nombre": "Matagochas",
+        "descripcion": "Ni el frio del paramo podra contra su filo",
+        "dano": 20
+    },
+    {
+        "tipo": "Pocion",
+        "nombre": "Pocion Milagrosa",
+        "descripcion": "Una pocion de diclofenac potasico",
+        "curacion": 15
+    },
+    {
+        "tipo": "Objeto Clave",
+        "nombre": "Aire siniestro",
+        "descripcion": "Un aire que huele a owo y corrupción"
+
+    }
+]
