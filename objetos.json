@@ -28,5 +28,12 @@
         "nombre": "Aire siniestro",
         "descripcion": "Un aire que huele a owo y corrupción"
 
+    },
+    {
+        "tipo": "Arma",
+        "nombre": "Dildo rosadito",
+        "descripcion": "La de luca: Mi guevo con peluca",
+        "dano": 20
+
     }
 ]

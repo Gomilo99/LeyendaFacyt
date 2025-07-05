@@ -8,7 +8,10 @@
 #include <fstream>
 #include <map>
 #include <memory>
+#include <cctype>
 #include "json.hpp"
+//#include <curses> //Linux
+//#include <conio.h> //para windows
 // This project is a simple turn-based battle game in C++
 // where a player can attack enemies or use potions to heal.
 
@@ -120,7 +123,7 @@ class Jugador : public Personaje {
 
     public:
     Jugador(string nombre)
-        : Personaje(nombre, 100, 15, 10), pociones(3), armaEquipada(nullptr) {}
+        : Personaje(nombre, 100, 15, 10), pociones(3), armaEquipada(NULL) {}
 
     void atacar(Personaje* objetivo) override {
         cout << nombre << " Atacas a " << objetivo->getNombre() << "!\n";
@@ -160,6 +163,7 @@ class Jugador : public Personaje {
     void agregarObjeto(shared_ptr<Objeto> objeto){
         string nombre = objeto->getNombre();
         inventario[nombre]++;
+        //por que? Violacion de memoria :'(
 
         auto arma = std::dynamic_pointer_cast<Arma>(objeto);
         if (arma) {
@@ -283,34 +287,15 @@ map<string, shared_ptr<Enemigo>> cargarEnemigosDesdeJSON(
         return enemigos;
     }
 
-int main() {
-    // Cargar objetos desde el archivo JSON
-    map<string, shared_ptr<Objeto>> objetos = cargarObjetosDesdeJSON("objetos.json");
-    if (objetos.empty()) {
-        cerr << "No se pudieron cargar los objetos desde el archivo JSON.\n";
-        return 1;
-    }
-    map<string, shared_ptr<Enemigo>> enemigos = cargarEnemigosDesdeJSON("enemigos.json", objetos);
-    if (enemigos.empty()) {
-        cerr << "No se pudieron cargar los enemigos desde el archivo JSON.\n";
-        return 1;
-    }
-
-    srand(static_cast<unsigned>(time(nullptr)));
-    
-    Jugador jugador("Heroe");
-    auto itEspada = objetos.find("Espada Gallo");
-    if (itEspada != objetos.end()) {
-        jugador.equiparArma(dynamic_pointer_cast<Arma>(itEspada->second));
-    } else {
-        cout << "No se encontró la espada en el inventario.\n";
-    }
-    
+    void batalla(Jugador jugador, map<string, shared_ptr<Enemigo>> enemigos){
+        system("clear");
     // Seleccionar un enemigo aleatorio del mapa
     int idx = rand() % enemigos.size();
     auto it = enemigos.begin();
     std::advance(it, idx);
     auto enemigo = it->second;
+
+
     cout << "Un " << enemigo->getNombre() << " ha aparecido!\n";
 
     cout << "¡Comienza la batalla!\n";
@@ -333,7 +318,7 @@ int main() {
                 break;
             case 4: 
                 jugador.mostrarEstado();
-                break;
+                continue;
             default:
                 cout << "Opción inválida!\n";
                 continue; // Volver al menú sin hacer nada más
@@ -346,7 +331,7 @@ int main() {
 
     if(!jugador.estaVivo()) {
             cout << "Has sido derrotado por " << enemigo->getNombre() << "!\n";
-            return 0; // Terminar el juego si el jugador muere
+            return; // Terminar el juego si el jugador muere
     }
     cout << "\n\nHAS DERROTADO A " << enemigo->getNombre() << "!\n";
 
@@ -364,6 +349,47 @@ int main() {
     if (lootGanado) {
         cout << "Has obtenido: " << lootGanado->getNombre() << "\n";
         jugador.agregarObjeto(shared_ptr<Objeto>(lootGanado));
+    }
+    delete &enemigo;
+    limpiarBuffer();
+    cout << "\n\nQuieres seguir jugando? (s/n) ";
+    char opcion2;
+    cin >> opcion2;
+    if(opcion2 == 's' || opcion2 == 'S'){
+        batalla(jugador, enemigos);
+    }
+    system("clear");
+    cout << "\nMuchas gracias por Jugar";
+    return;
+
+}
+int main() {
+    // Cargar objetos desde el archivo JSON
+    map<string, shared_ptr<Objeto>> objetos = cargarObjetosDesdeJSON("objetos.json");
+    if (objetos.empty()) {
+        cerr << "No se pudieron cargar los objetos desde el archivo JSON.\n";
+        return 1;
+    }
+    map<string, shared_ptr<Enemigo>> enemigos = cargarEnemigosDesdeJSON("enemigos.json", objetos);
+    if (enemigos.empty()) {
+        cerr << "No se pudieron cargar los enemigos desde el archivo JSON.\n";
+        return 1;
+    }
+
+    srand(static_cast<unsigned>(time(NULL)));
+    
+    Jugador jugador("Heroe");
+    auto itEspada = objetos.find("Espada Gallo");
+    if (itEspada != objetos.end()) {
+        jugador.equiparArma(dynamic_pointer_cast<Arma>(itEspada->second));
+    } else {
+        cout << "No se encontró la espada en el inventario.\n";
+    }
+
+    batalla(jugador, enemigos);
+    if(!jugador.estaVivo()) {
+            cout << "\n\nGAME OVER";
+            return 0; // Terminar el juego si el jugador muere
     }
     
     return 0;
