@@ -1,26 +1,205 @@
-[
-  {
-    "nombre": "Orco",
-    "salud": 60,
-    "ataque": 12,
-    "defensa": 5,
-    "loot1": "Pocion Milagrosa",
-    "loot2": "Sopladora"
-  },
-  {
-    "nombre": "Goblin",
-    "salud": 40,
-    "ataque": 8,
-    "defensa": 3,
-    "loot1": "Pocion Milagrosa",
-    "loot2": "Aire siniestro"
-  },
-  {
-    "nombre": "Carlos",
-    "salud": 100,
-    "ataque": 15,
-    "defensa":5,
-    "loot1": "Dildo rosadito",
-    "loot2": "Pocion Milagrosa"
-  }
-]
+{
+  "1": [
+    {
+      "nombre": "Goblin",
+      "salud": 40,
+      "ataque": 8,
+      "defensa": 3,
+      "loot1": "Pocion Milagrosa",
+      "loot2": "Aire siniestro"
+    },
+    {
+      "nombre": "Orco",
+      "salud": 60,
+      "ataque": 12,
+      "defensa": 5,
+      "loot1": "Pocion Milagrosa",
+      "loot2": "Sopladora"
+    },
+    {
+      "nombre": "Slime de Cafe Vencido",
+      "salud": 70,
+      "ataque": 10,
+      "defensa": 3,
+      "loot1": "Expreso",
+      "loot2": "Expreso"
+    },
+    {
+      "nombre": "Murcielago Rascao",
+      "salud": 65,
+      "ataque": 9,
+      "defensa": 2,
+      "loot1": "Alka-Seltzer",
+      "loot2": "Alka-Seltzer"
+    },
+    {
+      "nombre": "Zombie del Lunes",
+      "salud": 80,
+      "ataque": 12,
+      "defensa": 6,
+      "loot1": "Expreso",
+      "loot2": "La Taza de Cafe Rancia"
+    }
+  ],
+
+  "2": [
+    {
+      "nombre": "Fantasma",
+      "salud": 85,
+      "ataque": 13,
+      "defensa": 4,
+      "loot1": "Expreso",
+      "loot2": "El Llavero Perdido"
+    },
+    {
+      "nombre": "Fantasma del Visto",
+      "salud": 90,
+      "ataque": 15,
+      "defensa": 4,
+      "loot1": "Pocion de Pensamiento Critico",
+      "loot2": "El Teléfono Sin Bateria"
+    },
+    {
+      "nombre": "Esqueleto",
+      "salud": 95,
+      "ataque": 14,
+      "defensa": 5,
+      "loot1": "Expreso",
+      "loot2": "El Reloj Detenido"
+    },
+    {
+      "nombre": "Carlos",
+      "salud": 100,
+      "ataque": 15,
+      "defensa": 5,
+      "loot1": "Pocion Milagrosa",
+      "loot2": "Dildo"
+    },
+    {
+      "nombre": "Golem de Plastilina Seca",
+      "salud": 85,
+      "ataque": 14,
+      "defensa": 6,
+      "loot1": "Suavitel",
+      "loot2": "El Rodillo de Amasar"
+    },
+    {
+      "nombre": "Golem de Facturas",
+      "salud": 90,
+      "ataque": 10,
+      "defensa": 12,
+      "loot1": "Adblock",
+      "loot2": "La Pluma de la Deuda"
+    },
+    {
+      "nombre": "Bruja Joe Francisco",
+      "salud": 100,
+      "ataque": 20,
+      "defensa": 5,
+      "loot1": "Pocion de Lagrimas Cachondas",
+      "loot2": "La Cuchara de la Desesperación"
+    },
+    {
+      "nombre": "Cajero Automatico",
+      "salud": 120,
+      "ataque": 25,
+      "defensa": 8,
+      "loot1": "Tarjeta de Credito Ilimitada",
+      "loot2": "El Lector de Tarjetas"
+    },
+    {
+      "nombre": "Gargola del Wi-Fi",
+      "salud": 130,
+      "ataque": 18,
+      "defensa": 7,
+      "loot1": "Expreso",
+      "loot2": "El Router Roto"
+    },
+    {
+      "nombre": "Caballero del Control Remoto",
+      "salud": 135,
+      "ataque": 19,
+      "defensa": 9,
+      "loot1": "Expreso",
+      "loot2": "La Espada del Zapping"
+    },
+    {
+      "nombre": "Caballero de la Basura",
+      "salud": 140,
+      "ataque": 17,
+      "defensa": 9,
+      "loot1": "Suavitel",
+      "loot2": "La Pala de Recogida"
+    },
+    {
+      "nombre": "Caballero Cebolla",
+      "salud": 150,
+      "ataque": 20,
+      "defensa": 10,
+      "loot1": "Pocion de Lagrimas Cachondas",
+      "loot2": "Espada del Descongelamiento"
+    }
+  ],
+
+  "3": [
+    {
+      "nombre": "Dragon Pubico",
+      "salud": 160,
+      "ataque": 22,
+      "defensa": 11,
+      "loot1": "Suavitel",
+      "loot2": "El Aspirador del Vacío"
+    },
+    {
+      "nombre": "Golem de Ropa Sucia",
+      "salud": 165,
+      "ataque": 21,
+      "defensa": 10,
+      "loot1": "Suavitel",
+      "loot2": "La Lavadora de Almas"
+    },
+    {
+      "nombre": "Ogro Procrastinador",
+      "salud": 170,
+      "ataque": 24,
+      "defensa": 13,
+      "loot1": "Adblock",
+      "loot2": "El Mazo"
+    },
+    {
+      "nombre": "Duende Cable Pelao",
+      "salud": 60,
+      "ataque": 8,
+      "defensa": 2,
+      "loot1": "Alka-Seltzer",
+      "loot2": "Alka-Seltzer"
+    },
+    {
+      "nombre": "Ciclope miope",
+      "salud": 180,
+      "ataque": 28,
+      "defensa": 15,
+      "loot1": "Pocion de Pensamiento Critico",
+      "loot2": "Ojo miope"
+    },
+    {
+      "nombre": "Espectro Rojo",
+      "salud": 75,
+      "ataque": 11,
+      "defensa": 3,
+      "loot1": "Adblock",
+      "loot2": "El Banner Ineludible"
+    }
+  ],
+
+  "4": [
+    {
+      "nombre": "El Gran Administrador del Servidor Caido",
+      "salud": 500,
+      "ataque": 40,
+      "defensa": 25,
+      "loot1": "Pocion Cubana",
+      "loot2": "La Espada del Código Fuente"
+    }
+  ]
+}

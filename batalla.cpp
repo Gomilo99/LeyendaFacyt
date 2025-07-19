@@ -10,6 +10,8 @@
 #include <memory>
 #include <cctype>
 #include "json.hpp"
+#include <windows.h>
+// #include <unistd.h> //Linux 
 //#include <curses> //Linux
 //#include <conio.h> //para windows
 // This project is a simple turn-based battle game in C++
@@ -30,7 +32,7 @@ class Objeto {
         : nombre(nombre), descripcion(descripcion) {}
         
         virtual ~Objeto() = default;
-        virtual string tipo() const { return "Generico"; }
+        virtual string getTipo() const { return "Generico"; }
         string getNombre() const { return nombre; }
         string getDescripcion() const { return descripcion; }
         
@@ -44,8 +46,11 @@ class Arma : public Objeto {
     Arma(string nombre, string descripcion, int dano)
         : Objeto(nombre, descripcion), dano(dano) {}
 
-    string tipo() const override { return "Arma"; }
+    string getTipo() const override { return "Arma"; }
     int getDano() const { return dano; }
+    void setDano(int nuevoDano) {
+        dano = nuevoDano;
+    }
 };
 class Pocion : public Objeto {
     private:
@@ -55,21 +60,24 @@ class Pocion : public Objeto {
     Pocion(string nombre, string descripcion, int curacion)
         : Objeto(nombre, descripcion), curacion(curacion) {}
 
-    string tipo() const override { return "Pocion"; }
+    string getTipo() const override { return "Pocion"; }
     int getCuracion() const { return curacion; }
+    void setCuracion(int nuevaCuracion) {
+        curacion = nuevaCuracion;
+    }
 };
 class ObjClave : public Objeto {
     public:
     ObjClave(string nombre, string descripcion)
         : Objeto(nombre, descripcion) {}
-        string tipo() const override { return "Objeto Clave"; }
+        string getTipo() const override { return "Objeto Clave"; }
 };
 
 struct Drop{
-    Objeto* objeto;
+    shared_ptr<Objeto> objeto;
     int probabilidad;
 
-    Drop(Objeto* objeto, int probabilidad)
+    Drop(shared_ptr<Objeto> objeto, int probabilidad)
         : objeto(objeto), probabilidad(probabilidad) {}
 };
 
@@ -82,11 +90,14 @@ class Personaje{
     int saludMaxima;
     int ataque;
     int defensa;
+    int nivel;
 
     public:
-    Personaje(string nombre, int salud, int ataque, int defensa)
-        : nombre(nombre), salud(salud), saludMaxima(salud), ataque(ataque), defensa(defensa){}
-
+    Personaje(string nom, int hp, int atk, int def, int lvl)
+        : nombre(nom), salud(hp), saludMaxima(hp), ataque(atk), defensa(def), nivel(lvl) {}
+    Personaje(const Personaje& copia) 
+        : nombre(copia.nombre), salud(copia.salud), saludMaxima(copia.saludMaxima),
+            ataque(copia.ataque), defensa(copia.defensa), nivel(copia.nivel) {}
         virtual ~Personaje() {}
         virtual void atacar(Personaje* objetivo) = 0;
 
@@ -98,11 +109,11 @@ class Personaje{
                 danoReal = max(1, dano - defensa);
             }
             salud -= danoReal;
-            cout << nombre << " recibe " << danoReal << " de daño!\n";
+            cout << nombre << " recibe " << danoReal << " de dano!\n";
         }
         
         virtual void mostrarEstado() {
-            cout << nombre << " - Salud: " << salud << "/" << saludMaxima 
+            cout << "\n" << nombre << " - Salud: " << salud << "/" << saludMaxima 
             << " | Ataque: " << ataque << " | Defensa: " << defensa << endl;
         }
 
@@ -111,6 +122,13 @@ class Personaje{
         int getSalud() const { return salud; }
         int getAtaque() const { return ataque; }
         int getDefensa() const { return defensa; }
+        int getNivel() const { return nivel; }
+
+        void setSalud(int nuevaSalud) { salud = nuevaSalud; }
+        void setAtaque(int nuevoAtaque) { ataque = nuevoAtaque; }
+        void setDefensa(int nuevaDefensa) { defensa = nuevaDefensa; }
+        void setNivel(int nuevoNivel) { nivel = nuevoNivel; }
+
 
         };
 
@@ -118,65 +136,119 @@ class Personaje{
 class Jugador : public Personaje {
     private:
     int pociones;
-    map<string, int> inventario;
+    map<string, int> inventario; // nombre -> cantidad
+    map<string, shared_ptr<Objeto>> objetosInventario;// nombre -> objeto
     shared_ptr<Arma> armaEquipada;
-
+    int experiencia; // Experiencia del jugador
+    int expNecesaria = 100; // Experiencia necesaria para subir de nivel
     public:
     Jugador(string nombre)
-        : Personaje(nombre, 100, 15, 10), pociones(3), armaEquipada(NULL) {}
+        : Personaje(nombre, 100, 15, 10, 1), pociones(3), armaEquipada(NULL), experiencia(0) {}
+    Jugador(string nom, int hp, int atk, int def, int lvl, int poc)
+        : Personaje(nom, hp, atk, def, lvl), pociones(poc), armaEquipada(NULL), experiencia(0)
+        {}
 
     void atacar(Personaje* objetivo) override {
         cout << nombre << " Atacas a " << objetivo->getNombre() << "!\n";
         objetivo->recibirDano(ataque);
     }
+    int getExperiencia() const { return experiencia; }
+    void setExperiencia(int nuevaExperiencia) { experiencia = nuevaExperiencia; }
+    int getExperienciaNecesaria() const { return expNecesaria; }
+    void setExperienciaNecesaria(int nuevaExpNecesaria) { expNecesaria = nuevaExpNecesaria; }
+
+    int getPociones() const { return pociones; }
+    void setPociones(int nuevasPociones) { pociones = nuevasPociones; }
+
 
     void usarPocion(){
         if(pociones > 0){
             int curacion = 30;
             salud = min(salud + curacion, saludMaxima);
             pociones--;
-            cout << "Usas una poción. Salud recuperdad: +" << curacion << endl;
+            cout << "Usas una pocion. Salud recuperdad: +" << curacion << endl;
         } else {
             cout << "No tienes pociones restantes!\n";
         }
         }
-
-    virtual void mostrarEstado() override {
-            cout << nombre << " - Salud: " << salud << "/" << saludMaxima 
-            << " | Ataque: " << ataque << " | Defensa: " << defensa 
-            << "\nArma equipada: " << armaEquipada->getNombre() << "| daño: " 
-            << armaEquipada->getDano() << endl;
+    void usarPocion(Objeto* pocion){
+        auto pocionPtr = dynamic_cast<Pocion*>(pocion);
+        if (pocionPtr) {
+            int curacion = pocionPtr->getCuracion();
+            salud = min(salud + curacion, saludMaxima);
+            cout << "\n" << "Salud recuperada: +" << curacion << endl;
+        } else {
+            cout << "\nEl objeto no es una pocion valida.\n";
         }
+    }
+    virtual void mostrarEstado() override {
+            cout << "\n" << nombre << " - Salud: " << salud << "/" << saludMaxima 
+            << " | Ataque: " << ataque << " | Defensa: " << defensa 
+            << "\nArma equipada: " << armaEquipada->getNombre() << "| dano: " 
+            << armaEquipada->getDano() << "\nNivel: " << nivel <<" | Experiencia: " << experiencia 
+            << "/" << expNecesaria << endl;
+    }
     void mostrarInventario(){
         cout << "Inventario:\n";
         for (const auto& par : inventario) {
-            cout << "- " << par.first << " x" << par.second << "\n";
+            cout << "- " << par.first << " x" << par.second << "\n"
+            << objetosInventario[par.first]->getDescripcion() << endl;
         }
         if(armaEquipada){
-            cout << "Arma equipada: " << armaEquipada->getNombre() 
-                 << " (" << armaEquipada->getDano() << " de daño)\n";
+            cout << "\nArma equipada: " << armaEquipada->getNombre() 
+                 << " (" << armaEquipada->getDano() << " de dano)\n" 
+                 << armaEquipada->getDescripcion() << endl;
         } else {
             cout << "No tienes un arma equipada.\n";
         }
-    };
-    
+        string seleccion;
+        cout << "Deseas usar un objeto? (s/n): ";
+        cin >> seleccion;
+        cout << endl;
+        if(seleccion == "s" || seleccion == "S") {
+            string nombreObjeto;
+            cout << "\nIngresa el nombre del objeto: ";
+            cin >> nombreObjeto;
+            auto itObj = objetosInventario.find(nombreObjeto);
+            if (itObj != objetosInventario.end()) {
+                usarPocion(itObj->second.get());
+                eliminarObjeto(nombreObjeto);
+            } else {
+                cout << "No tienes ese objeto en tu inventario.\n";
+            }
+        }
+    }
     void agregarObjeto(shared_ptr<Objeto> objeto){
         string nombre = objeto->getNombre();
         inventario[nombre]++;
-        //por que? Violacion de memoria :'(
+        objetosInventario[nombre] = objeto;
 
-        auto arma = std::dynamic_pointer_cast<Arma>(objeto);
+        auto arma = dynamic_pointer_cast<Arma>(objeto);
         if (arma) {
-            cout << "Has equipado el arma: " << arma->getNombre() << " (" << arma->getDano() << " de daño).\n";
-            cout << "Deseas equiparla? (s/n(: ";
-        char r;
-        cin >> r;
-        if(r == 's' || r == 'S') {
-            equiparArma(arma);
+            cout << "Has encontrado el arma: " << arma->getNombre() << " (" << arma->getDano() << " de daño).\n";
+            cout << "¿Deseas equiparla? (s/n): ";
+            char r;
+            cin >> r;
+            if(r == 's' || r == 'S') {
+                equiparArma(arma);
+            }
         }
-    } 
     }
-    void equiparArma(shared_ptr<Arma> nuevaArma) {
+    void eliminarObjeto(const string& nombre){
+        auto it = inventario.find(nombre);
+        if (it != inventario.end()) {
+            it->second -= 1;
+            if (it->second <= 0) {
+                inventario.erase(it);
+                objetosInventario.erase(nombre);
+            }
+            //cout << "Has usado: " << nombre << " .\n";
+        } else {
+            cout << "No tienes ese objeto en tu inventario.\n";
+        }
+    };
+    
+    void equiparArma(shared_ptr<Arma> nuevaArma){
         if(armaEquipada){
             ataque -= armaEquipada->getDano();
         }
@@ -184,7 +256,7 @@ class Jugador : public Personaje {
         ataque += nuevaArma->getDano();
         cout << "Has equipado el arma: " << nuevaArma->getNombre() << "\n";
         }
-    
+
     void mostrarMenu(){
         cout << "\n--- Turno del Jugador ---\n";
         cout << "1. Atacar\n";
@@ -193,6 +265,27 @@ class Jugador : public Personaje {
         cout << "4. Ver estado\n";
         cout << "Elige una opcion: ";
     }
+    void obtenerExperiencia(int cantidad) {
+        experiencia += cantidad;
+        cout << "Has ganado " << cantidad << " de experiencia!\n";
+
+        if(experiencia >= expNecesaria){
+            cout << "Has subido de nivel!\n";
+            saludMaxima += 50*(nivel + 1); // Aumentar salud máxima al subir de nivel
+            salud = saludMaxima; // Restaurar salud al subir de nivel
+            defensa += 5*(nivel + 1); // Aumentar defensa al subir de nivel
+            ataque += 5*(nivel + 1); // Aumentar ataque al subir de nivel
+            nivel++;
+            expNecesaria += 200;
+            if(nivel == 3) expNecesaria = 700;
+
+            cout << "Subida de Estadisticas!!\n";
+            cout << "Nivel: " << nivel << " | Salud: " << salud << "/" << saludMaxima 
+                 << " | Ataque: " << ataque << " | Defensa: " << defensa 
+                 << " | Experiencia: " << experiencia << "/" << expNecesaria << endl;
+        }
+    }
+
 };
 
 // Clase Derivada Enemigo
@@ -200,9 +293,11 @@ class Enemigo : public Personaje {
     private:
     Drop loot1, loot2;
     public:
-    Enemigo(string nombre, int salud, int ataque, int defensa, Drop loot1, Drop loot2)
-        : Personaje(nombre, salud, ataque, defensa), loot1(loot1), loot2(loot2) {}
-    
+    Enemigo(string nom, int hp, int atk, int def, int lvl, Drop d1, Drop d2)
+        : Personaje(nom, hp, atk, def, lvl), loot1(d1), loot2(d2) {}
+    Enemigo(const Enemigo& copia)
+        : Personaje(copia), loot1(copia.loot1), loot2(copia.loot2) {}
+
     void atacar(Personaje* objetivo) override {
         cout << nombre << " te ataca!\n";
         objetivo->recibirDano(ataque);
@@ -224,173 +319,250 @@ void limpiarBuffer(){
 map<string, shared_ptr<Objeto>> cargarObjetosDesdeJSON(const string& archivo){
     map<string, shared_ptr<Objeto>> objetos;
     ifstream file(archivo);
+
     json j;
     file >> j;
-    if (!file.is_open()) {
-        cerr << "Error al abrir el archivo: " << archivo << endl;
-        return objetos;
-    }
     
-    for (const auto& item : j) {
-        string tipo = item["tipo"];
-        string nombre = item["nombre"];
-        string descripcion = item["descripcion"];
-
-        if (tipo == "Arma") {
+    // Leer armas
+    if (j.contains("arma")) {
+        for (const auto& item : j["arma"]) {
+            string nombre = item["nombre"];
+            string descripcion = item["descripcion"];
             int dano = item["dano"];
             objetos[nombre] = make_shared<Arma>(nombre, descripcion, dano);
-        } else if (tipo == "Pocion") {
+        }
+    }
+    // Leer pociones
+    if (j.contains("pocion")) {
+        for (const auto& item : j["pocion"]) {
+            string nombre = item["nombre"];
+            string descripcion = item["descripcion"];
             int curacion = item["curacion"];
             objetos[nombre] = make_shared<Pocion>(nombre, descripcion, curacion);
-        } else if (tipo == "Objeto Clave") {
+        }
+    }
+    // Leer objetos clave
+    if (j.contains("clave")) {
+        for (const auto& item : j["clave"]) {
+            string nombre = item["nombre"];
+            string descripcion = item["descripcion"];
             objetos[nombre] = make_shared<ObjClave>(nombre, descripcion);
         }
     }
-
     file.close();
     return objetos;
 }
-map<string, shared_ptr<Enemigo>> cargarEnemigosDesdeJSON(
-    const string& archivo, 
+map<string, shared_ptr<Enemigo>> cargarEnemigosDesdeJSON( const string& archivo, 
     const map<string, shared_ptr<Objeto>>& objetosDisponibles)
     {
         map<string, shared_ptr<Enemigo>> enemigos;
         ifstream file(archivo);
-        if(!file.is_open()) {
-            throw std::runtime_error("No se pudo arbir la lista de enemigos");
-        }
-
         json j;
         file >> j;
 
-        for (const auto& item: j){
-            string nombre = item["nombre"];
-            int salud = item["salud"];
-            int ataque = item["ataque"];
-            int defensa = item["defensa"];
-            string nombreLoot1 = item["loot1"];
-            string nombreLoot2 = item["loot2"];
+        for (auto it = j.begin(); it != j.end(); ++it) {
+            // nivel actual (puedes guardarlo si te interesa para otra lógica)
+            int nivel = stoi(it.key()); //Convierte una clave de string a int
+            for (const auto& item : it.value()) {
+                string nombre = item["nombre"];
+                int salud = item["salud"];
+                int ataque = item["ataque"];
+                int defensa = item["defensa"];
+                string nombreLoot1 = item["loot1"];
+                string nombreLoot2 = item["loot2"];
 
-            auto it1 = objetosDisponibles.find(nombreLoot1);
-            auto it2 = objetosDisponibles.find(nombreLoot2);
-            if (it1 == objetosDisponibles.end() || it2 == objetosDisponibles.end()) {
-                throw std::runtime_error("Objeto no encontrado: " + nombreLoot1 + " o " + nombreLoot2);
-                continue; // O puedes lanzar una excepción
+                auto it1 = objetosDisponibles.find(nombreLoot1);
+                auto it2 = objetosDisponibles.find(nombreLoot2);
+                if (it1 == objetosDisponibles.end() || it2 == objetosDisponibles.end()) {
+                    throw runtime_error("Objeto no encontrado: " + nombreLoot1 + " o " + nombreLoot2);
+                }
+
+                Drop drop1(it1->second, 70);
+                Drop drop2(it2->second, 30);
+
+                auto enemigo = make_shared<Enemigo>(nombre, salud, ataque, defensa, nivel, drop1, drop2);
+                enemigos[nombre] = enemigo;
             }
-
-            Drop drop1(it1->second.get(), 70);
-            Drop drop2(it2->second.get(), 30);
-
-            auto enemigo = make_shared<Enemigo>(nombre, salud, ataque, defensa, drop1, drop2);
-            enemigos[nombre] = enemigo;
         }
+        file.close();
         return enemigos;
     }
+Jugador cargarHeroe(const string& archivo){
+    ifstream file(archivo);
+    json j;
+    file >> j;
+    string nombre = j["nombre"];
+    int salud = j["salud"];
+    int ataque = j["ataque"];
+    int defensa = j["defensa"];
+    int nivel = j["nivel"];
+    int pociones = j["pociones"];
+    Jugador jugador(nombre, salud, ataque, defensa, nivel, pociones);
+    file.close();
+    return jugador;
+}
+shared_ptr<Enemigo> generarEnemigoPorNivel(
+    const map<string, shared_ptr<Enemigo>>& enemigos, int nivelMaxPermitido){
+        vector<shared_ptr<Enemigo>> candidatos;
 
-    void batalla(Jugador jugador, map<string, shared_ptr<Enemigo>> enemigos){
-        system("clear");
+        // Filtrar enemigos por nivel
+        for (const auto& par : enemigos) {
+            if (par.second->getNivel() == nivelMaxPermitido) {
+                candidatos.push_back(par.second);
+            }
+        }
+
+        if (candidatos.empty()) {
+            throw runtime_error("No hay enemigos disponibles para el nivel solicitado");
+        }
+
+        // Selección aleatoria entre los candidatos
+        int idx = rand() % candidatos.size();
+        return candidatos[idx];
+}
+
+void batalla(Jugador jugador, map<string, shared_ptr<Enemigo>> enemigos){
+        system("cls"); //system("clear") en Linux
     // Seleccionar un enemigo aleatorio del mapa
-    int idx = rand() % enemigos.size();
-    auto it = enemigos.begin();
-    std::advance(it, idx);
-    auto enemigo = it->second;
+    
+    auto enemigoSelec = generarEnemigoPorNivel(enemigos, jugador.getNivel());
+    Enemigo enemigo(*enemigoSelec); // Enemigo Auxiliar
+    bool jefefinal = false; // Bandera para jefe final
+    if(enemigo.getNivel() == 4){
+        cout << "Estas en una oscura cueva, siente una presencia extraña..." << endl;
+        Sleep(3500); //sleep(5); en linux
+        cout << "Ha aparecido el jefe final!!!\n Ha aparecido " << enemigo.getNombre() << endl;
+        jefefinal = true;
+    }else{
+        cout << "Un " << enemigo.getNombre() << " ha aparecido!\n";
+    }
 
-
-    cout << "Un " << enemigo->getNombre() << " ha aparecido!\n";
-
-    cout << "¡Comienza la batalla!\n";
-    while(jugador.estaVivo() && enemigo->estaVivo()){
-        limpiarBuffer();
+    cout << "Comienza la batalla!\n";
+    while(jugador.estaVivo() && enemigo.estaVivo()){
         jugador.mostrarMenu();
+        limpiarBuffer();
         int opcion;
         cin >> opcion;
         
         switch(opcion){
             case 1:
                 // enemigo es un shared_ptr<Enemigo>, usamos .get() para obtener el puntero crudo requerido por atacar
-                jugador.atacar(enemigo.get());
+                system("cls");
+                jugador.atacar(&enemigo);
                 break;
             case 2:
+                system("cls");
                 jugador.usarPocion();
                 break;
             case 3:
                 jugador.mostrarInventario();
-                break;
+                continue;
             case 4: 
                 jugador.mostrarEstado();
                 continue;
+            case -1: 
+                cout << "Saliendo del juego...\n";
+                return; // Terminar el juego si el jugador decide salir
             default:
-                cout << "Opción inválida!\n";
+                cout << "Opcion invalida!\n";
                 continue; // Volver al menú sin hacer nada más
         }
 
-        if (enemigo->estaVivo()) {
-            enemigo->atacar(&jugador);
+        if (enemigo.estaVivo()) {
+            enemigo.atacar(&jugador);
         }
     }
 
     if(!jugador.estaVivo()) {
-            cout << "Has sido derrotado por " << enemigo->getNombre() << "!\n";
+            cout << "Has sido derrotado por " << enemigo.getNombre() << "!\n";
             return; // Terminar el juego si el jugador muere
     }
-    cout << "\n\nHAS DERROTADO A " << enemigo->getNombre() << "!\n";
-
+    cout << "\n\nHAS DERROTADO A '" << enemigo.getNombre() << "' !\n";
+    if(jefefinal && enemigo.getSalud() <= 0){
+        cout << "Felicidades mano, has derrotado al jefe final!\n";
+        Sleep(3000);
+        cout << "...\n";
+        Sleep(3000);
+        cout << "Has ganado el juego!\n";
+        return; // Terminar el juego si se derrota al jefe final
+    }
+    int exp = jugador.getNivel() * 50; // Asumimos que el jugador obtiene 50 de experiencia por nivel
+    jugador.obtenerExperiencia(exp); // Asumimos que el jugador obtiene 50 de experiencia
     // Obtener loot del enemigo
     int chance = rand() % 100;
-    Objeto* lootGanado = nullptr;
-    bool obtenido = false;
-    Drop loot1 = enemigo->getLoot1();
-    Drop loot2 = enemigo->getLoot2();
+    shared_ptr<Objeto> lootGanado = nullptr;
+    
+    Drop loot1 = enemigo.getLoot1();
+    Drop loot2 = enemigo.getLoot2();
     if (chance < loot1.probabilidad) {
         lootGanado = loot1.objeto;
     } else if (chance < loot1.probabilidad + loot2.probabilidad) {
         lootGanado = loot2.objeto;
     }
-    if (lootGanado) {
+    if (lootGanado) { // Verifica si lootGanado no es nulo
         cout << "Has obtenido: " << lootGanado->getNombre() << "\n";
-        jugador.agregarObjeto(shared_ptr<Objeto>(lootGanado));
+        jugador.agregarObjeto(lootGanado);
     }
-    delete &enemigo;
+    
     limpiarBuffer();
     cout << "\n\nQuieres seguir jugando? (s/n) ";
     char opcion2;
     cin >> opcion2;
-    if(opcion2 == 's' || opcion2 == 'S'){
+    if(opcion2 == 's' || opcion2 == 'S' || opcion2 <= 52 || opcion2 >= 49){
+        // falta Guardar los datos del jugador en un archivo JSON
         batalla(jugador, enemigos);
     }
-    system("clear");
-    cout << "\nMuchas gracias por Jugar";
     return;
 
 }
 int main() {
+    //Verificar si el archivo de objetos y enemigos existe
+    ifstream objetosFile("objetos.json");
+    ifstream enemigosFile("enemigos.json");
+    ifstream heroeFile("hero.json");
+    if (!objetosFile.is_open() && !enemigosFile.is_open()) {
+        cerr << "Faltan archivos para ejecutar el juego.\n";
+        objetosFile.close();
+        enemigosFile.close();
+        heroeFile.close();
+        return 1;
+    }
+    objetosFile.close();
+    enemigosFile.close();
     // Cargar objetos desde el archivo JSON
     map<string, shared_ptr<Objeto>> objetos = cargarObjetosDesdeJSON("objetos.json");
     if (objetos.empty()) {
         cerr << "No se pudieron cargar los objetos desde el archivo JSON.\n";
+        heroeFile.close();
         return 1;
     }
     map<string, shared_ptr<Enemigo>> enemigos = cargarEnemigosDesdeJSON("enemigos.json", objetos);
     if (enemigos.empty()) {
         cerr << "No se pudieron cargar los enemigos desde el archivo JSON.\n";
+        heroeFile.close();
         return 1;
     }
 
     srand(static_cast<unsigned>(time(NULL)));
-    
     Jugador jugador("Heroe");
+    if(heroeFile.is_open()) {
+        jugador = cargarHeroe("heroe.json");
+    }
+    
     auto itEspada = objetos.find("Espada Gallo");
     if (itEspada != objetos.end()) {
         jugador.equiparArma(dynamic_pointer_cast<Arma>(itEspada->second));
     } else {
         cout << "No se encontró la espada en el inventario.\n";
     }
-
     batalla(jugador, enemigos);
+    
+    // Terminar el juego si el jugador muere
     if(!jugador.estaVivo()) {
             cout << "\n\nGAME OVER";
-            return 0; // Terminar el juego si el jugador muere
+            return 0;
     }
-    
+    cout << "\nMuchas gracias por Jugar :)" << endl;
+    heroeFile.close();
     return 0;
 }

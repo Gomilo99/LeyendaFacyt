@@ -1,39 +1,166 @@
-[
-    {
-        "tipo": "Arma",
-        "nombre": "Espada Gallo",
-        "descripcion": "Una espada forjada bajo inflacion y ajustes de precio",
-        "dano": 10
-    },
-    {
-        "tipo": "Arma",
-        "nombre": "Sopladora",
-        "descripcion": "Cuando se empuña se siente un aire de superioridad",
-        "dano": 14
-    },
-    {
-        "tipo": "Arma",
-        "nombre": "Matagochas",
-        "descripcion": "Ni el frio del paramo podra contra su filo",
-        "dano": 20
-    },
-    {
-        "tipo": "Pocion",
-        "nombre": "Pocion Milagrosa",
-        "descripcion": "Una pocion de diclofenac potasico",
-        "curacion": 15
-    },
-    {
-        "tipo": "Objeto Clave",
-        "nombre": "Aire siniestro",
-        "descripcion": "Un aire que huele a owo y corrupción"
-
-    },
-    {
-        "tipo": "Arma",
-        "nombre": "Dildo rosadito",
-        "descripcion": "La de luca: Mi guevo con peluca",
-        "dano": 20
-
-    }
-]
+{
+    "arma": [
+        {
+            "nombre": "Espada Gallo",
+            "descripcion": "Tu fiel compañera inicial, forjada bajo inflación y ajustes de precio. Daño básico pero confiable.",
+            "dano": 10
+        },
+        {
+            "nombre": "Sopladora",
+            "descripcion": "Cuando se empuña se siente un aire de superioridad. Ideal para los primeros soplos de victoria.",
+            "dano": 14
+        },
+        {
+            "nombre": "La Taza de Café Rancia",
+            "descripcion": "Una taza que aturde a los enemigos con su mal olor a lunes por la mañana.",
+            "dano": 12
+        },
+        {
+            "nombre": "El Llavero Perdido",
+            "descripcion": "Un llavero que confunde a los enemigos. ¿Dónde dejé mi dignidad?",
+            "dano": 13
+        },
+        {
+            "nombre": "El Teléfono Sin Batería",
+            "descripcion": "Un ladrillo inútil que, sorprendentemente, hace daño contundente. ¡Ideal para desconectarse!",
+            "dano": 15
+        },
+        {
+            "nombre": "El Reloj Detenido",
+            "descripcion": "Un reloj de bolsillo que detiene el tiempo para un solo enemigo. Siempre a tiempo para el desastre.",
+            "dano": 14
+        },
+        {
+            "nombre": "Dildo",
+            "descripcion": "La de luca: Mi guevo con peluca. Un arma sorprendente, no apta para todas las batallas.",
+            "dano": 20
+        },
+        {
+            "nombre": "El Rodillo de Amasar",
+            "descripcion": "Un rodillo que aplasta a los enemigos. ¡Hora de hacer galletas de dolor!",
+            "dano": 16
+        },
+        {
+            "nombre": "La Pluma de la Deuda",
+            "descripcion": "Una pluma gigante que escribe tu destino con tinta roja. Cada golpe es un recordatorio de tus pagos.",
+            "dano": 17
+        },
+        {
+            "nombre": "La Cuchara de la Desesperación",
+            "descripcion": "Una cuchara gigante que roba la energía de los enemigos. Perfecta para esos antojos de victoria.",
+            "dano": 22
+        },
+        {
+            "nombre": "El Lector de Tarjetas",
+            "descripcion": "Un arma contundente que emite pitidos molestos. ¡Cuidado con las comisiones!",
+            "dano": 24
+        },
+        {
+            "nombre": "El Router Roto",
+            "descripcion": "Un arma arrojadiza que causa daño de área y desconecta a los enemigos. ¡Adiós a la señal!",
+            "dano": 20
+        },
+        {
+            "nombre": "La Espada del Zapping",
+            "descripcion": "Una espada que lanza rayos de energía y cambia el canal de la realidad. ¡Nunca sabes qué esperar!",
+            "dano": 21
+        },
+        {
+            "nombre": "La Pala de Recogida",
+            "descripcion": "Una pala oxidada que golpea con fuerza sorprendente. Recoge victorias y malos olores.",
+            "dano": 19
+        },
+        {
+            "nombre": "Espada del Descongelamiento",
+            "descripcion": "Una espada que gotea y hace daño de agua. Ideal para derretir la resistencia enemiga.",
+            "dano": 23
+        },
+        {
+            "nombre": "El Aspirador del Vacío",
+            "descripcion": "Un arma que succiona la vida de tus enemigos. Deja todo impecable, menos a tus rivales.",
+            "dano": 26
+        },
+        {
+            "nombre": "La Lavadora de Almas",
+            "descripcion": "Un arma giratoria que limpia a los enemigos de su voluntad de luchar. ¡Deja las almas relucientes!",
+            "dano": 27
+        },
+        {
+            "nombre": "El Mazo",
+            "descripcion": "Un mazo gigante que aturde a los enemigos y los hace dudar. Para los que siempre dicen 'después'.",
+            "dano": 29
+        },
+        {
+            "nombre": "Ojo miope",
+            "descripcion": "Ojo con -6 dioptrias de miopia y -2 en agtismatismo, ve clarito.",
+            "dano": 32
+        },
+        {
+            "nombre": "El Banner Ineludible",
+            "descripcion": "Un arma que ciega temporalmente a los enemigos. ¡No podrás escapar de esta publicidad!",
+            "dano": 18
+        },
+        {
+            "nombre": "Matagochas",
+            "descripcion": "Ni el frío del páramo podrá contra su filo. Una hoja legendaria para los más valientes.",
+            "dano": 30
+        },
+        {
+            "nombre": "La Espada del Código Fuente",
+            "descripcion": "La espada definitiva, forjada con los errores de programación y el poder de los bugs. ¡Error 404: Enemigo no encontrado!",
+            "dano": 45
+        }
+    ],
+    "pocion": [
+        {
+            "nombre": "Pocion Milagrosa",
+            "descripcion": "Una poción de diclofenac potásico. Cura un poco y te hace sentir como nuevo.",
+            "curacion": 15
+        },
+        {
+            "nombre": "Expreso",
+            "descripcion": "Una poción que te da un rápido subidón de energía. ¡Para esos momentos de bajón!",
+            "curacion": 20
+        },
+        {
+            "nombre": "Alka-Seltzer",
+            "descripcion": "Una poción burbujeante que alivia los efectos de la resaca y restaura un poco de salud.",
+            "curacion": 12
+        },
+        {
+            "nombre": "Poción de Pensamiento Crítico",
+            "descripcion": "Te hace inmune a los engaños y te ayuda a ver la verdad. También cura un poco.",
+            "curacion": 20
+        },
+        {
+            "nombre": "Adblock",
+            "descripcion": "Te hace inmune a los anuncios y al estrés. Restaura salud y te da paz mental.",
+            "curacion": 50
+        },
+        {
+            "nombre": "Suavitel",
+            "descripcion": "Restaura salud y te da un aura de frescura. ¡Deja tu armadura suave y lista para la batalla!",
+            "curacion": 40
+        },
+        {
+            "nombre": "Poción de Lágrimas Cachondas",
+            "descripcion": "Una poción que cura la salud y te llena de una extraña euforia. ¡Úsala con discreción!",
+            "curacion": 30
+        },
+        {
+            "nombre": "Poción Cubana",
+            "descripcion": "La poción más potente, capaz de curar casi cualquier herida. Un secreto bien guardado.",
+            "curacion": 200
+        }
+    ],
+    "clave": [
+        {
+            "nombre": "Aire siniestro",
+            "descripcion": "Un aire que huele a owo y corrupción. Podría abrir puertas ocultas."
+        },
+        {
+            "nombre": "Tarjeta de Crédito Ilimitada",
+            "descripcion": "Una tarjeta que te da acceso a todo, pero te deja en bancarrota. ¡El verdadero costo del poder!"
+        }
+    ]
+}
