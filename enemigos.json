@@ -57,7 +57,7 @@
       "ataque": 15,
       "defensa": 4,
       "loot1": "Pocion de Pensamiento Critico",
-      "loot2": "El Teléfono Sin Bateria"
+      "loot2": "El Telefono Sin Bateria"
     },
     {
       "nombre": "Esqueleto",
@@ -148,7 +148,7 @@
       "ataque": 22,
       "defensa": 11,
       "loot1": "Suavitel",
-      "loot2": "El Aspirador del Vacío"
+      "loot2": "El Aspirador del Vacio"
     },
     {
       "nombre": "Golem de Ropa Sucia",
@@ -199,7 +199,7 @@
       "ataque": 40,
       "defensa": 25,
       "loot1": "Pocion Cubana",
-      "loot2": "La Espada del Código Fuente"
+      "loot2": "La Espada del Codigo Fuente"
     }
   ]
 }

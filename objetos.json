@@ -11,7 +11,7 @@
             "dano": 14
         },
         {
-            "nombre": "La Taza de Café Rancia",
+            "nombre": "La Taza de Cafe Rancia",
             "descripcion": "Una taza que aturde a los enemigos con su mal olor a lunes por la mañana.",
             "dano": 12
         },
@@ -21,7 +21,7 @@
             "dano": 13
         },
         {
-            "nombre": "El Teléfono Sin Batería",
+            "nombre": "El Telefono Sin Bateria",
             "descripcion": "Un ladrillo inútil que, sorprendentemente, hace daño contundente. ¡Ideal para desconectarse!",
             "dano": 15
         },
@@ -76,7 +76,7 @@
             "dano": 23
         },
         {
-            "nombre": "El Aspirador del Vacío",
+            "nombre": "El Aspirador del Vacio",
             "descripcion": "Un arma que succiona la vida de tus enemigos. Deja todo impecable, menos a tus rivales.",
             "dano": 26
         },
@@ -106,7 +106,7 @@
             "dano": 30
         },
         {
-            "nombre": "La Espada del Código Fuente",
+            "nombre": "La Espada del Codigo Fuente",
             "descripcion": "La espada definitiva, forjada con los errores de programación y el poder de los bugs. ¡Error 404: Enemigo no encontrado!",
             "dano": 45
         }
@@ -128,7 +128,7 @@
             "curacion": 12
         },
         {
-            "nombre": "Poción de Pensamiento Crítico",
+            "nombre": "Pocion de Pensamiento Critico",
             "descripcion": "Te hace inmune a los engaños y te ayuda a ver la verdad. También cura un poco.",
             "curacion": 20
         },
@@ -143,12 +143,12 @@
             "curacion": 40
         },
         {
-            "nombre": "Poción de Lágrimas Cachondas",
+            "nombre": "Pocion de Lagrimas Cachondas",
             "descripcion": "Una poción que cura la salud y te llena de una extraña euforia. ¡Úsala con discreción!",
             "curacion": 30
         },
         {
-            "nombre": "Poción Cubana",
+            "nombre": "Pocion Cubana",
             "descripcion": "La poción más potente, capaz de curar casi cualquier herida. Un secreto bien guardado.",
             "curacion": 200
         }
@@ -159,7 +159,7 @@
             "descripcion": "Un aire que huele a owo y corrupción. Podría abrir puertas ocultas."
         },
         {
-            "nombre": "Tarjeta de Crédito Ilimitada",
+            "nombre": "Tarjeta de Credito Ilimitada",
             "descripcion": "Una tarjeta que te da acceso a todo, pero te deja en bancarrota. ¡El verdadero costo del poder!"
         }
     ]
