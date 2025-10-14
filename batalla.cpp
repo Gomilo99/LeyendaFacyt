@@ -439,8 +439,8 @@ void batalla(Jugador jugador, map<string, shared_ptr<Enemigo>> enemigos){
 
     cout << "Comienza la batalla!\n";
     while(jugador.estaVivo() && enemigo.estaVivo()){
-        jugador.mostrarMenu();
         limpiarBuffer();
+        jugador.mostrarMenu();
         int opcion;
         cin >> opcion;
         
