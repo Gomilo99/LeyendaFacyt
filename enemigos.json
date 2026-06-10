@@ -6,7 +6,9 @@
       "ataque": 8,
       "defensa": 3,
       "loot1": "Pocion Milagrosa",
-      "loot2": "Aire siniestro"
+      "prob1": 70,
+      "loot2": "Aire siniestro",
+      "prob2": 30
     },
     {
       "nombre": "Orco",
@@ -14,7 +16,9 @@
       "ataque": 12,
       "defensa": 5,
       "loot1": "Pocion Milagrosa",
-      "loot2": "Sopladora"
+      "prob1": 60,
+      "loot2": "Sopladora",
+      "prob2": 40
     },
     {
       "nombre": "Slime de Cafe Vencido",
@@ -22,7 +26,9 @@
       "ataque": 10,
       "defensa": 3,
       "loot1": "Expreso",
-      "loot2": "Expreso"
+      "prob1": 80,
+      "loot2": "Expreso",
+      "prob2": 20
     },
     {
       "nombre": "Murcielago Rascao",
@@ -30,7 +36,9 @@
       "ataque": 9,
       "defensa": 2,
       "loot1": "Alka-Seltzer",
-      "loot2": "Alka-Seltzer"
+      "prob1": 75,
+      "loot2": "Alka-Seltzer",
+      "prob2": 25
     },
     {
       "nombre": "Zombie del Lunes",
@@ -38,7 +46,9 @@
       "ataque": 12,
       "defensa": 6,
       "loot1": "Expreso",
-      "loot2": "La Taza de Cafe Rancia"
+      "prob1": 65,
+      "loot2": "La Taza de Cafe Rancia",
+      "prob2": 35
     }
   ],
 
@@ -49,7 +59,9 @@
       "ataque": 13,
       "defensa": 4,
       "loot1": "Expreso",
-      "loot2": "El Llavero Perdido"
+      "prob1": 55,
+      "loot2": "El Llavero Perdido",
+      "prob2": 45
     },
     {
       "nombre": "Fantasma del Visto",
@@ -57,7 +69,9 @@
       "ataque": 15,
       "defensa": 4,
       "loot1": "Pocion de Pensamiento Critico",
-      "loot2": "El Telefono Sin Bateria"
+      "prob1": 50,
+      "loot2": "El Telefono Sin Bateria",
+      "prob2": 50
     },
     {
       "nombre": "Esqueleto",
@@ -65,7 +79,9 @@
       "ataque": 14,
       "defensa": 5,
       "loot1": "Expreso",
-      "loot2": "El Reloj Detenido"
+      "prob1": 55,
+      "loot2": "El Reloj Detenido",
+      "prob2": 45
     },
     {
       "nombre": "Carlos",
@@ -73,7 +89,9 @@
       "ataque": 15,
       "defensa": 5,
       "loot1": "Pocion Milagrosa",
-      "loot2": "Dildo"
+      "prob1": 50,
+      "loot2": "Dildo",
+      "prob2": 50
     },
     {
       "nombre": "Golem de Plastilina Seca",
@@ -81,7 +99,9 @@
       "ataque": 14,
       "defensa": 6,
       "loot1": "Suavitel",
-      "loot2": "El Rodillo de Amasar"
+      "prob1": 45,
+      "loot2": "El Rodillo de Amasar",
+      "prob2": 55
     },
     {
       "nombre": "Golem de Facturas",
@@ -89,7 +109,9 @@
       "ataque": 10,
       "defensa": 12,
       "loot1": "Adblock",
-      "loot2": "La Pluma de la Deuda"
+      "prob1": 35,
+      "loot2": "La Pluma de la Deuda",
+      "prob2": 65
     },
     {
       "nombre": "Bruja Joe Francisco",
@@ -97,7 +119,9 @@
       "ataque": 20,
       "defensa": 5,
       "loot1": "Pocion de Lagrimas Cachondas",
-      "loot2": "La Cuchara de la Desesperación"
+      "prob1": 40,
+      "loot2": "La Cuchara de la Desesperación",
+      "prob2": 60
     },
     {
       "nombre": "Cajero Automatico",
@@ -105,7 +129,9 @@
       "ataque": 25,
       "defensa": 8,
       "loot1": "Tarjeta de Credito Ilimitada",
-      "loot2": "El Lector de Tarjetas"
+      "prob1": 30,
+      "loot2": "El Lector de Tarjetas",
+      "prob2": 70
     },
     {
       "nombre": "Gargola del Wi-Fi",
@@ -113,7 +139,9 @@
       "ataque": 18,
       "defensa": 7,
       "loot1": "Expreso",
-      "loot2": "El Router Roto"
+      "prob1": 45,
+      "loot2": "El Router Roto",
+      "prob2": 55
     },
     {
       "nombre": "Caballero del Control Remoto",
@@ -121,7 +149,9 @@
       "ataque": 19,
       "defensa": 9,
       "loot1": "Expreso",
-      "loot2": "La Espada del Zapping"
+      "prob1": 40,
+      "loot2": "La Espada del Zapping",
+      "prob2": 60
     },
     {
       "nombre": "Caballero de la Basura",
@@ -129,7 +159,9 @@
       "ataque": 17,
       "defensa": 9,
       "loot1": "Suavitel",
-      "loot2": "La Pala de Recogida"
+      "prob1": 40,
+      "loot2": "La Pala de Recogida",
+      "prob2": 60
     },
     {
       "nombre": "Caballero Cebolla",
@@ -137,7 +169,9 @@
       "ataque": 20,
       "defensa": 10,
       "loot1": "Pocion de Lagrimas Cachondas",
-      "loot2": "Espada del Descongelamiento"
+      "prob1": 35,
+      "loot2": "Espada del Descongelamiento",
+      "prob2": 65
     }
   ],
 
@@ -148,7 +182,9 @@
       "ataque": 22,
       "defensa": 11,
       "loot1": "Suavitel",
-      "loot2": "El Aspirador del Vacio"
+      "prob1": 35,
+      "loot2": "El Aspirador del Vacio",
+      "prob2": 65
     },
     {
       "nombre": "Golem de Ropa Sucia",
@@ -156,7 +192,9 @@
       "ataque": 21,
       "defensa": 10,
       "loot1": "Suavitel",
-      "loot2": "La Lavadora de Almas"
+      "prob1": 35,
+      "loot2": "La Lavadora de Almas",
+      "prob2": 65
     },
     {
       "nombre": "Ogro Procrastinador",
@@ -164,7 +202,9 @@
       "ataque": 24,
       "defensa": 13,
       "loot1": "Adblock",
-      "loot2": "El Mazo"
+      "prob1": 30,
+      "loot2": "El Mazo",
+      "prob2": 70
     },
     {
       "nombre": "Duende Cable Pelao",
@@ -172,7 +212,9 @@
       "ataque": 8,
       "defensa": 2,
       "loot1": "Alka-Seltzer",
-      "loot2": "Alka-Seltzer"
+      "prob1": 70,
+      "loot2": "Alka-Seltzer",
+      "prob2": 30
     },
     {
       "nombre": "Ciclope miope",
@@ -180,7 +222,9 @@
       "ataque": 28,
       "defensa": 15,
       "loot1": "Pocion de Pensamiento Critico",
-      "loot2": "Ojo miope"
+      "prob1": 30,
+      "loot2": "Ojo miope",
+      "prob2": 70
     },
     {
       "nombre": "Espectro Rojo",
@@ -188,7 +232,9 @@
       "ataque": 11,
       "defensa": 3,
       "loot1": "Adblock",
-      "loot2": "El Banner Ineludible"
+      "prob1": 45,
+      "loot2": "El Banner Ineludible",
+      "prob2": 55
     }
   ],
 
@@ -199,7 +245,9 @@
       "ataque": 40,
       "defensa": 25,
       "loot1": "Pocion Cubana",
-      "loot2": "La Espada del Codigo Fuente"
+      "prob1": 40,
+      "loot2": "La Espada del Codigo Fuente",
+      "prob2": 60
     }
   ]
 }
