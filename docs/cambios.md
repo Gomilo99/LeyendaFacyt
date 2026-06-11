@@ -1,30 +1,55 @@
-### Log 10/06/2026
-1. Crash de mostrarEstado: `jugador.cpp`armaEquipada se inicializa en nullptr y solo se asigna si el jugador equipa un arma. Si se abre la pantalla de estado antes de equipar, es undefined behavior (segfault).
-2. Variable de path para los JSON: `Batalla.hpp` Los JSON están en json/ pero el código busca en la raíz. Crearé una función centralizada en Batalla.hpp para no repetir paths.
-3. Now update all file path usages in main.cpp
-  - Now update batalla.cpp — las referencias a "heroe.json"
-4. Condición de victoria: El problema: tras vencer al jefe final, `main.cpp` sigue en el while y genera otra batalla infinita. Solución: añadir flag haGanado al Jugador.
-  - Ahora en batalla.cpp, cambiar el early return del jefe por setHaGanado(true) y dejar que fluya normalmente.
-  - Actualizar main.cpp para que el loop termine también al ganar.
-5. Librería ``<random>`` en lugar de ``std::rand()``
-  - Now update ``main.cpp`` — eliminar ``srand`` y los includes que ya no se necesitan.
-6. Mejorar Makefile.
-7. Al final se compiló y verificó
-#### 8. Explicación del problema de magic numbers
-Antes de compilar, te explico esto que pediste.
+### Log 10/06/2026 — Correcciones de bugs, calidad y estructura
 
-Magic numbers son valores numéricos sin nombre que aparecen hardcodeados en el código sin contexto sobre qué significan. En tu proyecto:
+#### Cambios realizados
 
-|Ubicación	|Valor	|¿Qué representa?|
-|-----------|-------|----------------|
-|src/Jugador.cpp:7	|100, 15, 10, 1, 3	|Stats base del héroe|
-|src/Jugador.cpp:19	|30	|Curación de poción|
-|src/Jugador.cpp:132	|50	|Multiplicador de salud por nivel|
-|src/Jugador.cpp:134-135	|5	|Incremento de ataque/defensa por nivel|
-|src/Jugador.cpp:137	|200	|Umbral de XP adicional|
-|src/Jugador.cpp:138	|700	|XP necesaria en nivel 3|
-|src/batalla.cpp:87-88	|70, 30	|Probabilidades de loot|
-|src/batalla.cpp:206	|50	|XP ganada por batalla|
+| # | Cambio | Archivos afectados |
+|---|--------|--------------------|
+| 1 | **Crash `mostrarEstado`** — `armaEquipada` se accedía sin verificar `nullptr`. Agregado guard condition y mensaje "ninguna" si no hay arma equipada. | `src/Jugador.cpp` |
+| 2 | **Variable centralizada `dataPath()`** — Los JSON estaban en `json/` pero el código buscaba en la raíz. Se creó `dataPath(filename)` en `Batalla.hpp` que antepone `"json/"`. Actualizadas las 7 referencias a archivos. | `lib/Batalla.hpp`, `src/main.cpp`, `src/batalla.cpp` |
+| 3 | **Condición de victoria** — Al vencer al jefe final, `batalla()` hacía `return` temprano pero `main.cpp` seguía en el `while`, generando batallas infinitas. Se agregó flag `haGanado` a `Jugador`; ahora `batalla()` setea `setHaGanado(true)` y fluye normalmente; `main.cpp` verifica `!jugador.getHaGanado()` en el loop. | `lib/Jugador.hpp`, `src/batalla.cpp`, `src/main.cpp` |
+| 4 | **Naming inconsistente** — `setloot` → `setLoot` (convención camelCase como el resto del código). | `lib/Enemigo.hpp`, `src/Enemigo.cpp` |
+| 5 | **Librería `<random>`** — Reemplazado `std::rand()` / `std::srand()` por `std::mt19937` + `std::uniform_int_distribution`. Eliminados `#include <cstdlib>` y `<ctime>` donde ya no eran necesarios. | `src/batalla.cpp`, `src/main.cpp` |
+| 6 | **Makefile** — Agregados flags `-Wall -Wextra -Wpedantic -I.`, target con `.exe`, `clean` compatible con Windows. | `Makefile` |
+| 7 | **Advertencia `-Wdeprecated-copy`** — `Personaje` tenía copy constructor pero no copy assignment operator. Agregado `operator=(const Personaje&) = default;`. Compilación limpia sin warnings. | `lib/Personaje.hpp` |
+| 8 | **Log de cambios** — Este archivo fue limpiado y reestructurado. | `docs/cambios.md` |
+
+#### Por qué se hicieron
+
+**1. Crash `mostrarEstado`**
+`armaEquipada` se inicializa en `nullptr` y solo se asigna al equipar un arma. Si el usuario abría la pantalla de estado (opción 4 del menú) sin haber equipado "Espada Gallo" o si `objetos.find("Espada Gallo")` fallaba, la línea `armaEquipada->getNombre()` producía un segfault. `mostrarInventario()` ya tenía el guard condition, pero `mostrarEstado()` no.
+
+**2. Paths de JSON**
+Los archivos `objetos.json`, `enemigos.json` y `heroe.json` estaban en `json/` pero el código abría `"objetos.json"` desde la raíz, fallando siempre. La función `dataPath()` centraliza el prefijo `"json/"` en un solo lugar para evitar tener que buscar todas las llamadas.
+
+**3. Condición de victoria**
+El jefe final (nivel 4) se vencía pero `batalla()` retornaba sin indicarle a `main()` que el juego terminó. `main()` seguía en `while(jugador.estaVivo())` y generaba otro enemigo del nivel 4, creando un loop infinito. Con `haGanado`, el loop también verifica el flag de victoria.
+
+**4. Naming**
+`setloot` rompía la convención camelCase del resto del código (`getLoot1`, `getLoot2`, `getNombre`, `getSalud`, etc.).
+
+**5. `<random>` vs `std::rand()`**
+`std::rand()` tiene periodo pequeño, distribución pobre y no es thread-safe. `std::mt19937` es el estándar moderno de C++ para generación de números pseudoaleatorios.
+
+**6. Makefile**
+Faltaban `-Wall -Wextra -Wpedantic` para detectar warnings en compilación. Faltaba `-I.` para búsqueda de headers. El `clean` usaba `rm -rf` que no funciona en Windows nativo.
+
+**7. Warning de compilación**
+`Personaje` declaraba copy constructor pero no copy assignment. En C++11 la generación implícita del copy assignment está deprecada, generando warning con `-Wdeprecated-copy`.
+
+#### Magic Numbers: Explicación
+
+Los **magic numbers** son valores numéricos sin nombre que aparecen hardcodeados sin contexto:
+
+| Ubicación | Valor | ¿Qué representa? |
+|-----------|-------|------------------|
+| `src/Jugador.cpp:7` | 100, 15, 10, 1, 3 | Stats base del héroe |
+| `src/Jugador.cpp:19` | 30 | Curación de poción |
+| `src/Jugador.cpp:132` | 50 | Multiplicador de salud por nivel |
+| `src/Jugador.cpp:134-135` | 5 | Incremento de ataque/defensa por nivel |
+| `src/Jugador.cpp:137` | 200 | Umbral de XP adicional |
+| `src/Jugador.cpp:138` | 700 | XP necesaria en nivel 3 |
+| `src/batalla.cpp:87-88` | 70, 30 | Probabilidades de loot (hardcodeadas, ignorando `prob1`/`prob2` del JSON) |
+| `src/batalla.cpp:206` | 50 | XP ganada por batalla |
 
 **Problemas concretos:**
 
@@ -43,10 +68,20 @@ saludMaxima += SALUD_POR_NIVEL * (nivel + 1);
 ```
 Esto hace que el código sea **autodocumentado**, más fácil de **balancear** (todos los números están etiquetados), y evita errores al cambiar un valor sin querer que coincida con otro idéntico.
 
+- Cambiar la curación de poción requiere saber que `30` en `Jugador.cpp:19` es ese valor — no hay forma de buscarlo semánticamente
+- Hay 6 números dispersos en `obtenerExperiencia` sin relación explícita
+- El nivel 3 tiene tratamiento especial (`expNecesaria = 700`) sin documentar por qué
+- El `50` de XP por batalla no tiene conexión con los multiplicadores de nivelación
+
+**Solución pendiente:** Reemplazar con `constexpr` con nombre como `SALUD_POR_NIVEL`, `POCION_CURACION`, `XP_POR_BATALLA`, etc.
+
 #### 8. Críticas en diseño (detalladas)
 **God Class ``Jugador``**
 
 ``Jugador`` maneja **7 responsabilidades** distintas: combate (``atacar``), inventario (``agregarObjeto, eliminarObjeto, mostrarInventario``), equipo (``equiparArma``), UI/menús (``mostrarMenu, mostrarEstado``), nivelación (``obtenerExperiencia``), curación (``usarPocion``, dos sobrecargas) y ahora persistencia indirecta.
+
+Maneja 7 responsabilidades: combate (`atacar`), inventario (`agregarObjeto`, `eliminarObjeto`, `mostrarInventario`), equipo (`equiparArma`), UI (`mostrarMenu`, `mostrarEstado`), nivelación (`obtenerExperiencia`), curación (`usarPocion` dos sobrecargas) y persistencia indirecta. ~37 líneas de declaración y 145 de implementación. Extraer `Inventario` como clase separada simplificaría `Jugador` significativamente.
+
 
 **Consecuencia**: la clase tiene ~37 líneas de declaración y 145 de implementación, todo mezclado. Para añadir una armadura equipable tendrías que tocar 4 métodos distintos en la misma clase porque no hay separación de conceptos. La clase ``Inventario`` debería manejarse por separado.
 
@@ -59,15 +94,19 @@ Combina:
 - Lógica completa de la batalla
 - Utilidades de I/O (limpiarBuffer, limpiarPantalla)
 
+Combina parsing JSON, lógica de batalla, persistencia y utilidades I/O. Un cambio en la lectura de JSON puede romper la batalla y viceversa. Dividir en `DataLoader.cpp`, `SaveManager.cpp`, `Combate.cpp`, `Utils.cpp`.
+
 **Problema**: cualquier cambio en cómo se leen los JSON puede romper la batalla, y viceversa. Idealmente debería dividirse en ``DataLoader.cpp`` (JSON), ``SaveManager.cpp`` (persistencia), ``Combate.cpp`` (lógica de batalla), ``Utils.cpp`` (I/O).
 
 **UI acoplada a lógica de negocio**
 Todos los std::cout y std::cin están incrustados en las clases de modelo (Jugador::atacar, Enemigo::atacar, Personaje::recibirDano).
 
 **Consecuencia**: no puedes escribir **tests unitarios** sin capturar stdout. Si quisieras migrar a ncurses, SDL o una interfaz web, tendrías que reescribir cada función. La solución es separar en una interfaz Output/Input que las clases de modelo reciban por inyección.
+`std::cout`/`std::cin` directos en `Jugador::atacar`, `Enemigo::atacar`, `Personaje::recibirDano`. Imposible testear unitariamente sin capturar stdout. Separar en interfaz `Output`/`Input` por inyección.
 
 **``shared_ptr`` sobreutilizado**
 ``Objeto.hpp:49`` define ``Drop`` con ``shared_ptr<Objeto>``, y el mapa objetosInventario también usa ``shared_ptr``. Esto introduce conteo de referencias atómico innecesario. ``Objeto, Arma, Pocion, ObjClave`` tienen dueño único (el inventario del jugador o el mapa global de objetos cargados). Bastaría ``unique_ptr`` para los mapas y raw pointers (no owning) para los ``Drop``.
+`Drop` con `shared_ptr<Objeto>` introduce conteo de referencias atómico innecesario. Los objetos tienen dueño único. Bastaría `unique_ptr` para los mapas y raw pointers (no owning) para los `Drop`.
 
 **Sin tests**
 No hay ningún test. Con la UI acoplada, probar la lógica de combate requiere ejecutar el juego completo y leer la salida por terminal. Separar la lógica de la presentación permitiría testear:
@@ -77,7 +116,9 @@ No hay ningún test. Con la UI acoplada, probar la lógica de combate requiere e
 - Probabilidades de loot
 - Algoritmo de selección de enemigos
 
-**Manejo de errofrases**
+**Manejo de errores**
+Las funciones JSON lanzan `std::runtime_error` pero `main.cpp` no tiene ningún `try/catch`. Cualquier error (objeto faltante, JSON mal formado, nivel sin enemigos) llama a `std::terminate()` sin mensaje al usuario.
+
 Las funciones JSON lanzan excepciones (``throw std::runtime_error``) pero ``main.cpp`` no tiene un solo ``try/catch``. Si:
 
 - Un objeto del JSON de enemigos no existe → ``terminate()``
