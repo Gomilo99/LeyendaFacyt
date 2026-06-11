@@ -1,4 +1,4 @@
-### Log
+### Log 10/06/2026
 1. Crash de mostrarEstado: `jugador.cpp`armaEquipada se inicializa en nullptr y solo se asigna si el jugador equipa un arma. Si se abre la pantalla de estado antes de equipar, es undefined behavior (segfault).
 2. Variable de path para los JSON: `Batalla.hpp` Los JSON están en json/ pero el código busca en la raíz. Crearé una función centralizada en Batalla.hpp para no repetir paths.
 3. Now update all file path usages in main.cpp
