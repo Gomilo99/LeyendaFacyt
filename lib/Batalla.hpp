@@ -4,7 +4,7 @@
 #include <map>
 #include <memory>
 #include <string>
-#include "lib/json.hpp"
+#include "json.hpp"
 #include "Objeto.hpp"
 #include "Enemigo.hpp"
 #include "Jugador.hpp"
