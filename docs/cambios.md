@@ -1,36 +1,3 @@
-1. Se arreglaron problemas y bugs
-    - Se cambio de recursividad a un while para la lógica de las batallas
-    - Ahora si se carga el json con los datos del heroe.
-    - Se modificó la entrada de datos a la función de batalla de "por valor" a "por referencia" para reducir el uso de memoria y la carga en cada iteración.
-    - Se cambio los NULL -> nullptr
-    - Se modificó el uso de `system("clear")` para usar caracteres ANSI y que sea más portable.
-2. Se agrego la funcion de guardarHeroe() para mantener los datos del personaje
-3. Se modificaron y se eliminó `using namespace std;`, se añadieron todas las llamadas a la librería std.
-4. Modificación estructura del proyecto.
-
-### Reestructuración
-Listo. Estructura final del proyecto:
-
-    Raiz/
-    ├── Objeto.hpp         # Clases Objeto, Arma, Pocion, ObjClave, Drop
-    ├── Personaje.hpp      # Clase base Personaje
-    ├── Jugador.hpp        # Declaracion de Jugador
-    ├── Jugador.cpp        # Implementacion de Jugador
-    ├── Enemigo.hpp        # Declaracion de Enemigo
-    ├── Enemigo.cpp        # Implementacion de Enemigo
-    ├── Batalla.hpp        # Declaracion de funciones (JSON, batalla, etc.)
-    ├── Batalla.cpp        # Implementacion de batalla y JSON
-    ├── main.cpp           # Solo main()
-    ├── batalla.cpp        # (reemplazado por nota)
-    ├── lib/
-    │   ├── json.hpp       # Libreria nlohmann/json
-    │   ├── objeto.hpp     # → redirige a Objeto.hpp
-    │   └── Personaje.hpp  # → redirige a Personaje.hpp
-    ├── objetos.json
-    ├── enemigos.json
-    └── heroe.json
-
-
 ### Mejoras
 Estado actual del proyecto:
 
@@ -89,6 +56,7 @@ Tu base actual es buena porque el combate ya funciona con datos reales. No tires
 Aquí está el diseño conceptual fusionado y el roadmap para construirlo.
 
 Arquitectura Fusionada
+```
             ┌─────────────────────────────────────────┐
             │              GameEngine                  │
             │  (Máquina de Estados: FSM)               │
@@ -105,7 +73,8 @@ Arquitectura Fusionada
             ▼      ▼      ▼      ▼
        MapSystem │  Combat  │  Input   │  Render
        (tu nuevo)│  (tu código actual) │  (ASCII)
-
+```
+```
 Estructura de Archivos Propuesta
 Raiz/
 ├── main.cpp
@@ -133,8 +102,9 @@ Raiz/
 │   ├── nivel1.txt            ← NUEVO
 │   └── nivel2.txt
 └── heroe.json
-
+```
 Leyenda del Mapa (nivel1.txt)
+```
 ################
 #......E.......#
 #..............#
@@ -142,7 +112,7 @@ Leyenda del Mapa (nivel1.txt)
 #..............#
 #......P.......#
 ################
-
+```
 Símbolo	Significado
 #	Pared
 .	Suelo transitable
@@ -179,17 +149,17 @@ Mapa de Transiciones (Flujo del Juego)
 ```
 
 Roadmap por Fases
-Fase 0 — Base actual (ya lista)
+- Fase 0 — Base actual (ya lista)
 Combate funcional, JSON, inventario, equipamiento, nivelación
 Se compila y juega
-Fase 1 — Sistema de Mapa 2D
+- Fase 1 — Sistema de Mapa 2D
 Archivos nuevos:
 
 Mapa.hpp / Mapa.cpp
 mapas/nivel1.txt
 Qué hace:
 
-Carga un .txt a una matriz std::vector<std::string>
+Carga un .txt a una matriz ``std::vector<std::string>``
 El jugador tiene posición (x, y) y se mueve con WASD
 Colisiones con # (no puede atravesar)
 Renderizado top-down sencillo para debug:
