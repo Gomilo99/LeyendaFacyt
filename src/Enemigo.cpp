@@ -1,4 +1,4 @@
-#include "lib/Enemigo.hpp"
+#include "../lib/Enemigo.hpp"
 #include <iostream>
 
 Enemigo::Enemigo(std::string nom, int hp, int atk, int def, int lvl, Drop d1, Drop d2)

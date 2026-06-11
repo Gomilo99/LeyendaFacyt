@@ -2,7 +2,7 @@
 #include <fstream>
 #include <cstdlib>
 #include <ctime>
-#include "lib/Batalla.hpp"
+#include "../lib/Batalla.hpp"
 
 int main() {
     std::ifstream objetosFile("objetos.json");

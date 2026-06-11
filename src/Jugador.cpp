@@ -1,4 +1,4 @@
-#include "lib/Jugador.hpp"
+#include "../lib/Jugador.hpp"
 #include <iostream>
 #include <algorithm>
 #include <limits>
