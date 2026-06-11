@@ -12,7 +12,7 @@ public:
     Enemigo(std::string nom, int hp, int atk, int def, int lvl, Drop d1, Drop d2);
     Enemigo(const Enemigo& copia);
     void atacar(Personaje* objetivo) override;
-    void setloot(Drop nuevoLoot1, Drop nuevoLoot2);
+    void setLoot(Drop nuevoLoot1, Drop nuevoLoot2);
     Drop getLoot1() const { return loot1; }
     Drop getLoot2() const { return loot2; }
 };

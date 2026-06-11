@@ -38,9 +38,14 @@ void Jugador::usarPocion(Objeto* pocion){
 
 void Jugador::mostrarEstado() const {
     std::cout << "\n" << nombre << " - Salud: " << salud << "/" << saludMaxima
-              << " | Ataque: " << ataque << " | Defensa: " << defensa
-              << "\nArma equipada: " << armaEquipada->getNombre() << "| dano: "
-              << armaEquipada->getDano() << "\nNivel: " << nivel <<" | Experiencia: " << experiencia
+              << " | Ataque: " << ataque << " | Defensa: " << defensa;
+    if (armaEquipada) {
+        std::cout << "\nArma equipada: " << armaEquipada->getNombre()
+                  << " | dano: " << armaEquipada->getDano();
+    } else {
+        std::cout << "\nArma equipada: ninguna";
+    }
+    std::cout << "\nNivel: " << nivel << " | Experiencia: " << experiencia
               << "/" << expNecesaria << std::endl;
 }
 

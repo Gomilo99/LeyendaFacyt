@@ -11,6 +11,10 @@
 
 using json = nlohmann::json;
 
+inline std::string dataPath(const std::string& filename) {
+    return std::string("json/") + filename;
+}
+
 void limpiarBuffer();
 void limpiarPantalla();
 

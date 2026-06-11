@@ -3,12 +3,16 @@
 #include <algorithm>
 #include <string>
 #include <limits>
-#include <ctime>
-#include <cstdlib>
 #include <map>
 #include <memory>
 #include <vector>
+#include <random>
 #include "../lib/Batalla.hpp"
+
+std::mt19937& rng() {
+    static std::mt19937 engine(std::random_device{}());
+    return engine;
+}
 
 void limpiarBuffer() {
     std::cin.clear();
@@ -137,8 +141,8 @@ std::shared_ptr<Enemigo> generarEnemigoPorNivel(
         throw std::runtime_error("No hay enemigos disponibles para el nivel solicitado");
     }
 
-    int idx = std::rand() % candidatos.size();
-    return candidatos[idx];
+    std::uniform_int_distribution<int> dist(0, candidatos.size() - 1);
+    return candidatos[dist(rng())];
 }
 
 void batalla(Jugador& jugador, const std::map<std::string, std::shared_ptr<Enemigo>>& enemigos) {
@@ -190,7 +194,7 @@ void batalla(Jugador& jugador, const std::map<std::string, std::shared_ptr<Enemi
 
     if (!jugador.estaVivo()) {
         std::cout << "Has sido derrotado por " << enemigo.getNombre() << "!\n";
-        guardarHeroe(jugador, "heroe.json");
+        guardarHeroe(jugador, dataPath("heroe.json"));
         return;
     }
 
@@ -199,14 +203,14 @@ void batalla(Jugador& jugador, const std::map<std::string, std::shared_ptr<Enemi
         std::cout << "Felicidades mano, has derrotado al jefe final!\n";
         std::cout << "...\n";
         std::cout << "Has ganado el juego!\n";
-        guardarHeroe(jugador, "heroe.json");
-        return;
+        jugador.setHaGanado(true);
     }
 
     int exp = jugador.getNivel() * 50;
     jugador.obtenerExperiencia(exp);
 
-    int chance = std::rand() % 100;
+    std::uniform_int_distribution<int> distLoot(0, 99);
+    int chance = distLoot(rng());
     std::shared_ptr<Objeto> lootGanado = nullptr;
 
     Drop loot1 = enemigo.getLoot1();
@@ -221,5 +225,5 @@ void batalla(Jugador& jugador, const std::map<std::string, std::shared_ptr<Enemi
         jugador.agregarObjeto(lootGanado);
     }
 
-    guardarHeroe(jugador, "heroe.json");
+    guardarHeroe(jugador, dataPath("heroe.json"));
 }

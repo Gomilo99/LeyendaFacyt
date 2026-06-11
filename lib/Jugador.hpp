@@ -15,6 +15,7 @@ private:
     std::shared_ptr<Arma> armaEquipada;
     int experiencia;
     int expNecesaria = 100;
+    bool haGanado = false;
 public:
     Jugador(std::string nombre);
     Jugador(std::string nom, int hp, int atk, int def, int lvl, int poc);
@@ -34,6 +35,8 @@ public:
     void equiparArma(std::shared_ptr<Arma> nuevaArma);
     void mostrarMenu();
     void obtenerExperiencia(int cantidad);
+    bool getHaGanado() const { return haGanado; }
+    void setHaGanado(bool ganado) { haGanado = ganado; }
 };
 
 #endif

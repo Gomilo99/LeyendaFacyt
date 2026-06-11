@@ -20,6 +20,7 @@ public:
     Personaje(const Personaje& copia)
         : nombre(copia.nombre), salud(copia.salud), saludMaxima(copia.saludMaxima),
           ataque(copia.ataque), defensa(copia.defensa), nivel(copia.nivel) {}
+    Personaje& operator=(const Personaje&) = default;
     virtual ~Personaje() {}
     virtual void atacar(Personaje* objetivo) = 0;
 

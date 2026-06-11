@@ -12,7 +12,7 @@ void Enemigo::atacar(Personaje* objetivo) {
     objetivo->recibirDano(ataque);
 }
 
-void Enemigo::setloot(Drop nuevoLoot1, Drop nuevoLoot2) {
+void Enemigo::setLoot(Drop nuevoLoot1, Drop nuevoLoot2) {
     loot1 = nuevoLoot1;
     loot2 = nuevoLoot2;
 }
