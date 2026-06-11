@@ -7,7 +7,9 @@
 2. Se agrego la funcion de guardarHeroe() para mantener los datos del personaje
 3. Se modificaron y se eliminó `using namespace std;`, se añadieron todas las llamadas a la librería std.
 4. Modificación estructura del proyecto.
-    Listo. Estructura final del proyecto:
+
+### Reestructuración
+Listo. Estructura final del proyecto:
 
     Raiz/
     ├── Objeto.hpp         # Clases Objeto, Arma, Pocion, ObjClave, Drop
