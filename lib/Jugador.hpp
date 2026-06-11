@@ -27,7 +27,7 @@ public:
     void setPociones(int nuevasPociones) { pociones = nuevasPociones; }
     void usarPocion();
     void usarPocion(Objeto* pocion);
-    void mostrarEstado() override;
+    void mostrarEstado() const override;
     void mostrarInventario();
     void agregarObjeto(std::shared_ptr<Objeto> objeto);
     void eliminarObjeto(const std::string& nombre);

@@ -36,7 +36,7 @@ void Jugador::usarPocion(Objeto* pocion){
     }
 }
 
-void Jugador::mostrarEstado() {
+void Jugador::mostrarEstado() const {
     std::cout << "\n" << nombre << " - Salud: " << salud << "/" << saludMaxima
               << " | Ataque: " << ataque << " | Defensa: " << defensa
               << "\nArma equipada: " << armaEquipada->getNombre() << "| dano: "

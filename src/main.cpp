@@ -8,7 +8,7 @@ int main() {
     std::ifstream objetosFile("objetos.json");
     std::ifstream enemigosFile("enemigos.json");
     std::ifstream heroeFile("heroe.json");
-    if (!objetosFile.is_open() && !enemigosFile.is_open()) {
+    if (!objetosFile.is_open() || !enemigosFile.is_open()) {
         std::cerr << "Faltan archivos para ejecutar el juego.\n";
         objetosFile.close();
         enemigosFile.close();

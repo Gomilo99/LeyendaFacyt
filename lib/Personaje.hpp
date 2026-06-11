@@ -29,7 +29,7 @@ public:
         std::cout << nombre << " recibe " << danoReal << " de dano!\n";
     }
 
-    virtual void mostrarEstado() {
+    virtual void mostrarEstado() const {
         std::cout << "\n" << nombre << " - Salud: " << salud << "/" << saludMaxima
                   << " | Ataque: " << ataque << " | Defensa: " << defensa << std::endl;
     }
