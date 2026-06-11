@@ -1,15 +1,18 @@
 CXX      := g++
-CXXFLAGS := -std=c++11 -Wall -Wextra -Wpedantic -I.
+CXXFLAGS := -std=c++11 -Wall -Wextra -Wpedantic -I. -MMD -MP
 SRCDIR   := src
 OBJDIR   := obj
 TARGET   := batalla.exe
 
 SRCS := $(wildcard $(SRCDIR)/*.cpp)
 OBJS := $(patsubst $(SRCDIR)/%.cpp, $(OBJDIR)/%.o, $(SRCS))
+DEPS := $(OBJS:.o=.d)
 
 .PHONY: all clean run
 
 all: $(TARGET)
+
+-include $(DEPS)
 
 $(TARGET): $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $^
@@ -23,4 +26,4 @@ clean:
 	if exist "$(TARGET)" del /f /q "$(TARGET)"
 
 run: $(TARGET)
-	./$(TARGET)
+	$(TARGET)
