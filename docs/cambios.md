@@ -241,7 +241,8 @@ Leyenda del Mapa (nivel1.txt)
 #......P.......#
 ################
 ```
-Símbolo	Significado
+**Símbolo	Significado**
+```
 #	Pared
 .	Suelo transitable
 P	Posición inicial del jugador
@@ -249,8 +250,8 @@ E	Spawn de enemigo (aleatorio del JSON por nivel)
 K	Llave mágica (victoria)
 H	Poción curativa en el suelo
 T	Trampa (daño al pisar)
-
-Mapa de Transiciones (Flujo del Juego)
+```
+**Mapa de Transiciones (Flujo del Juego)**
 ```
   EXPLORE
     │
@@ -276,7 +277,7 @@ Mapa de Transiciones (Flujo del Juego)
   GAME_OVER ───→ "Has muerto"
 ```
 
-Roadmap por Fases
+**Roadmap por Fases**
 - Fase 0 — Base actual (ya lista)
 Combate funcional, JSON, inventario, equipamiento, nivelación
 Se compila y juega
@@ -290,7 +291,8 @@ Qué hace:
 Carga un .txt a una matriz ``std::vector<std::string>``
 El jugador tiene posición (x, y) y se mueve con WASD
 Colisiones con # (no puede atravesar)
-Renderizado top-down sencillo para debug:
+
+**Renderizado top-down sencillo para debug:**
 ```
 ################
 #......E.......#
@@ -298,20 +300,20 @@ Renderizado top-down sencillo para debug:
 #..............#
 ################
 ```
-Cambios en tu código:
+**Cambios en tu código:**
 
 Jugador gana getX(), getY(), setPos(int x, int y)
 Personaje gana getPosX(), getPosY()
 Prueba: Mover un @ por el mapa sin salirte.
 
 Fase 2 — Integrar Combate con Mapa
-Qué cambia:
+**Qué cambia:**
 
 GameEngine con máquina de estados (enum GameState)
 Al pisar E, se genera un enemigo desde tu JSON actual y se llama a batalla()
 Al terminar el combate, vuelve al mapa en la misma posición
 El enemigo se marca como derrotado (no reaparece en esa casilla)
-Cambios en tu código:
+**Cambios en tu código:**
 
 batalla() ya recibe Jugador& — funciona igual
 Solo agregas la transición de estado en GameEngine
@@ -471,3 +473,11 @@ Mapa 2D ──▶ Integrar combate ──▶ Vista 1ra persona ──▶ Defende
     └──▶ Armadura ──▶ Victoria/multi-nivel ──▶ Pulido
 ```
 Cada fase produce un juego jugable desde el primer momento. No necesitas terminar todo para probar.
+
+
+### Mejora a implementar
+- Teclear un objeto con espacios para usar en el inventario no funciona. (ej: "pluma no se que").
+- Testear progreso niveles
+- Retornar cuando se obtenga un objeto
+- Agregar cambios de daño y daño crítico.
+- Visualización de vida, etc.
