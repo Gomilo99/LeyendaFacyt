@@ -1,4 +1,5 @@
-### Log 10/06/2026 — Correcciones de bugs, calidad y estructura
+## Log
+### 10/06/2026 — Correcciones de bugs, calidad y estructura
 
 #### Cambios realizados
 
@@ -125,8 +126,18 @@ Las funciones JSON lanzan excepciones (``throw std::runtime_error``) pero ``main
 - No hay enemigos para el nivel del jugador → ``terminate()``
 - ``heroe.json`` está mal formado → ``terminate()``
 Tres formas distintas de crashear sin mensaje de error al usuario.
-
-### Mejoras
+### 13/06/2026 - Mejoras Fase 1
+1. Creación de sistemas para visualización de un mapa donde hay:
+  - Paredes '#'
+  - Espacios transitables '.'
+  - Enemigos 'E'
+  - Pociones 'H'
+  - Posicioón inicial del jugador 'P'
+  - Posición dinámica para el jugador '@'
+2. Correción de bugs: Ya se mueve el jugador por el mapa.
+3. Implementación de sistema de caché: los archivos json originales no se modifican.
+4. Limipeza de tiles: al derrotar un enemigo o usar una poción en el mapa, el tile se marca como suelo.
+## Mejoras
 Estado actual del proyecto:
 
 Lo que tienes ahora es un módulo de combate sólido y funcional, pero no es un dungeon crawler completo. Es solo el subsistema de batalla del proyecto soñado. Los puntos fuertes actuales:

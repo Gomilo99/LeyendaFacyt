@@ -99,7 +99,12 @@ std::map<std::string, std::shared_ptr<Enemigo>> cargarEnemigosDesdeJSON(
 }
 
 Jugador cargarHeroe(const std::string& archivo) {
-    std::ifstream file(archivo);
+    std::string cacheArchivo = cachePath("heroe.cache");
+    std::ifstream file(cacheArchivo);
+    bool desdeCache = file.is_open();
+    if (!desdeCache) {
+        file.open(archivo);
+    }
     json j;
     file >> j;
     std::string nombre = j["nombre"];
@@ -109,11 +114,14 @@ Jugador cargarHeroe(const std::string& archivo) {
     int nivel = j["nivel"];
     int pociones = j["pociones"];
     Jugador jugador(nombre, salud, ataque, defensa, nivel, pociones);
+    if (desdeCache && j.contains("posX")) {
+        jugador.setPos(j["posX"], j["posY"]);
+    }
     file.close();
     return jugador;
 }
 
-void guardarHeroe(const Jugador& jugador, const std::string& archivo) {
+void guardarHeroe(const Jugador& jugador) {
     json j;
     j["nombre"] = jugador.getNombre();
     j["salud"] = jugador.getSalud();
@@ -121,7 +129,9 @@ void guardarHeroe(const Jugador& jugador, const std::string& archivo) {
     j["defensa"] = jugador.getDefensa();
     j["nivel"] = jugador.getNivel();
     j["pociones"] = jugador.getPociones();
-    std::ofstream file(archivo);
+    j["posX"] = jugador.getPosX();
+    j["posY"] = jugador.getPosY();
+    std::ofstream file(cachePath("heroe.cache"));
     file << j.dump(4);
     file.close();
 }
@@ -194,7 +204,7 @@ void batalla(Jugador& jugador, const std::map<std::string, std::shared_ptr<Enemi
 
     if (!jugador.estaVivo()) {
         std::cout << "Has sido derrotado por " << enemigo.getNombre() << "!\n";
-        guardarHeroe(jugador, dataPath("heroe.json"));
+        guardarHeroe(jugador);
         return;
     }
 
@@ -225,5 +235,5 @@ void batalla(Jugador& jugador, const std::map<std::string, std::shared_ptr<Enemi
         jugador.agregarObjeto(lootGanado);
     }
 
-    guardarHeroe(jugador, dataPath("heroe.json"));
+    guardarHeroe(jugador);
 }

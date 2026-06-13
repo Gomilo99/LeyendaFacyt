@@ -17,10 +17,34 @@ bool Mapa::cargar(const std::string &archivo){
         }
     }
 
-    // Verifica si la grilla tiene al menos una fila.
-    alto = grid.size(); // Accede a la primera fila
-    ancho = alto > 0 ? grid[0].size() : 0; // Obtiene el tamaño.
+    alto = grid.size();
+    ancho = alto > 0 ? grid[0].size() : 0;
 
+    return true;
+}
+
+bool Mapa::cargarConCache(const std::string& archivoOriginal, const std::string& archivoCache) {
+    std::ifstream cacheFile(archivoCache);
+    if (cacheFile.is_open()) {
+        cacheFile.close();
+        return cargar(archivoCache);
+    }
+    if (!cargar(archivoOriginal)) {
+        return false;
+    }
+    guardarCache(archivoCache);
+    return true;
+}
+
+bool Mapa::guardarCache(const std::string& archivoCache) const {
+    std::ofstream file(archivoCache);
+    if (!file.is_open()) {
+        std::cerr << "No se pudo guardar cache: " << archivoCache << "\n";
+        return false;
+    }
+    for (const auto& linea : grid) {
+        file << linea << "\n";
+    }
     return true;
 }
 
