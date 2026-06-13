@@ -16,27 +16,42 @@ private:
     int experiencia;
     int expNecesaria = 100;
     bool haGanado = false;
+    int posX, posY;
 public:
     Jugador(std::string nombre);
     Jugador(std::string nom, int hp, int atk, int def, int lvl, int poc);
-    void atacar(Personaje* objetivo) override;
+
     int getExperiencia() const { return experiencia; }
     void setExperiencia(int nuevaExperiencia) { experiencia = nuevaExperiencia; }
+    
     int getExperienciaNecesaria() const { return expNecesaria; }
     void setExperienciaNecesaria(int nuevaExpNecesaria) { expNecesaria = nuevaExpNecesaria; }
+    
     int getPociones() const { return pociones; }
     void setPociones(int nuevasPociones) { pociones = nuevasPociones; }
+    
+    bool getHaGanado() const { return haGanado; }
+    void setHaGanado(bool ganado) { haGanado = ganado; }
+
+    int getPosX() const { return posX; }
+    int getPosY() const { return posY; }
+    void setPos(int x, int y) { posX = x; posY = y; }
+
+    void atacar(Personaje* objetivo) override;
     void usarPocion();
     void usarPocion(Objeto* pocion);
+
+    void mostrarMenu();
     void mostrarEstado() const override;
     void mostrarInventario();
+
     void agregarObjeto(std::shared_ptr<Objeto> objeto);
     void eliminarObjeto(const std::string& nombre);
     void equiparArma(std::shared_ptr<Arma> nuevaArma);
-    void mostrarMenu();
+
     void obtenerExperiencia(int cantidad);
-    bool getHaGanado() const { return haGanado; }
-    void setHaGanado(bool ganado) { haGanado = ganado; }
+
+
 };
 
 #endif

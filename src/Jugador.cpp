@@ -4,7 +4,7 @@
 #include <limits>
 
 Jugador::Jugador(std::string nombre)
-    : Personaje(nombre, 100, 15, 10, 1), pociones(3), armaEquipada(nullptr), experiencia(0) {}
+    : Personaje(nombre, 100, 15, 10, 1), pociones(3), armaEquipada(nullptr), experiencia(0), posX(1), posY(1) {}
 
 Jugador::Jugador(std::string nom, int hp, int atk, int def, int lvl, int poc)
     : Personaje(nom, hp, atk, def, lvl), pociones(poc), armaEquipada(nullptr), experiencia(0) {}
