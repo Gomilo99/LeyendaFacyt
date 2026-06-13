@@ -7,7 +7,7 @@ int main() {
     std::string OBJETOS_DATAPATH = "json/objetos.json";
     std::string ENEMIGOS_DATAPATH = "json/enemigos.json";
     std::string HEROE_DATAPATH = "json/heroe.json";
-    std::string MAPAS_DATAPATH = "../mapas/nivel.txt";
+    std::string MAPAS_DATAPATH = "mapas/nivel1.txt";
 
     // Carga de archivos JSON
     std::ifstream objetosFile(OBJETOS_DATAPATH);
@@ -79,8 +79,9 @@ int main() {
                 }else{
                     std::cout << mapa.getTile(x, y);
                 }
-                std::cout << std::endl;
+                
             }
+            std::cout << std::endl;
         }
 
         // Selección de acciones
@@ -102,6 +103,7 @@ int main() {
         // Detección de nuevo valores de movimiento
         int nuevoX = jugador.getPosX() + dx;
         int nuevoY = jugador.getPosY() + dy;
+        jugador.setPos(nuevoX, nuevoY);
 
         if (mapa.esTransitable(nuevoX, nuevoY)){
             char tile = mapa.getTile(nuevoX, nuevoY);
