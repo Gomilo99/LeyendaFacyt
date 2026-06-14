@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
-#include "../lib/Batalla.hpp"
-#include "../lib/Mapa.hpp"
+#include "../lib/batalla.hpp"
+#include "../lib/mapa.hpp"
 
 int main() {
     std::string OBJETOS_DATAPATH = "json/objetos.json";

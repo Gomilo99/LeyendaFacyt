@@ -5,9 +5,9 @@
 #include <memory>
 #include <string>
 #include "json.hpp"
-#include "Objeto.hpp"
-#include "Enemigo.hpp"
-#include "Jugador.hpp"
+#include "objeto.hpp"
+#include "enemigo.hpp"
+#include "jugador.hpp"
 
 using json = nlohmann::json;
 

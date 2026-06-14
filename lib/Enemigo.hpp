@@ -1,8 +1,8 @@
 #ifndef ENEMIGO_HPP
 #define ENEMIGO_HPP
 
-#include "Personaje.hpp"
-#include "Objeto.hpp"
+#include "personaje.hpp"
+#include "objeto.hpp"
 #include <memory>
 
 class Enemigo : public Personaje {

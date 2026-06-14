@@ -7,7 +7,7 @@
 #include <memory>
 #include <vector>
 #include <random>
-#include "../lib/Batalla.hpp"
+#include "../lib/batalla.hpp"
 
 std::mt19937& rng() {
     static std::mt19937 engine(std::random_device{}());

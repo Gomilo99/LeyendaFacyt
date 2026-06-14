@@ -1,8 +1,8 @@
 #ifndef JUGADOR_HPP
 #define JUGADOR_HPP
 
-#include "Personaje.hpp"
-#include "Objeto.hpp"
+#include "personaje.hpp"
+#include "objeto.hpp"
 #include <map>
 #include <memory>
 #include <string>

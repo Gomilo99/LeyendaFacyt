@@ -1,4 +1,4 @@
-#include "../lib/Mapa.hpp"
+#include "../lib/mapa.hpp"
 #include <fstream>
 #include <iostream>
 

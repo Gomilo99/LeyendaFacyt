@@ -2,8 +2,8 @@
 #define CACHE_MANAGER_HPP
 
 #include <string>
-#include "Mapa.hpp"
-#include "Jugador.hpp"
+#include "mapa.hpp"
+#include "jugador.hpp"
 namespace CacheManager{
     bool existePartida();
     void crearPartida(const Mapa &mapa, const Jugador &jugador);
