@@ -38,3 +38,11 @@ bool Mapa::esTransitable(int x, int y) const {
     return tile == '.' || tile == 'p' || tile == 'E' || tile == 'K' || tile == 'H';
 }
 
+bool Mapa::guardar(const std::string &archivo) const{
+    std::ofstream file(archivo);
+    if(!file.is_open()) return false;
+    for (const auto& linea : grid){
+        file << linea << std::endl;
+    }
+    return true;
+}

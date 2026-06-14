@@ -17,6 +17,8 @@ class Mapa{
         int getAlto() const { return alto; }
 
         bool esTransitable(int x, int y) const;
+
+        bool guardar(const std::string &archivo) const;
 };
 
 #endif
