@@ -44,6 +44,7 @@ public:
     void drawBox(int x, int y, int w, int h, int color = 0);
     void drawBar(int x, int y, int w, int current, int max, int color = 0);
     void render();
+    void forceRedraw();
 
     static void hideCursor();
     static void showCursor();

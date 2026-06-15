@@ -139,6 +139,10 @@ void ScreenBuffer::render() {
     syncPrev();
 }
 
+void ScreenBuffer::forceRedraw() {
+    firstFrame = true;
+}
+
 void ScreenBuffer::hideCursor() {
     std::cout << "\033[?25l";
     std::cout.flush();
@@ -466,10 +470,38 @@ void BattleSystem::doPlayerAction() {
 
         case 2: // Inventario
             limpiarPantalla();
-            player->mostrarInventario();
-            std::cout << "\nPresiona Enter para volver al combate...";
+            player->mostrarEstado();
+            std::cout << "\n--- Inventario ---\n";
+            {
+                auto& inv = player->getInventario();
+                if (inv.empty()) {
+                    std::cout << "(vacio)\n";
+                } else {
+                    for (const auto& par : inv) {
+                        std::cout << "- " << par.first << " x" << par.second << "\n";
+                    }
+                }
+            }
+            std::cout << "\nPociones: " << player->getPociones() << "\n";
+            std::cout << "\nEscribe el nombre del objeto a usar, o Enter para volver: ";
             limpiarBuffer();
-            std::cin.get();
+            {
+                std::string nombreObj;
+                std::getline(std::cin, nombreObj);
+                if (!nombreObj.empty()) {
+                    auto it = player->getObjetosInventario().find(nombreObj);
+                    if (it != player->getObjetosInventario().end()) {
+                        player->usarPocion(it->second.get());
+                        player->eliminarObjeto(nombreObj);
+                    } else {
+                        std::cout << "No tienes \"" << nombreObj << "\" en tu inventario.\n";
+                        std::cout << "Presiona Enter para continuar...";
+                        limpiarBuffer();
+                        std::cin.get();
+                    }
+                }
+            }
+            screenBuffer.forceRedraw();
             currentState = BattleState::PLAYER_TURN;
             break;
 

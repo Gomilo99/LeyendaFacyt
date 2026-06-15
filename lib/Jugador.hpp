@@ -38,6 +38,9 @@ public:
     bool getHaGanado() const { return haGanado; }
     void setHaGanado(bool ganado) { haGanado = ganado; }
 
+    const std::map<std::string, int>& getInventario() const { return inventario; }
+    const std::map<std::string, std::shared_ptr<Objeto>>& getObjetosInventario() const { return objetosInventario; }
+
     int getPosX() const { return posX; }
     int getPosY() const { return posY; }
     void setPos(int x, int y) { posX = x; posY = y; }
