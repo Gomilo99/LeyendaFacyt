@@ -10,6 +10,7 @@
 class Jugador : public Personaje {
 private:
     int pociones;
+    int mana, manaMaxima;
     std::map<std::string, int> inventario;
     std::map<std::string, std::shared_ptr<Objeto>> objetosInventario;
     std::shared_ptr<Arma> armaEquipada;
@@ -30,6 +31,10 @@ public:
     int getPociones() const { return pociones; }
     void setPociones(int nuevasPociones) { pociones = nuevasPociones; }
     
+    int getMana() const { return mana; }
+    int getManaMaxima() const { return manaMaxima; }
+    void setMana(int nuevaMana) { mana = nuevaMana; }
+    
     bool getHaGanado() const { return haGanado; }
     void setHaGanado(bool ganado) { haGanado = ganado; }
 
@@ -40,6 +45,7 @@ public:
     void atacar(Personaje* objetivo) override;
     void usarPocion();
     void usarPocion(Objeto* pocion);
+    void usarMagia(Personaje* objetivo);
 
     void mostrarMenu();
     void mostrarEstado() const override;
@@ -50,8 +56,6 @@ public:
     void equiparArma(std::shared_ptr<Arma> nuevaArma);
 
     void obtenerExperiencia(int cantidad);
-
-
 };
 
 #endif

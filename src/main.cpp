@@ -24,7 +24,6 @@ int main() {
     objetosFile.close();
     enemigosFile.close();
 
-    // Una vez se verifica todo, se carga la información
     auto objetos = cargarObjetosDesdeJSON(OBJETOS_DATAPATH);
     if (objetos.empty()) {
         std::cerr << "No se pudieron cargar los objetos desde el archivo JSON.\n";
@@ -48,8 +47,9 @@ int main() {
     if(heroeFile.is_open()) {
         jugador = cargarHeroe(HEROE_DATAPATH);
     }
+    heroeFile.close();
 
-    // Buscar tile 'P' para gestionar al jugar
+    // Buscar tile 'P' para posicion inicial del jugador
     for(int y = 0; y < mapa.getAlto(); y++){
         for(int x = 0; x < mapa.getAncho(); x++){
             if(mapa.getTile(x, y) == 'P'){
@@ -58,12 +58,12 @@ int main() {
         }
     }
 
-    // Cargar datos iniciales
+    // Equipar arma inicial
     auto itEspada = objetos.find("Espada Gallo");
     if (itEspada != objetos.end()) {
         jugador.equiparArma(std::dynamic_pointer_cast<Arma>(itEspada->second));
     } else {
-        std::cout << "No se encontró la espada en el inventario.\n";
+        std::cout << "No se encontro la espada en el inventario.\n";
     }
 
     // Bucle principal: EXPLORE -> COMBAT
@@ -79,12 +79,11 @@ int main() {
                 }else{
                     std::cout << mapa.getTile(x, y);
                 }
-                
             }
             std::cout << std::endl;
         }
 
-        // Selección de acciones
+        // Seleccion de acciones
         std::cout << "\nWASD para mover, I inventario, Q salir: ";
         char input;
         std::cin >> input;
@@ -100,40 +99,33 @@ int main() {
         default: continue;
         }
 
-        // Detección de nuevo valores de movimiento
         int nuevoX = jugador.getPosX() + dx;
         int nuevoY = jugador.getPosY() + dy;
-        jugador.setPos(nuevoX, nuevoY);
 
         if (mapa.esTransitable(nuevoX, nuevoY)){
+            jugador.setPos(nuevoX, nuevoY);
             char tile = mapa.getTile(nuevoX, nuevoY);
             if (tile == 'E'){
-                // Transición de combate
                 batalla(jugador, enemigos);
-                // Marcar tile 'E' como '.' para que no reaparezca
-                // (rquiere modificar el mapa: grid mutable)
                 if (jugador.estaVivo()){
-                    // Limpiar la E del mapa
-                    // (necesitas un setTile en Mapa)
+                    mapa.setTile(nuevoX, nuevoY, '.');
                 }
             }
             if (tile == 'K'){
-                std::cout << "Has encontrado la llave mágica!\n";
+                std::cout << "Has encontrado la llave magica!\n";
                 jugador.setHaGanado(true);
             }
             if (tile == 'H'){
                 jugador.usarPocion();
-                // Marcar H como .
+                mapa.setTile(nuevoX, nuevoY, '.');
             }
         }
     }
 
-    // Cerrar el juego
     if (jugador.getHaGanado()) {
         std::cout << "\nMuchas gracias por Jugar :)" << std::endl;
     } else {
         std::cout << "\n\nGAME OVER";
     }
-    heroeFile.close();
     return 0;
 }

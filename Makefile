@@ -1,5 +1,5 @@
 CXX      := g++
-CXXFLAGS := -std=c++11 -Wall -Wextra -Wpedantic -I. -MMD -MP
+CXXFLAGS := -std=c++17 -Wall -Wextra -Wpedantic -I. -MMD -MP
 SRCDIR   := src
 OBJDIR   := obj
 TARGET   := batalla.exe

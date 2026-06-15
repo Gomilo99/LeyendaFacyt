@@ -1,5 +1,5 @@
-obj/Enemigo.o: src/Enemigo.cpp src/../lib/Enemigo.hpp \
- src/../lib/Personaje.hpp src/../lib/Objeto.hpp
-src/../lib/Enemigo.hpp:
-src/../lib/Personaje.hpp:
-src/../lib/Objeto.hpp:
+obj/enemigo.o: src/enemigo.cpp src/../lib/enemigo.hpp \
+ src/../lib/personaje.hpp src/../lib/objeto.hpp
+src/../lib/enemigo.hpp:
+src/../lib/personaje.hpp:
+src/../lib/objeto.hpp:
