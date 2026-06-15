@@ -1,7 +1,6 @@
 #include "../lib/jugador.hpp"
 #include <iostream>
 #include <algorithm>
-#include <limits>
 
 Jugador::Jugador(std::string nombre)
     : Personaje(nombre, 100, 15, 10, 1), pociones(3), mana(50), manaMaxima(50),
@@ -132,16 +131,6 @@ void Jugador::equiparArma(std::shared_ptr<Arma> nuevaArma){
     armaEquipada = nuevaArma;
     ataque += nuevaArma->getDano();
     std::cout << "Has equipado el arma: " << nuevaArma->getNombre() << "\n";
-}
-
-void Jugador::mostrarMenu(){
-    std::cout << "\n--- Turno del Jugador ---\n";
-    std::cout << "1. Atacar\n";
-    std::cout << "2. Magia (" << mana << " MP)\n";
-    std::cout << "3. Usar pocion (" << pociones << " restantes)\n";
-    std::cout << "4. Ver inventario\n";
-    std::cout << "5. Ver estado\n";
-    std::cout << "Elige una opcion: ";
 }
 
 void Jugador::obtenerExperiencia(int cantidad) {

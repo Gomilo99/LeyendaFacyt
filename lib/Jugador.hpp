@@ -50,7 +50,6 @@ public:
     void usarPocion(Objeto* pocion);
     void usarMagia(Personaje* objetivo);
 
-    void mostrarMenu();
     void mostrarEstado() const override;
     void mostrarInventario();
 

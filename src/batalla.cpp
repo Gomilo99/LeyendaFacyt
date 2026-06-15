@@ -1,25 +1,15 @@
 #include <iostream>
-#include <fstream>
 #include <algorithm>
 #include <string>
 #include <limits>
-#include <map>
-#include <memory>
-#include <vector>
 #include <random>
-#include <cstdlib>
 #include <thread>
 #include <chrono>
 #ifdef _WIN32
 #include <windows.h>
 #endif
 #include "../lib/batalla.hpp"
-
-// Generador de numeros aleatorios compartido (Mersenne Twister)
-std::mt19937& rng() {
-    static std::mt19937 engine(std::random_device{}());
-    return engine;
-}
+#include "../lib/DataManager.hpp"
 
 // Limpia el buffer de entrada: descarta hasta encontrar \n
 void limpiarBuffer() {
@@ -567,7 +557,7 @@ void BattleSystem::doPlayerAction() {
         case 3: // Huir: 50% de probabilidad de exito
         {
             std::uniform_int_distribution<int> dist(0, 99);
-            int chance = dist(rng());
+            int chance = dist(DataManager::rng());
             if (chance < 50) {
                 setLog("Has huido exitosamente!");
                 render();
@@ -662,144 +652,13 @@ void BattleSystem::run() {
     ScreenBuffer::showCursor();
 }
 
-// ==================== DATA LOADING ====================
-
-// Carga objetos desde JSON: armas, pociones y objetos clave.
-// Cada objeto se instancia como shared_ptr<Objeto> y se indexa por nombre.
-std::map<std::string, std::shared_ptr<Objeto>> cargarObjetosDesdeJSON(const std::string& archivo) {
-    std::map<std::string, std::shared_ptr<Objeto>> objetos;
-    std::ifstream file(archivo);
-    if (!file.is_open()) return objetos;
-    json j;
-    file >> j;
-
-    if (j.contains("arma")) {
-        for (const auto& item : j["arma"]) {
-            std::string nombre = item["nombre"];
-            std::string descripcion = item["descripcion"];
-            int dano = item["dano"];
-            objetos[nombre] = std::make_shared<Arma>(nombre, descripcion, dano);
-        }
-    }
-    if (j.contains("pocion")) {
-        for (const auto& item : j["pocion"]) {
-            std::string nombre = item["nombre"];
-            std::string descripcion = item["descripcion"];
-            int curacion = item["curacion"];
-            objetos[nombre] = std::make_shared<Pocion>(nombre, descripcion, curacion);
-        }
-    }
-    if (j.contains("clave")) {
-        for (const auto& item : j["clave"]) {
-            std::string nombre = item["nombre"];
-            std::string descripcion = item["descripcion"];
-            objetos[nombre] = std::make_shared<ObjClave>(nombre, descripcion);
-        }
-    }
-    file.close();
-    return objetos;
-}
-
-// Carga enemigos desde JSON organizados por nivel.
-// Cada enemigo referencia dos objetos de loot del map de objetos disponibles.
-// Si un objeto referenciado no existe, lanza runtime_error.
-std::map<std::string, std::shared_ptr<Enemigo>> cargarEnemigosDesdeJSON(
-    const std::string& archivo,
-    const std::map<std::string, std::shared_ptr<Objeto>>& objetosDisponibles)
-{
-    std::map<std::string, std::shared_ptr<Enemigo>> enemigos;
-    std::ifstream file(archivo);
-    if (!file.is_open()) return enemigos;
-    json j;
-    file >> j;
-
-    for (auto it = j.begin(); it != j.end(); ++it) {
-        int nivel = std::stoi(it.key());
-        for (const auto& item : it.value()) {
-            std::string nombre = item["nombre"];
-            int salud = item["salud"];
-            int ataque = item["ataque"];
-            int defensa = item["defensa"];
-            std::string nombreLoot1 = item["loot1"];
-            std::string nombreLoot2 = item["loot2"];
-            int prob1 = item.contains("prob1") ? (int)item["prob1"] : 70;
-            int prob2 = item.contains("prob2") ? (int)item["prob2"] : 30;
-
-            auto it1 = objetosDisponibles.find(nombreLoot1);
-            auto it2 = objetosDisponibles.find(nombreLoot2);
-            if (it1 == objetosDisponibles.end() || it2 == objetosDisponibles.end()) {
-                throw std::runtime_error("Objeto no encontrado: " + nombreLoot1 + " o " + nombreLoot2);
-            }
-
-            Drop drop1(it1->second, prob1);
-            Drop drop2(it2->second, prob2);
-
-            auto enemigo = std::make_shared<Enemigo>(nombre, salud, ataque, defensa, nivel, drop1, drop2);
-            enemigos[nombre] = enemigo;
-        }
-    }
-    file.close();
-    return enemigos;
-}
-
-// Carga el estado del heroe desde un archivo JSON.
-// Devuelve un objeto Jugador con los valores persistidos.
-Jugador cargarHeroe(const std::string& archivo) {
-    std::ifstream file(archivo);
-    json j;
-    file >> j;
-    std::string nombre = j["nombre"];
-    int salud = j["salud"];
-    int ataque = j["ataque"];
-    int defensa = j["defensa"];
-    int nivel = j["nivel"];
-    int pociones = j.contains("pociones") ? (int)j["pociones"] : 3;
-    Jugador jugador(nombre, salud, ataque, defensa, nivel, pociones);
-    file.close();
-    return jugador;
-}
-
-// Persiste el estado del heroe a JSON, incluyendo mana.
-void guardarHeroe(const Jugador& jugador, const std::string& archivo) {
-    json j;
-    j["nombre"] = jugador.getNombre();
-    j["salud"] = jugador.getSalud();
-    j["ataque"] = jugador.getAtaque();
-    j["defensa"] = jugador.getDefensa();
-    j["nivel"] = jugador.getNivel();
-    j["pociones"] = jugador.getPociones();
-    j["mana"] = jugador.getMana();
-    std::ofstream file(archivo);
-    file << j.dump(4);
-    file.close();
-}
-
-// Selecciona un enemigo aleatorio de entre los que coinciden con el nivel especificado.
-// Lanza runtime_error si no hay candidatos para ese nivel.
-std::shared_ptr<Enemigo> generarEnemigoPorNivel(
-    const std::map<std::string, std::shared_ptr<Enemigo>>& enemigos, int nivelMaxPermitido)
-{
-    std::vector<std::shared_ptr<Enemigo>> candidatos;
-    for (const auto& par : enemigos) {
-        if (par.second->getNivel() == nivelMaxPermitido)
-            candidatos.push_back(par.second);
-    }
-    if (candidatos.empty())
-        throw std::runtime_error("No hay enemigos disponibles para el nivel solicitado");
-    std::uniform_int_distribution<int> dist(0, candidatos.size() - 1);
-    return candidatos[dist(rng())];
-}
-
 // Punto de entrada al combate desde el mapa:
-// 1. Genera enemigo segun nivel del jugador
-// 2. Muestra intro (jefe final o enemigo normal)
-// 3. Instancia y ejecuta BattleSystem
-// 4. Post-batalla: maneja huida, derrota, victoria, experiencia y loot
-void batalla(Jugador& jugador, const std::map<std::string, std::shared_ptr<Enemigo>>& enemigos) {
+// 1. Muestra intro (jefe final o enemigo normal)
+// 2. Instancia y ejecuta BattleSystem
+// 3. Post-batalla: maneja huida, derrota, victoria, experiencia y loot
+void batalla(Jugador& jugador, Enemigo& enemigo) {
     limpiarPantalla();
 
-    auto enemigoSelec = generarEnemigoPorNivel(enemigos, jugador.getNivel());
-    Enemigo enemigo(*enemigoSelec);
     bool jefefinal = (enemigo.getNivel() >= 4);
 
     if (jefefinal) {
@@ -824,7 +683,7 @@ void batalla(Jugador& jugador, const std::map<std::string, std::shared_ptr<Enemi
 
     if (!jugador.estaVivo()) {
         std::cout << "\nHas sido derrotado por " << enemigo.getNombre() << "!\n";
-        guardarHeroe(jugador, dataPath("heroe.json"));
+        DataManager::guardarHeroe(jugador);
         std::cout << "Presiona Enter para continuar...";
         limpiarBuffer();
         std::cin.get();
@@ -847,7 +706,7 @@ void batalla(Jugador& jugador, const std::map<std::string, std::shared_ptr<Enemi
 
     // Calcular loot segun probabilidades del enemigo
     std::uniform_int_distribution<int> distLoot(0, 99);
-    int chance = distLoot(rng());
+    int chance = distLoot(DataManager::rng());
     std::shared_ptr<Objeto> lootGanado = nullptr;
 
     Drop loot1 = enemigo.getLoot1();
@@ -862,7 +721,7 @@ void batalla(Jugador& jugador, const std::map<std::string, std::shared_ptr<Enemi
         jugador.agregarObjeto(lootGanado);
     }
 
-    guardarHeroe(jugador, dataPath("heroe.json"));
+    DataManager::guardarHeroe(jugador);
     std::cout << "Presiona Enter para continuar...";
     limpiarBuffer();
     std::cin.get();

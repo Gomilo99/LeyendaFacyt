@@ -1,10 +1,10 @@
 #include "../lib/cacheManager.hpp"
 #include "../lib/config.hpp"
-#include "../lib/batalla.hpp"
 #include <fstream>
 #include <iostream>
 #include <filesystem>
 
+using json = nlohmann::json;
 namespace fs = std::filesystem;
 
 bool CacheManager::existePartida(){
@@ -28,11 +28,30 @@ bool CacheManager::cargarMapa(Mapa &mapa){
 }
 
 void CacheManager::guardarHeroe(const Jugador &jugador){
-    ::guardarHeroe(jugador, Config::heroePath());
+    json j;
+    j["nombre"] = jugador.getNombre();
+    j["salud"] = jugador.getSalud();
+    j["ataque"] = jugador.getAtaque();
+    j["defensa"] = jugador.getDefensa();
+    j["nivel"] = jugador.getNivel();
+    j["pociones"] = jugador.getPociones();
+    j["mana"] = jugador.getMana();
+    std::ofstream file(Config::heroeCachePath());
+    file << j.dump(4);
 }
 
 Jugador CacheManager::cargarHeroe(){
-    return ::cargarHeroe(Config::heroePath());
+    std::ifstream file(Config::heroeCachePath());
+    json j;
+    file >> j;
+    std::string nombre = j["nombre"];
+    int salud = j["salud"];
+    int ataque = j["ataque"];
+    int defensa = j["defensa"];
+    int nivel = j["nivel"];
+    int pociones = j.contains("pociones") ? (int)j["pociones"] : 3;
+    file.close();
+    return Jugador(nombre, salud, ataque, defensa, nivel, pociones);
 }
 
 void CacheManager::limpiar(){

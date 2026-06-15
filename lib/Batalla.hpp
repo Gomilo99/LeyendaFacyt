@@ -1,17 +1,11 @@
 #ifndef BATALLA_HPP
 #define BATALLA_HPP
 
-#include <map>
-#include <memory>
 #include <string>
 #include <vector>
 #include <sstream>
-#include "json.hpp"
-#include "objeto.hpp"
 #include "enemigo.hpp"
 #include "jugador.hpp"
-
-using json = nlohmann::json;
 
 // Dimensiones fijas del buffer de pantalla de combate
 const int SCREEN_WIDTH = 56;
@@ -173,30 +167,12 @@ public:
     void run();
 };
 
-// Construye ruta dentro de json/
-inline std::string dataPath(const std::string& filename) {
-    return std::string("json/") + filename;
-}
-
 // Limpia el buffer de entrada (cin.clear + ignore hasta \n)
 void limpiarBuffer();
 // Limpia la terminal (\033[2J\033[1;1H)
 void limpiarPantalla();
 
-// Carga objetos desde json/objetos.json
-std::map<std::string, std::shared_ptr<Objeto>> cargarObjetosDesdeJSON(const std::string& archivo);
-// Carga enemigos desde json/enemigos.json, vinculando loot con objetos cargados
-std::map<std::string, std::shared_ptr<Enemigo>> cargarEnemigosDesdeJSON(
-    const std::string& archivo,
-    const std::map<std::string, std::shared_ptr<Objeto>>& objetosDisponibles);
-// Carga estado del heroe desde JSON
-Jugador cargarHeroe(const std::string& archivo);
-// Persiste estado del heroe a JSON
-void guardarHeroe(const Jugador& jugador, const std::string& archivo);
-// Selecciona un enemigo aleatorio del nivel indicado
-std::shared_ptr<Enemigo> generarEnemigoPorNivel(
-    const std::map<std::string, std::shared_ptr<Enemigo>>& enemigos, int nivelMaxPermitido);
 // Punto de entrada al combate: muestra intro, instancia BattleSystem, maneja loot/exp post-batalla
-void batalla(Jugador& jugador, const std::map<std::string, std::shared_ptr<Enemigo>>& enemigos);
+void batalla(Jugador& jugador, Enemigo& enemigo);
 
 #endif

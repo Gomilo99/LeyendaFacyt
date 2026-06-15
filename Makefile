@@ -2,7 +2,7 @@ CXX      := g++
 CXXFLAGS := -std=c++17 -Wall -Wextra -Wpedantic -I. -MMD -MP
 SRCDIR   := src
 OBJDIR   := obj
-TARGET   := batalla.exe
+TARGET   := leyenda.exe
 
 SRCS := $(wildcard $(SRCDIR)/*.cpp)
 OBJS := $(patsubst $(SRCDIR)/%.cpp, $(OBJDIR)/%.o, $(SRCS))
