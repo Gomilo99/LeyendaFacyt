@@ -1,5 +1,6 @@
 #include "../lib/DataManager.hpp"
 #include "../lib/config.hpp"
+#include "../lib/json.hpp"
 #include <fstream>
 #include <algorithm>
 #include <stdexcept>

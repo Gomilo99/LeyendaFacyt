@@ -5,6 +5,17 @@
 #include "../lib/batalla.hpp"
 #include "../lib/config.hpp"
 
+/**
+ * Constructor del motor del juego.
+ *
+ * Flujo de inicialización:
+ * 1. Carga objetos desde objetos.json
+ * 2. Carga plantillas de enemigos desde enemigos.json (EnemyFactory)
+ * 3. Carga el mapa desde mapas/nivel1.txt
+ * 4. Si existe heroe.json, restaura la partida guardada
+ * 5. Busca el tile 'P' en el mapa para colocar al jugador
+ * 6. Equipa la "Espada Gallo" por defecto si existe en el JSON
+ */
 GameManager::GameManager()
     : jugador("Heroe"), state(GameState::MAIN_MENU)
 {
@@ -39,6 +50,12 @@ GameManager::GameManager()
     }
 }
 
+/**
+ * Renderiza la pantalla de título principal.
+ * Muestra el nombre del juego, instrucciones básicas
+ * y espera a que el jugador presione Enter para comenzar.
+ * Luego transiciona al estado OVERWORLD.
+ */
 void GameManager::mostrarMenuPrincipal() {
     limpiarPantalla();
     std::cout << "========================================\n";
@@ -55,6 +72,11 @@ void GameManager::mostrarMenuPrincipal() {
     state = GameState::OVERWORLD;
 }
 
+/**
+ * Renderiza el mapa en vista top-down.
+ * Dibuja la cuadrícula completa, reemplazando la posición
+ * del jugador con '@'.
+ */
 void GameManager::renderMapa() {
     for (int y = 0; y < mapa.getAlto(); y++){
         for (int x = 0; x < mapa.getAncho(); x++){
@@ -68,6 +90,17 @@ void GameManager::renderMapa() {
     }
 }
 
+/**
+ * Mueve al jugador si el tile destino es transitable.
+ *
+ * Flujo:
+ * 1. Calcula nueva posición (nuevoX, nuevoY)
+ * 2. Si es transitable, actualiza la posición
+ * 3. Procesa el tile pisado (B = boss, K = victoria, H = poción)
+ * 4. Si no hubo evento especial y el jugador sigue vivo:
+ *    - Registra el paso en EncounterManager
+ *    - Verifica si debe ocurrir un encuentro aleatorio
+ */
 void GameManager::moverJugador(int dx, int dy) {
     int nuevoX = jugador.getPosX() + dx;
     int nuevoY = jugador.getPosY() + dy;
@@ -87,6 +120,13 @@ void GameManager::moverJugador(int dx, int dy) {
     }
 }
 
+/**
+ * Procesa tiles especiales del mapa.
+ *
+ * B: Inicia combate contra el jefe del nivel
+ * K: Marca victoria (jugador encontró la llave)
+ * H: Usa una poción y elimina el tile del mapa
+ */
 void GameManager::handleTile(char tile) {
     if (tile == 'B'){
         iniciarCombateJefe();
@@ -108,11 +148,21 @@ void GameManager::mostrarInventario() {
     jugador.mostrarInventario();
 }
 
+/**
+ * Inicia un combate contra un enemigo aleatorio.
+ * EnemyFactory selecciona una plantilla mediante peso ponderado
+ * y crea una instancia de Enemigo lista para batalla().
+ */
 void GameManager::iniciarCombate() {
     Enemigo enemigo = enemyFactory.crearEnemigo(jugador.getNivel());
     batalla(jugador, enemigo);
 }
 
+/**
+ * Inicia un combate contra el jefe del nivel actual.
+ * Si no hay jefe definido para el nivel del jugador,
+ * muestra un mensaje y cae en un combate aleatorio normal.
+ */
 void GameManager::iniciarCombateJefe() {
     if (enemyFactory.hayJefe(jugador.getNivel())) {
         Enemigo jefe = enemyFactory.crearJefe(jugador.getNivel());
@@ -126,6 +176,15 @@ void GameManager::iniciarCombateJefe() {
     }
 }
 
+/**
+ * Bucle principal del juego con máquina de estados explícita.
+ *
+ * MAIN_MENU → OVERWORLD → (BATTLE anidado) → OVERWORLD o GAME_OVER
+ *
+ * El estado BATTLE se maneja dentro de iniciarCombate()/iniciarCombateJefe()
+ * que llaman a batalla() de forma síncrona; al terminar el combate
+ * se retorna al bucle OVERWORLD.
+ */
 void GameManager::run() {
     state = GameState::MAIN_MENU;
 

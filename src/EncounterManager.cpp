@@ -2,6 +2,10 @@
 #include "../lib/DataManager.hpp"
 #include <random>
 
+/**
+ * Inicializa el gestor con terreno LLANURA (probabilidad base 10%)
+ * y contador de pasos en 0 (primeros pasos con gracia).
+ */
 EncounterManager::EncounterManager()
     : terrenoActual(Terreno::LLANURA), pasosDesdeUltimo(0) {}
 
@@ -17,6 +21,13 @@ void EncounterManager::resetear() {
     pasosDesdeUltimo = 0;
 }
 
+/**
+ * Probabilidad base según el terreno donde se mueve el jugador.
+ * - CAMINO:    5%  (seguro)
+ * - LLANURA:  10%  (neutral)
+ * - MAZMORRA: 14%  (peligroso)
+ * - BOSQUE:   18%  (muy peligroso)
+ */
 int EncounterManager::getProbabilidadBase() const {
     switch (terrenoActual) {
         case Terreno::CAMINO:    return 5;
@@ -27,6 +38,16 @@ int EncounterManager::getProbabilidadBase() const {
     }
 }
 
+/**
+ * Verifica si debe ocurrir un encuentro aleatorio.
+ *
+ * Reglas:
+ * 1. No hay encuentros en los primeros 3 pasos (gracia).
+ * 2. Probabilidad base según terreno.
+ * 3. Aumenta +3% por cada paso extra después del paso 3.
+ * 4. Tope máximo de 40%.
+ * 5. Si el RNG acierta, resetea el contador y devuelve true.
+ */
 bool EncounterManager::verificarEncuentro() {
     if (pasosDesdeUltimo < 3) return false;
 
