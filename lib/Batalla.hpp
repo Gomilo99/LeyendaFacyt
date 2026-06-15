@@ -5,6 +5,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <sstream>
 #include "json.hpp"
 #include "objeto.hpp"
 #include "enemigo.hpp"
@@ -117,6 +118,11 @@ class BattleSystem {
     std::string enemyArt[6];
     std::string logMessage;
 
+    std::streambuf* oldCoutBuf;
+    std::ostringstream coutSink;
+
+    void suppressCout();
+    void restoreCout();
     void generateEnemyArt();
     void processInput();
     void doPlayerAction();
