@@ -15,22 +15,26 @@
 #endif
 #include "../lib/batalla.hpp"
 
+// Generador de numeros aleatorios compartido (Mersenne Twister)
 std::mt19937& rng() {
     static std::mt19937 engine(std::random_device{}());
     return engine;
 }
 
+// Limpia el buffer de entrada: descarta hasta encontrar \n
 void limpiarBuffer() {
     std::cin.clear();
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 }
 
+// Limpia la terminal usando codigo ANSI
 void limpiarPantalla() {
     std::cout << "\033[2J\033[1;1H";
 }
 
 // ==================== SCREEN BUFFER ====================
 
+// Inicializa el buffer: firstFrame=true fuerza redibujado completo en el primer render()
 ScreenBuffer::ScreenBuffer() : firstFrame(true) {
     clear();
     for (int y = 0; y < SCREEN_HEIGHT; y++)
@@ -38,6 +42,7 @@ ScreenBuffer::ScreenBuffer() : firstFrame(true) {
             prev[y][x] = '\0';
 }
 
+// Copia el estado actual (grid + attrs) a los buffers anteriores (prev + prevAttrs)
 void ScreenBuffer::syncPrev() {
     for (int y = 0; y < SCREEN_HEIGHT; y++) {
         for (int x = 0; x < SCREEN_WIDTH; x++) {
@@ -47,6 +52,7 @@ void ScreenBuffer::syncPrev() {
     }
 }
 
+// Llena todo el buffer con espacios y resetea colores
 void ScreenBuffer::clear() {
     for (int y = 0; y < SCREEN_HEIGHT; y++) {
         for (int x = 0; x < SCREEN_WIDTH; x++) {
@@ -56,6 +62,7 @@ void ScreenBuffer::clear() {
     }
 }
 
+// Escribe un caracter en (x,y) con color opcional. Ignora coordenadas fuera de rango.
 void ScreenBuffer::setChar(int x, int y, char c, int color) {
     if (x >= 0 && x < SCREEN_WIDTH && y >= 0 && y < SCREEN_HEIGHT) {
         grid[y][x] = c;
@@ -63,24 +70,29 @@ void ScreenBuffer::setChar(int x, int y, char c, int color) {
     }
 }
 
+// Cambia solo el color de una celda sin modificar el caracter
 void ScreenBuffer::setAttr(int x, int y, int color) {
     if (x >= 0 && x < SCREEN_WIDTH && y >= 0 && y < SCREEN_HEIGHT)
         attrs[y][x] = color;
 }
 
+// Dibuja texto horizontal desde (x,y)
 void ScreenBuffer::drawString(int x, int y, const std::string& str, int color) {
     for (size_t i = 0; i < str.size(); i++)
         setChar(x + (int)i, y, str[i], color);
 }
 
+// Dibuja linea horizontal de longitud w con el caracter c
 void ScreenBuffer::drawHLine(int x, int y, int w, char c, int color) {
     for (int i = 0; i < w; i++) setChar(x + i, y, c, color);
 }
 
+// Dibuja linea vertical de altura h con el caracter c
 void ScreenBuffer::drawVLine(int x, int y, int h, char c, int color) {
     for (int i = 0; i < h; i++) setChar(x, y + i, c, color);
 }
 
+// Dibuja un recuadro de w x h usando '=' para bordes horizontales y '|' para verticales
 void ScreenBuffer::drawBox(int x, int y, int w, int h, int color) {
     drawHLine(x, y, w, '=', color);
     drawHLine(x, y + h - 1, w, '=', color);
@@ -92,6 +104,7 @@ void ScreenBuffer::drawBox(int x, int y, int w, int h, int color) {
     setChar(x + w - 1, y + h - 1, '+', color);
 }
 
+// Dibuja una barra de progreso: '#' para el porcentaje completado, '.' para el resto
 void ScreenBuffer::drawBar(int x, int y, int w, int current, int max, int color) {
     int fill = (max > 0) ? (current * w / max) : 0;
     fill = std::max(0, std::min(w, fill));
@@ -101,7 +114,10 @@ void ScreenBuffer::drawBar(int x, int y, int w, int current, int max, int color)
     drawHLine(x + fill, y, w - fill, '.', emptyColor);
 }
 
+// Vuelca el buffer a la terminal con redibujado diferencial:
+// solo las lineas que cambiaron se reescriben, usando posicionamiento ANSI.
 void ScreenBuffer::render() {
+    // Primer frame: limpiar pantalla completa e invalidar prev
     if (firstFrame) {
         std::cout << "\033[2J";
         firstFrame = false;
@@ -110,6 +126,7 @@ void ScreenBuffer::render() {
                 prev[y][x] = '\0';
     }
 
+    // Comparar cada linea contra su version anterior
     for (int y = 0; y < SCREEN_HEIGHT; y++) {
         bool lineSame = true;
         for (int x = 0; x < SCREEN_WIDTH; x++) {
@@ -118,12 +135,14 @@ void ScreenBuffer::render() {
                 break;
             }
         }
-        if (lineSame) continue;
+        if (lineSame) continue; // saltar lineas sin cambios
 
+        // Posicionar cursor al inicio de la linea (1-indexed)
         std::cout << "\033[" << (y + 1) << ";1H";
         int currentColor = 0;
         for (int x = 0; x < SCREEN_WIDTH; x++) {
             int c = attrs[y][x];
+            // Emitir codigo ANSI solo si el color cambio
             if (c != currentColor) {
                 if (c) std::cout << "\033[" << c << "m";
                 else   std::cout << "\033[0m";
@@ -134,25 +153,30 @@ void ScreenBuffer::render() {
         if (currentColor) std::cout << "\033[0m";
     }
 
+    // Posicionar cursor al final del area de juego para evitar parpadeo
     std::cout << "\033[" << SCREEN_HEIGHT << ";1H";
     std::cout.flush();
     syncPrev();
 }
 
+// Invalida el buffer anterior para forzar un redibujado completo en el proximo render()
 void ScreenBuffer::forceRedraw() {
     firstFrame = true;
 }
 
+// Oculta el cursor de la terminal usando secuencia ANSI DECTCEM
 void ScreenBuffer::hideCursor() {
     std::cout << "\033[?25l";
     std::cout.flush();
 }
 
+// Muestra el cursor de la terminal
 void ScreenBuffer::showCursor() {
     std::cout << "\033[?25h";
     std::cout.flush();
 }
 
+// Consulta el ancho de la terminal via Win32 Console API. Fallback a 80.
 int ScreenBuffer::getTerminalWidth() {
     #ifdef _WIN32
     CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -163,6 +187,7 @@ int ScreenBuffer::getTerminalWidth() {
     return 80;
 }
 
+// Consulta el alto de la terminal via Win32 Console API. Fallback a 24.
 int ScreenBuffer::getTerminalHeight() {
     #ifdef _WIN32
     CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -179,6 +204,7 @@ Renderer::Renderer(ScreenBuffer& buffer)
     : buf(buffer), selOpt(0), enemyHP(0), enemyMaxHP(1),
       playerHP(0), playerMaxHP(1), playerMP(0), playerMaxMP(1) {}
 
+// Almacena la informacion del enemigo para el proximo frame
 void Renderer::setEnemyInfo(const std::string& name, int hp, int maxHp, const std::string art[6]) {
     enemyName = name;
     enemyHP = hp;
@@ -186,6 +212,7 @@ void Renderer::setEnemyInfo(const std::string& name, int hp, int maxHp, const st
     for (int i = 0; i < 6; i++) enemyArt[i] = art[i];
 }
 
+// Almacena la informacion del jugador para el proximo frame
 void Renderer::setPlayerInfo(const std::string& name, int hp, int maxHp, int mp, int maxMp) {
     playerName = name;
     playerHP = hp;
@@ -194,11 +221,13 @@ void Renderer::setPlayerInfo(const std::string& name, int hp, int maxHp, int mp,
     playerMaxMP = std::max(maxMp, 1);
 }
 
+// Dibuja el encabezado del frame de combate
 void Renderer::drawBackground() {
     buf.drawString(0, 0, "=== LEYENDA DEL CAMPUS - COMBATE ===", COL_BYELLOW);
     buf.drawHLine(0, 1, SCREEN_WIDTH, '-', COL_CYAN);
 }
 
+// Dibuja el recuadro con nombre del enemigo (centrado) y 6 lineas de arte ASCII
 void Renderer::drawEnemy() {
     int cx = SCREEN_WIDTH / 2;
     int nameLen = (int)enemyName.size();
@@ -214,6 +243,7 @@ void Renderer::drawEnemy() {
     }
 }
 
+// Dibuja barra de vida del enemigo con color variable segun % de HP
 void Renderer::drawEnemyHealthBar() {
     int cx = SCREEN_WIDTH / 2;
     int barW = 30;
@@ -226,6 +256,8 @@ void Renderer::drawEnemyHealthBar() {
     buf.drawBar(barX, 5, barW, enemyHP, enemyMaxHP, barColor);
 }
 
+// Dibuja el menu de acciones del jugador (Atacar, Magia, Inventario, Huir)
+// con la opcion seleccionada resaltada en amarillo brillante
 void Renderer::drawCombatMenu() {
     int menuX = 3;
     int menuY = 12;
@@ -246,6 +278,7 @@ void Renderer::drawCombatMenu() {
     buf.drawString(menuX + 2, menuY + 5, "[W/S] Navegar [SPACE] OK", COL_CYAN);
 }
 
+// Dibuja el panel del jugador con nombre, barra de HP (verde/amarillo/rojo) y MP (azul)
 void Renderer::drawPlayerInfo() {
     int infoX = SCREEN_WIDTH - 28;
     int infoY = 12;
@@ -269,6 +302,7 @@ void Renderer::drawPlayerInfo() {
     buf.drawString(infoX + infoW - 1 - (int)mpNum.size(), infoY + 5, mpNum, COL_BLUE);
 }
 
+// Dibuja el mensaje de log centrado en la ultima linea del buffer
 void Renderer::drawLog() {
     if (!logMsg.empty()) {
         int cx = SCREEN_WIDTH / 2;
@@ -276,6 +310,7 @@ void Renderer::drawLog() {
     }
 }
 
+// Renderiza el frame completo: limpia buffer, dibuja todas las secciones, presenta en terminal
 void Renderer::renderAll() {
     buf.clear();
     drawBackground();
@@ -291,10 +326,12 @@ void Renderer::renderAll() {
 
 InputHandler::InputHandler() : selectedOption(0) {}
 
+// Mueve la seleccion hacia arriba (circular, 4 opciones)
 void InputHandler::moveUp() {
     selectedOption = (selectedOption - 1 + 4) % 4;
 }
 
+// Mueve la seleccion hacia abajo (circular, 4 opciones)
 void InputHandler::moveDown() {
     selectedOption = (selectedOption + 1) % 4;
 }
@@ -309,6 +346,8 @@ BattleSystem::BattleSystem(Jugador& p, Enemigo& e)
     generateEnemyArt();
 }
 
+// Genera 6 lineas de arte ASCII para el enemigo segun keywords en su nombre.
+// Si no coincide con ningun keyword, usa una forma generica.
 void BattleSystem::generateEnemyArt() {
     std::string name = currentEnemy->getNombre();
     std::string lower = name;
@@ -392,6 +431,7 @@ void BattleSystem::generateEnemyArt() {
         enemyArt[4] = "   |/   \\|";
         enemyArt[5] = "  _/     \\_";
     } else {
+        // Forma generica por defecto
         enemyArt[0] = "     /\\";
         enemyArt[1] = "    /  \\";
         enemyArt[2] = "   | {} |";
@@ -401,11 +441,13 @@ void BattleSystem::generateEnemyArt() {
     }
 }
 
+// Redirige cout a un stringstream interno para silenciar salida durante acciones de combate
 void BattleSystem::suppressCout() {
     oldCoutBuf = std::cout.rdbuf();
     std::cout.rdbuf(coutSink.rdbuf());
 }
 
+// Restaura cout a su buffer original y descarta lo acumulado
 void BattleSystem::restoreCout() {
     std::cout.rdbuf(oldCoutBuf);
     coutSink.str("");
@@ -417,6 +459,8 @@ void BattleSystem::setLog(const std::string& msg) {
     renderer.setLogMessage(logMessage);
 }
 
+// Procesa entrada del jugador en estado PLAYER_TURN:
+// W/S navegan el menu, SPACE confirma la seleccion actual
 void BattleSystem::processInput() {
     if (currentState != BattleState::PLAYER_TURN) return;
 
@@ -430,11 +474,11 @@ void BattleSystem::processInput() {
             renderer.setSelectedOption(inputHandler.getSelectedOption());
         } else if (key == ' ') {
             currentState = BattleState::PLAYER_ACTION;
-            inputHandler.getSelectedOption(); // just to keep interface clean
         }
     }
 }
 
+// Ejecuta la accion correspondiente segun la opcion seleccionada (0-3)
 void BattleSystem::doPlayerAction() {
     int opt = inputHandler.getSelectedOption();
     switch (opt) {
@@ -457,7 +501,7 @@ void BattleSystem::doPlayerAction() {
             currentState = BattleState::ENEMY_TURN;
             break;
 
-        case 1: // Magia
+        case 1: // Magia: requiere 10 MP minimo
             if (player->getMana() < 10) {
                 setLog("No tienes suficiente mana! (10 MP)");
                 render();
@@ -483,7 +527,7 @@ void BattleSystem::doPlayerAction() {
             currentState = BattleState::ENEMY_TURN;
             break;
 
-        case 2: // Inventario
+        case 2: // Inventario: muestra estado e inventario, permite usar objetos por nombre
             limpiarPantalla();
             player->mostrarEstado();
             std::cout << "\n--- Inventario ---\n";
@@ -520,7 +564,7 @@ void BattleSystem::doPlayerAction() {
             currentState = BattleState::PLAYER_TURN;
             break;
 
-        case 3: // Huir
+        case 3: // Huir: 50% de probabilidad de exito
         {
             std::uniform_int_distribution<int> dist(0, 99);
             int chance = dist(rng());
@@ -542,6 +586,7 @@ void BattleSystem::doPlayerAction() {
     }
 }
 
+// Turno del enemigo: muestra mensaje de ataque, pausa animada, ejecuta ataque
 void BattleSystem::doEnemyTurn() {
     setLog(currentEnemy->getNombre() + " te ataca!");
     render();
@@ -562,6 +607,7 @@ void BattleSystem::doEnemyTurn() {
     }
 }
 
+// Compone el frame de combate actual: pasa datos de enemigo/jugador al Renderer y lo dibuja
 void BattleSystem::render() {
     renderer.setEnemyInfo(
         currentEnemy->getNombre(),
@@ -580,16 +626,22 @@ void BattleSystem::render() {
     renderer.renderAll();
 }
 
+// Bucle principal del combate:
+// 1. Oculta el cursor
+// 2. Ciclo: PLAYER_TURN (input) → doPlayerAction → ENEMY_TURN → loop
+// 3. Muestra el cursor al terminar
 void BattleSystem::run() {
     ScreenBuffer::hideCursor();
     renderer.setSelectedOption(0);
 
     while (!battleOver) {
+        // Reiniciar a turno del jugador
         currentState = BattleState::PLAYER_TURN;
         inputHandler.setSelectedOption(0);
         renderer.setSelectedOption(0);
         logMessage = "Selecciona una accion (W/S, SPACE)";
 
+        // Bucle de entrada: renderiza y procesa teclas hasta que confirme
         while (currentState == BattleState::PLAYER_TURN && !battleOver) {
             render();
             processInput();
@@ -601,6 +653,7 @@ void BattleSystem::run() {
 
         if (battleOver) break;
 
+        // Turno del enemigo
         currentState = BattleState::ENEMY_TURN;
         doEnemyTurn();
     }
@@ -611,6 +664,8 @@ void BattleSystem::run() {
 
 // ==================== DATA LOADING ====================
 
+// Carga objetos desde JSON: armas, pociones y objetos clave.
+// Cada objeto se instancia como shared_ptr<Objeto> y se indexa por nombre.
 std::map<std::string, std::shared_ptr<Objeto>> cargarObjetosDesdeJSON(const std::string& archivo) {
     std::map<std::string, std::shared_ptr<Objeto>> objetos;
     std::ifstream file(archivo);
@@ -645,6 +700,9 @@ std::map<std::string, std::shared_ptr<Objeto>> cargarObjetosDesdeJSON(const std:
     return objetos;
 }
 
+// Carga enemigos desde JSON organizados por nivel.
+// Cada enemigo referencia dos objetos de loot del map de objetos disponibles.
+// Si un objeto referenciado no existe, lanza runtime_error.
 std::map<std::string, std::shared_ptr<Enemigo>> cargarEnemigosDesdeJSON(
     const std::string& archivo,
     const std::map<std::string, std::shared_ptr<Objeto>>& objetosDisponibles)
@@ -684,6 +742,8 @@ std::map<std::string, std::shared_ptr<Enemigo>> cargarEnemigosDesdeJSON(
     return enemigos;
 }
 
+// Carga el estado del heroe desde un archivo JSON.
+// Devuelve un objeto Jugador con los valores persistidos.
 Jugador cargarHeroe(const std::string& archivo) {
     std::ifstream file(archivo);
     json j;
@@ -699,6 +759,7 @@ Jugador cargarHeroe(const std::string& archivo) {
     return jugador;
 }
 
+// Persiste el estado del heroe a JSON, incluyendo mana.
 void guardarHeroe(const Jugador& jugador, const std::string& archivo) {
     json j;
     j["nombre"] = jugador.getNombre();
@@ -713,6 +774,8 @@ void guardarHeroe(const Jugador& jugador, const std::string& archivo) {
     file.close();
 }
 
+// Selecciona un enemigo aleatorio de entre los que coinciden con el nivel especificado.
+// Lanza runtime_error si no hay candidatos para ese nivel.
 std::shared_ptr<Enemigo> generarEnemigoPorNivel(
     const std::map<std::string, std::shared_ptr<Enemigo>>& enemigos, int nivelMaxPermitido)
 {
@@ -727,6 +790,11 @@ std::shared_ptr<Enemigo> generarEnemigoPorNivel(
     return candidatos[dist(rng())];
 }
 
+// Punto de entrada al combate desde el mapa:
+// 1. Genera enemigo segun nivel del jugador
+// 2. Muestra intro (jefe final o enemigo normal)
+// 3. Instancia y ejecuta BattleSystem
+// 4. Post-batalla: maneja huida, derrota, victoria, experiencia y loot
 void batalla(Jugador& jugador, const std::map<std::string, std::shared_ptr<Enemigo>>& enemigos) {
     limpiarPantalla();
 
@@ -763,6 +831,7 @@ void batalla(Jugador& jugador, const std::map<std::string, std::shared_ptr<Enemi
         return;
     }
 
+    // Victoria
     limpiarPantalla();
     std::cout << "\n\nHAS DERROTADO A '" << enemigo.getNombre() << "' !\n";
     if (jefefinal) {
@@ -772,9 +841,11 @@ void batalla(Jugador& jugador, const std::map<std::string, std::shared_ptr<Enemi
         jugador.setHaGanado(true);
     }
 
+    // Otorgar experiencia
     int exp = jugador.getNivel() * 50;
     jugador.obtenerExperiencia(exp);
 
+    // Calcular loot segun probabilidades del enemigo
     std::uniform_int_distribution<int> distLoot(0, 99);
     int chance = distLoot(rng());
     std::shared_ptr<Objeto> lootGanado = nullptr;
