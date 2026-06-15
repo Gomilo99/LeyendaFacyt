@@ -7,23 +7,35 @@
 #include "mapa.hpp"
 #include "jugador.hpp"
 #include "objeto.hpp"
-#include "enemigo.hpp"
+#include "enemyFactory.hpp"
+#include "encounterManager.hpp"
 
 class GameManager {
+public:
+    enum class GameState {
+        MAIN_MENU,
+        OVERWORLD,
+        GAME_OVER
+    };
+
+    GameManager();
+    void run();
+
+private:
     Mapa mapa;
     Jugador jugador;
     std::map<std::string, std::shared_ptr<Objeto>> objetos;
-    std::map<std::string, std::shared_ptr<Enemigo>> enemigos;
+    EnemyFactory enemyFactory;
+    EncounterManager encounterMgr;
+    GameState state;
 
+    void mostrarMenuPrincipal();
     void renderMapa();
     void moverJugador(int dx, int dy);
     void handleTile(char tile);
     void mostrarInventario();
     void iniciarCombate();
-
-public:
-    GameManager();
-    void run();
+    void iniciarCombateJefe();
 };
 
 #endif

@@ -1,2 +1,2 @@
-obj/mapa.o: src/mapa.cpp src/../lib/mapa.hpp
+obj/Mapa.o: src/Mapa.cpp src/../lib/mapa.hpp
 src/../lib/mapa.hpp:

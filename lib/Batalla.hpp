@@ -145,8 +145,6 @@ class BattleSystem {
     void suppressCout();
     void restoreCout();
 
-    // Genera 6 lineas de arte ASCII segun keywords en el nombre del enemigo
-    void generateEnemyArt();
     // Lee W/S/SPACE del stdin durante PLAYER_TURN
     void processInput();
     // Ejecuta la opcion seleccionada del menu

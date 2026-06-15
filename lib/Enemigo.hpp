@@ -4,17 +4,23 @@
 #include "personaje.hpp"
 #include "objeto.hpp"
 #include <memory>
+#include <vector>
+#include <string>
 
 class Enemigo : public Personaje {
 private:
-    Drop loot1, loot2;
+    std::string id;
+    std::string asciiArt[6];
+    std::vector<Drop> botin;
 public:
-    Enemigo(std::string nom, int hp, int atk, int def, int lvl, Drop d1, Drop d2);
+    Enemigo(std::string id, std::string nom, int hp, int atk, int def, int lvl,
+            const std::string art[6], const std::vector<Drop>& drops);
     Enemigo(const Enemigo& copia);
     void atacar(Personaje* objetivo) override;
-    void setLoot(Drop nuevoLoot1, Drop nuevoLoot2);
-    Drop getLoot1() const { return loot1; }
-    Drop getLoot2() const { return loot2; }
+
+    std::string getId() const { return id; }
+    const std::string* getAsciiArt() const { return asciiArt; }
+    const std::vector<Drop>& getBotin() const { return botin; }
 };
 
 #endif

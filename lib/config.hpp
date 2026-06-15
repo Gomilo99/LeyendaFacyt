@@ -2,8 +2,6 @@
 #define CONFIG_HPP
 
 #include <string>
-#include <optional>
-#include "json.hpp"
 
 struct Config{
     static const std::string DATA_DIR;

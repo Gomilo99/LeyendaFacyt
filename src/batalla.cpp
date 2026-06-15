@@ -332,103 +332,8 @@ BattleSystem::BattleSystem(Jugador& p, Enemigo& e)
     : currentState(BattleState::PLAYER_TURN), currentEnemy(&e), player(&p),
       screenBuffer(), renderer(screenBuffer), inputHandler(),
       battleOver(false), victory(false), fled(false) {
-    for (int i = 0; i < 6; i++) enemyArt[i] = "";
-    generateEnemyArt();
-}
-
-// Genera 6 lineas de arte ASCII para el enemigo segun keywords en su nombre.
-// Si no coincide con ningun keyword, usa una forma generica.
-void BattleSystem::generateEnemyArt() {
-    std::string name = currentEnemy->getNombre();
-    std::string lower = name;
-    std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
-
-    if (lower.find("dragon") != std::string::npos || lower.find("admin") != std::string::npos) {
-        enemyArt[0] = "     /\\/\\/\\/\\/\\/\\/\\/\\";
-        enemyArt[1] = "    /     BOSS        \\";
-        enemyArt[2] = "   /  /\\          /\\  \\";
-        enemyArt[3] = "  /  /  \\        /  \\  \\";
-        enemyArt[4] = " /  /    \\      /    \\  \\";
-        enemyArt[5] = "/__/______\\____/______\\__\\";
-    } else if (lower.find("golem") != std::string::npos || lower.find("ogro") != std::string::npos) {
-        enemyArt[0] = "      ___________";
-        enemyArt[1] = "     /           \\";
-        enemyArt[2] = "    |  O       O  |";
-        enemyArt[3] = "    |      _      |";
-        enemyArt[4] = "    |     |_|     |";
-        enemyArt[5] = "    |___/    \\___|";
-    } else if (lower.find("fantasma") != std::string::npos || lower.find("espectro") != std::string::npos) {
-        enemyArt[0] = "       .-.";
-        enemyArt[1] = "      (o o)";
-        enemyArt[2] = "      | O |";
-        enemyArt[3] = "     /|___|\\";
-        enemyArt[4] = "    / /   \\ \\";
-        enemyArt[5] = "   / /     \\ \\";
-    } else if (lower.find("esqueleto") != std::string::npos) {
-        enemyArt[0] = "      .-.";
-        enemyArt[1] = "     ( . )";
-        enemyArt[2] = "      /|\\";
-        enemyArt[3] = "     / | \\";
-        enemyArt[4] = "       |";
-        enemyArt[5] = "      / \\";
-    } else if (lower.find("cajero") != std::string::npos) {
-        enemyArt[0] = "  +-----------+";
-        enemyArt[1] = "  | [__] [__] |";
-        enemyArt[2] = "  |  _    _   |";
-        enemyArt[3] = "  | |_|  |_|  |";
-        enemyArt[4] = "  |    ___    |";
-        enemyArt[5] = "  +-----------+";
-    } else if (lower.find("gargola") != std::string::npos || lower.find("caballero") != std::string::npos) {
-        enemyArt[0] = "     /\\";
-        enemyArt[1] = "    /  \\";
-        enemyArt[2] = "   | ._.|";
-        enemyArt[3] = "   |_/ \\_|";
-        enemyArt[4] = "    |   |";
-        enemyArt[5] = "   /     \\";
-    } else if (lower.find("ciclope") != std::string::npos) {
-        enemyArt[0] = "     ______";
-        enemyArt[1] = "    | O   |";
-        enemyArt[2] = "    |  _  |";
-        enemyArt[3] = "    | | | |";
-        enemyArt[4] = "    |_| |_|";
-        enemyArt[5] = "     /   \\";
-    } else if (lower.find("slime") != std::string::npos) {
-        enemyArt[0] = "     .-.";
-        enemyArt[1] = "    (o o)";
-        enemyArt[2] = "    | ~ |";
-        enemyArt[3] = "    \\___/";
-        enemyArt[4] = "   /     \\";
-        enemyArt[5] = "  /       \\";
-    } else if (lower.find("goblin") != std::string::npos || lower.find("duende") != std::string::npos) {
-        enemyArt[0] = "     /\\";
-        enemyArt[1] = "    /  \\";
-        enemyArt[2] = "   | <> |";
-        enemyArt[3] = "   | <> |";
-        enemyArt[4] = "   /    \\";
-        enemyArt[5] = "  /______\\";
-    } else if (lower.find("orco") != std::string::npos) {
-        enemyArt[0] = "    /^^^\\";
-        enemyArt[1] = "   | . . |";
-        enemyArt[2] = "   |  _  |";
-        enemyArt[3] = "   | / \\ |";
-        enemyArt[4] = "   |/   \\|";
-        enemyArt[5] = "  _/     \\_";
-    } else if (lower.find("zombie") != std::string::npos || lower.find("bruja") != std::string::npos) {
-        enemyArt[0] = "     ___";
-        enemyArt[1] = "    / . \\";
-        enemyArt[2] = "   |  _  |";
-        enemyArt[3] = "   | / \\ |";
-        enemyArt[4] = "   |/   \\|";
-        enemyArt[5] = "  _/     \\_";
-    } else {
-        // Forma generica por defecto
-        enemyArt[0] = "     /\\";
-        enemyArt[1] = "    /  \\";
-        enemyArt[2] = "   | {} |";
-        enemyArt[3] = "   | {} |";
-        enemyArt[4] = "   /    \\";
-        enemyArt[5] = "  /______\\";
-    }
+    const std::string* art = e.getAsciiArt();
+    for (int i = 0; i < 6; i++) enemyArt[i] = art[i];
 }
 
 // Redirige cout a un stringstream interno para silenciar salida durante acciones de combate
@@ -704,17 +609,20 @@ void batalla(Jugador& jugador, Enemigo& enemigo) {
     int exp = jugador.getNivel() * 50;
     jugador.obtenerExperiencia(exp);
 
-    // Calcular loot segun probabilidades del enemigo
+    // Calcular loot segun probabilidades del enemigo (recorre el vector botin)
     std::uniform_int_distribution<int> distLoot(0, 99);
     int chance = distLoot(DataManager::rng());
     std::shared_ptr<Objeto> lootGanado = nullptr;
 
-    Drop loot1 = enemigo.getLoot1();
-    Drop loot2 = enemigo.getLoot2();
-    if (chance < loot1.probabilidad)
-        lootGanado = loot1.objeto;
-    else if (chance < loot1.probabilidad + loot2.probabilidad)
-        lootGanado = loot2.objeto;
+    const auto& botin = enemigo.getBotin();
+    int acumulado = 0;
+    for (const auto& drop : botin) {
+        acumulado += drop.probabilidad;
+        if (chance < acumulado) {
+            lootGanado = drop.objeto;
+            break;
+        }
+    }
 
     if (lootGanado) {
         std::cout << "Has obtenido: " << lootGanado->getNombre() << "\n";
