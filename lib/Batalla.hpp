@@ -27,17 +27,46 @@ enum class BattleState {
 
 class ScreenBuffer {
     char grid[SCREEN_HEIGHT][SCREEN_WIDTH];
+    char prev[SCREEN_HEIGHT][SCREEN_WIDTH];
+    int attrs[SCREEN_HEIGHT][SCREEN_WIDTH];
+    int prevAttrs[SCREEN_HEIGHT][SCREEN_WIDTH];
+    bool firstFrame;
+
+    void syncPrev();
 public:
     ScreenBuffer();
     void clear();
-    void setChar(int x, int y, char c);
-    void drawString(int x, int y, const std::string& str);
-    void drawHLine(int x, int y, int w, char c);
-    void drawVLine(int x, int y, int h, char c);
-    void drawBox(int x, int y, int w, int h);
-    void drawBar(int x, int y, int w, int current, int max);
+    void setChar(int x, int y, char c, int color = 0);
+    void setAttr(int x, int y, int color);
+    void drawString(int x, int y, const std::string& str, int color = 0);
+    void drawHLine(int x, int y, int w, char c, int color = 0);
+    void drawVLine(int x, int y, int h, char c, int color = 0);
+    void drawBox(int x, int y, int w, int h, int color = 0);
+    void drawBar(int x, int y, int w, int current, int max, int color = 0);
     void render();
+
+    static void hideCursor();
+    static void showCursor();
+    static int getTerminalWidth();
+    static int getTerminalHeight();
 };
+
+// ANSI color constants for use with ScreenBuffer
+const int COL_DEFAULT  = 0;
+const int COL_RED      = 31;
+const int COL_GREEN    = 32;
+const int COL_YELLOW   = 33;
+const int COL_BLUE     = 34;
+const int COL_MAGENTA  = 35;
+const int COL_CYAN     = 36;
+const int COL_WHITE    = 37;
+const int COL_BRED     = 91;
+const int COL_BGREEN   = 92;
+const int COL_BYELLOW  = 93;
+const int COL_BBLUE    = 94;
+const int COL_BMAGENTA = 95;
+const int COL_BCYAN    = 96;
+const int COL_BWHITE   = 97;
 
 class Renderer {
     ScreenBuffer& buf;

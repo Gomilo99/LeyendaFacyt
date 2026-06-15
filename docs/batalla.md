@@ -160,6 +160,43 @@ El arte se genera automáticamente según keywords en el nombre:
 
 ---
 
+---
+
+## Optimizaciones de renderizado
+
+### a) Redibujado diferencial de líneas
+`ScreenBuffer::render()` mantiene un buffer `prev[22][56]` con el estado anterior. Antes de escribir, compara cada línea del grid actual con la previa. Si una línea no cambió, se salta por completo evitando escritura innecesaria a la terminal. Solo las líneas modificadas se reescriben usando posicionamiento ANSI (`\033[Y;1H`).
+
+### b) Control de cursor
+- `ScreenBuffer::hideCursor()`: envía `\033[?25l` al entrar al combate
+- `ScreenBuffer::showCursor()`: envía `\033[?25h` al salir
+- Al finalizar cada frame se posiciona el cursor en `\033[SCREEN_HEIGHT;1H` para que no parpadee en medio de la pantalla
+
+### c) Colores ANSI
+`ScreenBuffer` tiene una capa de atributos `attrs[22][56]` paralela al grid de caracteres. Cada `setChar()` acepta un código de color ANSI opcional. El método `render()` compara ambos planos (chars + attrs) y emite las secuencias de color solo cuando cambian respecto al frame anterior, minimizando la cantidad de bytes enviados.
+
+Constantes de color disponibles:
+- `COL_DEFAULT`, `COL_RED`, `COL_GREEN`, `COL_YELLOW`, `COL_BLUE`, `COL_MAGENTA`, `COL_CYAN`, `COL_WHITE`
+- Variantes brillantes: `COL_BRED`, `COL_BGREEN`, `COL_BYELLOW`, `COL_BBLUE`, `COL_BMAGENTA`, `COL_BCYAN`, `COL_BWHITE`
+
+Colores aplicados en el renderizado:
+| Elemento                    | Color        |
+|-----------------------------|--------------|
+| Título superior             | Amarillo brillante |
+| Recuadros (menú, enemy, info) | Cyan         |
+| Nombre del enemigo          | Rojo brillante |
+| Barra de vida enemiga       | Verde / Amarillo / Rojo según % |
+| Opción seleccionada del menú| Amarillo brillante |
+| Nombre del jugador          | Blanco brillante |
+| Barra de HP del jugador     | Verde / Amarillo / Rojo según % |
+| Barra de MP del jugador     | Azul         |
+| Log de mensajes             | Amarillo brillante |
+
+### d) Detección de tamaño de terminal
+`ScreenBuffer::getTerminalWidth()` y `getTerminalHeight()` consultan el tamaño real de la consola mediante `GetConsoleScreenBufferInfo` (Win32). Si falla, retornan 80×24 como fallback.
+
+---
+
 ## Archivos modificados
 
 | Archivo                 | Cambio                                                   |

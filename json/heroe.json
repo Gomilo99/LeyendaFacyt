@@ -1,8 +1,9 @@
 {
-    "ataque": 35,
-    "defensa": 12,
-    "nivel": 2,
+    "ataque": 77,
+    "defensa": 27,
+    "mana": 50,
+    "nivel": 3,
     "nombre": "Yisus",
     "pociones": 3,
-    "salud": 200
+    "salud": 350
 }

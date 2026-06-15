@@ -10,6 +10,9 @@
 #include <cstdlib>
 #include <thread>
 #include <chrono>
+#ifdef _WIN32
+#include <windows.h>
+#endif
 #include "../lib/batalla.hpp"
 
 std::mt19937& rng() {
@@ -28,58 +31,142 @@ void limpiarPantalla() {
 
 // ==================== SCREEN BUFFER ====================
 
-ScreenBuffer::ScreenBuffer() { clear(); }
-
-void ScreenBuffer::clear() {
+ScreenBuffer::ScreenBuffer() : firstFrame(true) {
+    clear();
     for (int y = 0; y < SCREEN_HEIGHT; y++)
         for (int x = 0; x < SCREEN_WIDTH; x++)
+            prev[y][x] = '\0';
+}
+
+void ScreenBuffer::syncPrev() {
+    for (int y = 0; y < SCREEN_HEIGHT; y++) {
+        for (int x = 0; x < SCREEN_WIDTH; x++) {
+            prev[y][x] = grid[y][x];
+            prevAttrs[y][x] = attrs[y][x];
+        }
+    }
+}
+
+void ScreenBuffer::clear() {
+    for (int y = 0; y < SCREEN_HEIGHT; y++) {
+        for (int x = 0; x < SCREEN_WIDTH; x++) {
             grid[y][x] = ' ';
+            attrs[y][x] = 0;
+        }
+    }
 }
 
-void ScreenBuffer::setChar(int x, int y, char c) {
-    if (x >= 0 && x < SCREEN_WIDTH && y >= 0 && y < SCREEN_HEIGHT)
+void ScreenBuffer::setChar(int x, int y, char c, int color) {
+    if (x >= 0 && x < SCREEN_WIDTH && y >= 0 && y < SCREEN_HEIGHT) {
         grid[y][x] = c;
+        if (color) attrs[y][x] = color;
+    }
 }
 
-void ScreenBuffer::drawString(int x, int y, const std::string& str) {
+void ScreenBuffer::setAttr(int x, int y, int color) {
+    if (x >= 0 && x < SCREEN_WIDTH && y >= 0 && y < SCREEN_HEIGHT)
+        attrs[y][x] = color;
+}
+
+void ScreenBuffer::drawString(int x, int y, const std::string& str, int color) {
     for (size_t i = 0; i < str.size(); i++)
-        setChar(x + (int)i, y, str[i]);
+        setChar(x + (int)i, y, str[i], color);
 }
 
-void ScreenBuffer::drawHLine(int x, int y, int w, char c) {
-    for (int i = 0; i < w; i++) setChar(x + i, y, c);
+void ScreenBuffer::drawHLine(int x, int y, int w, char c, int color) {
+    for (int i = 0; i < w; i++) setChar(x + i, y, c, color);
 }
 
-void ScreenBuffer::drawVLine(int x, int y, int h, char c) {
-    for (int i = 0; i < h; i++) setChar(x, y + i, c);
+void ScreenBuffer::drawVLine(int x, int y, int h, char c, int color) {
+    for (int i = 0; i < h; i++) setChar(x, y + i, c, color);
 }
 
-void ScreenBuffer::drawBox(int x, int y, int w, int h) {
-    drawHLine(x, y, w, '=');
-    drawHLine(x, y + h - 1, w, '=');
-    drawVLine(x, y, h, '|');
-    drawVLine(x + w - 1, y, h, '|');
-    setChar(x, y, '+');
-    setChar(x + w - 1, y, '+');
-    setChar(x, y + h - 1, '+');
-    setChar(x + w - 1, y + h - 1, '+');
+void ScreenBuffer::drawBox(int x, int y, int w, int h, int color) {
+    drawHLine(x, y, w, '=', color);
+    drawHLine(x, y + h - 1, w, '=', color);
+    drawVLine(x, y, h, '|', color);
+    drawVLine(x + w - 1, y, h, '|', color);
+    setChar(x, y, '+', color);
+    setChar(x + w - 1, y, '+', color);
+    setChar(x, y + h - 1, '+', color);
+    setChar(x + w - 1, y + h - 1, '+', color);
 }
 
-void ScreenBuffer::drawBar(int x, int y, int w, int current, int max) {
+void ScreenBuffer::drawBar(int x, int y, int w, int current, int max, int color) {
     int fill = (max > 0) ? (current * w / max) : 0;
     fill = std::max(0, std::min(w, fill));
-    drawHLine(x, y, fill, '#');
-    drawHLine(x + fill, y, w - fill, '.');
+    int fillColor = color ? color : COL_GREEN;
+    int emptyColor = COL_DEFAULT;
+    drawHLine(x, y, fill, '#', fillColor);
+    drawHLine(x + fill, y, w - fill, '.', emptyColor);
 }
 
 void ScreenBuffer::render() {
-    std::cout << "\033[2J\033[1;1H";
-    for (int y = 0; y < SCREEN_HEIGHT; y++) {
-        for (int x = 0; x < SCREEN_WIDTH; x++)
-            std::cout << grid[y][x];
-        std::cout << '\n';
+    if (firstFrame) {
+        std::cout << "\033[2J";
+        firstFrame = false;
+        for (int y = 0; y < SCREEN_HEIGHT; y++)
+            for (int x = 0; x < SCREEN_WIDTH; x++)
+                prev[y][x] = '\0';
     }
+
+    for (int y = 0; y < SCREEN_HEIGHT; y++) {
+        bool lineSame = true;
+        for (int x = 0; x < SCREEN_WIDTH; x++) {
+            if (grid[y][x] != prev[y][x] || attrs[y][x] != prevAttrs[y][x]) {
+                lineSame = false;
+                break;
+            }
+        }
+        if (lineSame) continue;
+
+        std::cout << "\033[" << (y + 1) << ";1H";
+        int currentColor = 0;
+        for (int x = 0; x < SCREEN_WIDTH; x++) {
+            int c = attrs[y][x];
+            if (c != currentColor) {
+                if (c) std::cout << "\033[" << c << "m";
+                else   std::cout << "\033[0m";
+                currentColor = c;
+            }
+            std::cout << grid[y][x];
+        }
+        if (currentColor) std::cout << "\033[0m";
+    }
+
+    std::cout << "\033[" << SCREEN_HEIGHT << ";1H";
     std::cout.flush();
+    syncPrev();
+}
+
+void ScreenBuffer::hideCursor() {
+    std::cout << "\033[?25l";
+    std::cout.flush();
+}
+
+void ScreenBuffer::showCursor() {
+    std::cout << "\033[?25h";
+    std::cout.flush();
+}
+
+int ScreenBuffer::getTerminalWidth() {
+    #ifdef _WIN32
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    if (GetStdHandle(STD_OUTPUT_HANDLE) != INVALID_HANDLE_VALUE &&
+        GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi))
+        return csbi.srWindow.Right - csbi.srWindow.Left + 1;
+    #endif
+    return 80;
+}
+
+int ScreenBuffer::getTerminalHeight() {
+    #ifdef _WIN32
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    if (GetStdHandle(STD_OUTPUT_HANDLE) != INVALID_HANDLE_VALUE &&
+        GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi))
+        return csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+    #endif
+    return 24;
 }
 
 // ==================== RENDERER ====================
@@ -104,8 +191,8 @@ void Renderer::setPlayerInfo(const std::string& name, int hp, int maxHp, int mp,
 }
 
 void Renderer::drawBackground() {
-    buf.drawString(0, 0, "=== LEYENDA DEL CAMPUS - COMBATE ===");
-    buf.drawHLine(0, 1, SCREEN_WIDTH, '-');
+    buf.drawString(0, 0, "=== LEYENDA DEL CAMPUS - COMBATE ===", COL_BYELLOW);
+    buf.drawHLine(0, 1, SCREEN_WIDTH, '-', COL_CYAN);
 }
 
 void Renderer::drawEnemy() {
@@ -114,12 +201,12 @@ void Renderer::drawEnemy() {
     int boxW = std::max(nameLen + 4, 18);
     int boxX = cx - boxW / 2;
 
-    buf.drawBox(boxX, 2, boxW, 2);
-    buf.drawString(cx - nameLen / 2, 3, enemyName);
+    buf.drawBox(boxX, 2, boxW, 2, COL_CYAN);
+    buf.drawString(cx - nameLen / 2, 3, enemyName, COL_BRED);
 
     for (int i = 0; i < 6; i++) {
         int artX = cx - (int)enemyArt[i].size() / 2;
-        buf.drawString(artX, 6 + i, enemyArt[i]);
+        buf.drawString(artX, 6 + i, enemyArt[i], COL_WHITE);
     }
 }
 
@@ -128,8 +215,11 @@ void Renderer::drawEnemyHealthBar() {
     int barW = 30;
     int barX = cx - barW / 2;
     std::string hpText = "HP: " + std::to_string(enemyHP) + "/" + std::to_string(enemyMaxHP);
-    buf.drawString(cx - (int)hpText.size() / 2, 4, hpText);
-    buf.drawBar(barX, 5, barW, enemyHP, enemyMaxHP);
+    buf.drawString(cx - (int)hpText.size() / 2, 4, hpText, COL_BWHITE);
+
+    int pct = (enemyMaxHP > 0) ? (enemyHP * 100 / enemyMaxHP) : 0;
+    int barColor = (pct > 50) ? COL_GREEN : (pct > 25) ? COL_YELLOW : COL_RED;
+    buf.drawBar(barX, 5, barW, enemyHP, enemyMaxHP, barColor);
 }
 
 void Renderer::drawCombatMenu() {
@@ -138,17 +228,18 @@ void Renderer::drawCombatMenu() {
     int menuW = 22;
     int menuH = 7;
 
-    buf.drawBox(menuX, menuY, menuW, menuH);
+    buf.drawBox(menuX, menuY, menuW, menuH, COL_CYAN);
 
     const char* options[] = { "Atacar", "Magia", "Inventario", "Huir" };
     for (int i = 0; i < 4; i++) {
         int optY = menuY + 1 + i;
+        int selColor = (i == selOpt) ? COL_BYELLOW : COL_DEFAULT;
         std::string line = (i == selOpt) ? " > " + std::string(options[i])
                                          : "   " + std::string(options[i]);
-        buf.drawString(menuX + 2, optY, line);
+        buf.drawString(menuX + 2, optY, line, selColor);
     }
 
-    buf.drawString(menuX + 2, menuY + 5, "[W/S] Navegar [SPACE] OK");
+    buf.drawString(menuX + 2, menuY + 5, "[W/S] Navegar [SPACE] OK", COL_CYAN);
 }
 
 void Renderer::drawPlayerInfo() {
@@ -157,25 +248,27 @@ void Renderer::drawPlayerInfo() {
     int infoW = 26;
     int infoH = 7;
 
-    buf.drawBox(infoX, infoY, infoW, infoH);
-    buf.drawString(infoX + 2, infoY + 1, playerName);
+    buf.drawBox(infoX, infoY, infoW, infoH, COL_CYAN);
+    buf.drawString(infoX + 2, infoY + 1, playerName, COL_BWHITE);
 
-    buf.drawString(infoX + 2, infoY + 2, "HP");
-    buf.drawBar(infoX + 5, infoY + 2, 16, playerHP, playerMaxHP);
+    buf.drawString(infoX + 2, infoY + 2, "HP", COL_GREEN);
+    int hpPct = (playerMaxHP > 0) ? (playerHP * 100 / playerMaxHP) : 0;
+    int hpColor = (hpPct > 50) ? COL_GREEN : (hpPct > 25) ? COL_YELLOW : COL_RED;
+    buf.drawBar(infoX + 5, infoY + 2, 16, playerHP, playerMaxHP, hpColor);
 
-    buf.drawString(infoX + 2, infoY + 3, "MP");
-    buf.drawBar(infoX + 5, infoY + 3, 16, playerMP, playerMaxMP);
+    buf.drawString(infoX + 2, infoY + 3, "MP", COL_BLUE);
+    buf.drawBar(infoX + 5, infoY + 3, 16, playerMP, playerMaxMP, COL_BLUE);
 
     std::string hpNum = std::to_string(playerHP) + "/" + std::to_string(playerMaxHP);
-    buf.drawString(infoX + infoW - 1 - (int)hpNum.size(), infoY + 4, hpNum);
+    buf.drawString(infoX + infoW - 1 - (int)hpNum.size(), infoY + 4, hpNum, hpColor);
     std::string mpNum = std::to_string(playerMP) + "/" + std::to_string(playerMaxMP);
-    buf.drawString(infoX + infoW - 1 - (int)mpNum.size(), infoY + 5, mpNum);
+    buf.drawString(infoX + infoW - 1 - (int)mpNum.size(), infoY + 5, mpNum, COL_BLUE);
 }
 
 void Renderer::drawLog() {
     if (!logMsg.empty()) {
         int cx = SCREEN_WIDTH / 2;
-        buf.drawString(cx - (int)logMsg.size() / 2, SCREEN_HEIGHT - 1, logMsg);
+        buf.drawString(cx - (int)logMsg.size() / 2, SCREEN_HEIGHT - 1, logMsg, COL_BYELLOW);
     }
 }
 
@@ -430,7 +523,7 @@ void BattleSystem::render() {
     renderer.setPlayerInfo(
         player->getNombre(),
         player->getSalud(),
-        player->getSalud() + 9999,
+        player->getSaludMaxima(),
         player->getMana(),
         player->getManaMaxima()
     );
@@ -439,6 +532,7 @@ void BattleSystem::render() {
 }
 
 void BattleSystem::run() {
+    ScreenBuffer::hideCursor();
     renderer.setSelectedOption(0);
 
     while (!battleOver) {
@@ -463,6 +557,7 @@ void BattleSystem::run() {
     }
 
     render();
+    ScreenBuffer::showCursor();
 }
 
 // ==================== DATA LOADING ====================
