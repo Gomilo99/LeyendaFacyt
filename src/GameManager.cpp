@@ -1,5 +1,7 @@
 #include <iostream>
 #include <fstream>
+#include <vector>
+#include <algorithm>
 #include "../lib/GameManager.hpp"
 #include "../lib/DataManager.hpp"
 #include "../lib/Batalla.hpp"
@@ -47,7 +49,7 @@ GameManager::GameManager()
 
     auto itEspada = objetos.find("Espada Gallo");
     if (itEspada != objetos.end()) {
-        jugador.equiparArma(std::dynamic_pointer_cast<Arma>(itEspada->second));
+        jugador.equiparArma(std::dynamic_pointer_cast<Arma>(itEspada->second), true);
     }
 }
 
@@ -68,26 +70,83 @@ void GameManager::mostrarMenuPrincipal() {
     std::cout << "\033[36m  y encuentra la llave magica!\033[0m\n";
     std::cout << "\033[37m\n  [WASD] Mover  [I] Inventario  [Q] Salir\033[0m\n";
     std::cout << "\033[92m\n  Presiona Enter para comenzar...\033[0m";
-
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     std::cin.get();
+
+    if (jugador.getNombre() == "Heroe") {
+        std::cout << "\033[36mIngresa tu nombre (Enter para 'Heroe'): \033[0m";
+        std::string nombreInput;
+        std::getline(std::cin, nombreInput);
+        if (!nombreInput.empty())
+            jugador.setNombre(nombreInput);
+    }
     state = GameState::OVERWORLD;
 }
 
 /**
- * Renderiza el mapa en vista top-down.
- * Dibuja la cuadrícula completa, reemplazando la posición
- * del jugador con '@'.
+ * Renderiza el mapa en vista top-down con el HUD del jugador a la derecha.
+ * Los tiles del mapa tienen color según su tipo.
+ * HUD muestra: nombre, nivel, EXP, HP, MP, arma, pociones.
  */
 void GameManager::renderMapa() {
-    for (int y = 0; y < mapa.getAlto(); y++){
-        for (int x = 0; x < mapa.getAncho(); x++){
-            if (x == jugador.getPosX() && y == jugador.getPosY()){
-                std::cout << '@';
-            } else {
-                std::cout << mapa.getTile(x, y);
+    int anchoMapa = mapa.getAncho();
+    int altoMapa = mapa.getAlto();
+
+    int hpPct = (jugador.getSaludMaxima() > 0)
+        ? (jugador.getSalud() * 100 / jugador.getSaludMaxima()) : 0;
+    std::string hpColor = (hpPct > 50) ? "32" : (hpPct > 25) ? "33" : "31";
+
+    int barW = 10;
+    int hpFill = (jugador.getSaludMaxima() > 0)
+        ? (jugador.getSalud() * barW / jugador.getSaludMaxima()) : 0;
+    int mpFill = (jugador.getManaMaxima() > 0)
+        ? (jugador.getMana() * barW / jugador.getManaMaxima()) : 0;
+
+    std::string hpBar = std::string(hpFill, '#') + std::string(barW - hpFill, '.');
+    std::string mpBar = std::string(mpFill, '#') + std::string(barW - mpFill, '.');
+
+    std::vector<std::string> hud;
+    hud.push_back("\033[36m+-----------------------+\033[0m");
+    hud.push_back("\033[93m|  " + jugador.getNombre() + "\033[0m");
+    hud.push_back("\033[97m|  Nv: " + std::to_string(jugador.getNivel())
+        + "  Exp: " + std::to_string(jugador.getExperiencia())
+        + "/" + std::to_string(jugador.getExperienciaNecesaria()) + "\033[0m");
+    hud.push_back("\033[" + hpColor + "m|  HP: "
+        + std::to_string(jugador.getSalud()) + "/"
+        + std::to_string(jugador.getSaludMaxima()) + " " + hpBar + "\033[0m");
+    hud.push_back("\033[94m|  MP: "
+        + std::to_string(jugador.getMana()) + "/"
+        + std::to_string(jugador.getManaMaxima()) + " " + mpBar + "\033[0m");
+    hud.push_back("\033[97m|  Arma: " + jugador.getArmaNombre() + "\033[0m");
+    hud.push_back("\033[97m|  Pociones: " + std::to_string(jugador.getPociones()) + "\033[0m");
+    hud.push_back("\033[36m+-----------------------+\033[0m");
+
+    int altoHud = (int)hud.size();
+    int altoTotal = std::max(altoMapa, altoHud);
+
+    for (int y = 0; y < altoTotal; y++) {
+        if (y < altoMapa) {
+            for (int x = 0; x < anchoMapa; x++) {
+                if (x == jugador.getPosX() && y == jugador.getPosY()) {
+                    std::cout << "\033[93m@\033[0m";
+                } else {
+                    char t = mapa.getTile(x, y);
+                    switch (t) {
+                        case '#': std::cout << "\033[90m#\033[0m"; break;
+                        case '.': std::cout << "\033[32m.\033[0m"; break;
+                        case 'K': std::cout << "\033[93mK\033[0m"; break;
+                        case 'B': std::cout << "\033[91mB\033[0m"; break;
+                        case 'H': std::cout << "\033[92mH\033[0m"; break;
+                        default:  std::cout << t;
+                    }
+                }
             }
+        } else {
+            for (int x = 0; x < anchoMapa; x++) std::cout << ' ';
         }
+
+        std::cout << "  ";
+        if (y < altoHud) std::cout << hud[y];
         std::cout << std::endl;
     }
 }

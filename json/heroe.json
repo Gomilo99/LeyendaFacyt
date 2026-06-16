@@ -1,9 +1,9 @@
 {
-    "ataque": 1,
+    "ataque": 11,
     "defensa": 2,
-    "mana": 10,
+    "mana": 50,
     "nivel": 1,
-    "nombre": "Heroe",
+    "nombre": "Jesus",
     "pociones": 3,
     "salud": 50
 }

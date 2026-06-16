@@ -53,9 +53,16 @@ public:
     void mostrarEstado() const override;
     void mostrarInventario();
 
+    std::string getArmaNombre() const {
+        return armaEquipada ? armaEquipada->getNombre() : "ninguna";
+    }
+    int getArmaDano() const {
+        return armaEquipada ? armaEquipada->getDano() : 0;
+    }
+
     void agregarObjeto(std::shared_ptr<Objeto> objeto);
     void eliminarObjeto(const std::string& nombre);
-    void equiparArma(std::shared_ptr<Arma> nuevaArma);
+    void equiparArma(std::shared_ptr<Arma> nuevaArma, bool silencioso = false);
 
     void obtenerExperiencia(int cantidad);
 };

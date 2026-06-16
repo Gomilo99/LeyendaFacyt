@@ -124,13 +124,14 @@ void Jugador::eliminarObjeto(const std::string& nombre){
     }
 }
 
-void Jugador::equiparArma(std::shared_ptr<Arma> nuevaArma){
+void Jugador::equiparArma(std::shared_ptr<Arma> nuevaArma, bool silencioso){
     if(armaEquipada){
         ataque -= armaEquipada->getDano();
     }
     armaEquipada = nuevaArma;
     ataque += nuevaArma->getDano();
-    std::cout << "Has equipado el arma: " << nuevaArma->getNombre() << "\n";
+    if (!silencioso)
+        std::cout << "Has equipado el arma: " << nuevaArma->getNombre() << "\n";
 }
 
 void Jugador::obtenerExperiencia(int cantidad) {

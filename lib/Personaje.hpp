@@ -37,6 +37,7 @@ public:
 
     bool estaVivo() const { return salud > 0; }
     std::string getNombre() const { return nombre; }
+    void setNombre(const std::string& nuevoNombre) { nombre = nuevoNombre; }
     int getSalud() const { return salud; }
     int getSaludMaxima() const { return saludMaxima; }
     int getAtaque() const { return ataque; }
