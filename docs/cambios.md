@@ -1,3 +1,4 @@
+## Log
 ### Log 15/06/2026 (sesión 2) — Separación de Managers
 
 #### Cambios realizados
@@ -289,7 +290,7 @@ Las funciones JSON lanzan excepciones (``throw std::runtime_error``) pero ``main
 - ``heroe.json`` está mal formado → ``terminate()``
 Tres formas distintas de crashear sin mensaje de error al usuario.
 
-### Mejoras
+## Mejoras
 Estado actual del proyecto:
 
 Lo que tienes ahora es un módulo de combate sólido y funcional, pero no es un dungeon crawler completo. Es solo el subsistema de batalla del proyecto soñado. Los puntos fuertes actuales:
@@ -301,18 +302,24 @@ Lo que tienes ahora es un módulo de combate sólido y funcional, pero no es un 
 ✅ Sistema de nivelación con stats escalables
 ✅ Separación en archivos limpia
 ✅ Sin dependencias Windows
+✅ Mapa cargado desde archivo
+✅ Movimiento WASD con solisiones en el mapa
+✅ Encuentros aleatorios al moverte
+✅ Sistema de magia/MP
+✅ Condición de victoria por llave
+✅ Maquina de estados
+
 Lo que falta para llegar al dungeon crawler:
 
 Característica	Estado
-Mapa cargado desde archivo	❌ No existe
-Movimiento WASD con colisiones	❌ No existe
-Vista primera persona ASCII	❌ No existe
-Encuentros aleatorios al moverte	❌ No existe
+Mapa cargado desde archivo	❌ Faltan más niveles
+Sistema de niveles ❌ Continuidad de niveles por dificultad
 Acción "Defender" en combate	❌ Solo atacar/usar poción
-Sistema de magia/MP	❌ No existe
 Armadura como equipable	❌ Solo arma
-Condición de victoria (llave)	❌ Solo jefe final
-Máquina de estados (FSM)	❌ Un solo flujo lineal
+Diseño de niveles para progresión de objetos y equipables
+Condición de victoria (llave)	❌ Integrar con un sistema de continuidad para los niveles (termina el juego cuando se vence al jefe final)
+Capacidad de salir del juego guardando la partida y continuar desde donde se quedó ❌ Se inicia y termina sin guardado
+
 Crítica al diseño de gemini.md:
 
 La vista en primera persona es el verdadero desafío — El prompt dice "Aquí programarías la lógica" como si fuera trivial. Simular un pasillo 3D en ASCII requiere dibujar paredes en perspectiva según la dirección que mires y la distancia a las paredes. Es lo más complejo del proyecto, no un detalle menor.
@@ -551,25 +558,27 @@ Cambios en objetos.json:
 ]
 ```
 Cambios en Jugador:
+- Slot armaduraEquipada (similar a armaEquipada)
+- defensa base + armadura al calcular daño recibido
+- Al dropear armadura, preguntar si quiere equiparla
 
-Slot armaduraEquipada (similar a armaEquipada)
-defensa base + armadura al calcular daño recibido
-Al dropear armadura, preguntar si quiere equiparla
 Cambios en cargarObjetosDesdeJSON:
-
 Leer sección "armadura" del JSON
+
 Fase 6 — Condición de Victoria y Múltiples Niveles
-Al pisar K, transición a WIN
-Mostrar pantalla de victoria con estadísticas finales
-Opcional: al ganar, cargar nivel2.txt más difícil
-Persistencia: guardarHeroe() al salir de cada nivel
-Obstáculos: puertas cerradas que requieren llave del piso anterior
+- Al pisar K, transición a WIN
+- Mostrar pantalla de victoria con estadísticas finales
+- Opcional: al ganar, cargar nivel2.txt más difícil
+- Persistencia: guardarHeroe() al salir de cada nivel
+ -Obstáculos: puertas cerradas que requieren llave del piso anterior
+
 Fase 7 — Pulido Final
-Barras de vida horizontales con ASCII: [██████░░░░]
-Efectos de sonido con \a (beep)
-Mensajes con color ANSI (\033[31m para rojo, \033[32m verde)
-Animación de texto lento (sleep_for + cout)
-Transiciones suaves entre estados
+- Barras de vida horizontales con ASCII: [██████░░░░]
+- Efectos de sonido con \a (beep)
+- Mensajes con color ANSI (\033[31m para rojo, \033[32m verde)
+- Animación de texto lento (sleep_for + cout)
+- Transiciones suaves entre estados
+
 Diagrama de Clases Fusionado
 ```
 Objeto
@@ -619,17 +628,18 @@ Batalla              ← EXISTE (refactorizar)
 Resumen Estratégico
 Lo que ya tienes y sirve:
 
-Todo el sistema de objetos, combate, loot, inventario, nivelación
-JSON como fuente de datos
-Separación en archivos
-Lo que tomas de gemini.md:
+- Todo el sistema de objetos, combate, loot, inventario, nivelación
+- JSON como fuente de datos
+- Separación en archivos
 
-FSM del GameEngine
-Mapa cargado desde archivo
-Vista primera persona (aunque hay que implementarla bien)
-Acciones Defender, Magia, Huir
-Armadura como equipable
-Condición de victoria por llave
+Lo que tomas de gemini.md:
+- FSM del GameEngine
+- Mapa cargado desde archivo
+- Vista primera persona (aunque hay que implementarla bien)
+- Acciones Defender, Magia, Huir
+- Armadura como equipable
+- Condición de victoria por llave
+
 Orden recomendado de implementación:
 ```
 Mapa 2D ──▶ Integrar combate ──▶ Vista 1ra persona ──▶ Defender/Magia
