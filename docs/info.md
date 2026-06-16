@@ -8,9 +8,9 @@
 
 | Manager | Responsabilidad |
 |---|---|---|
-| **GameManager** | Orquestador del juego con FSM (`MAIN_MENU → OVERWORLD → GAME_OVER`). Loop principal, renderizado del mapa, movimiento WASD, eventos de tiles, inicio de combate, condición de victoria |
-| **DataManager** | Carga/guarda toda la data desde JSON (objetos, enemigos, héroe). Usa `Config` para paths |
-| **CacheManager** | Maneja archivos de cache (`cache/`) para persistir el progreso sin modificar archivos originales |
+| **GameManager** | Orquestador del juego con FSM (`MAIN_MENU → OVERWORLD → GAME_OVER`). Menú principal (Nueva Partida/Continuar/Salir), loop de exploración, renderizado del mapa, movimiento WASD, eventos de tiles, inicio de combate, condición de victoria, guardado al salir |
+| **DataManager** | Carga datos desde JSON (`objetos.json`, `enemigos.json`). Solo lectura. Usa `Config` para paths. Ya no guarda ni carga héroe (esa función pasó a `CacheManager`) |
+| **CacheManager** | Capa de persistencia en `cache/`. Guarda/carga héroe (14 campos + inventario), mapa (tiles modificados) y flag de partida. No modifica archivos originales |
 | **EnemyFactory** | Carga `json/enemigos.json`, almacena plantillas por nivel en `map<int, vector<EnemyTemplate>>`. Crea enemigos con selección ponderada por `peso` (ruleta). Busca jefes hacia abajo desde el nivel actual |
 | **EncounterManager** | Decide encuentros aleatorios al moverse por tile `.` usando probabilidad por terreno (BOSQUE=8%, CAVERNA=10%, MAZMORRA=15%, ABISMO=18%). Grace period de 3 pasos, +3% por paso extra, cap 40% |
 
@@ -90,10 +90,35 @@ Cada enemigo tiene dos objetos de loot con probabilidades independientes (defaul
 
 Cada enemigo: `nombre`, `salud`, `ataque`, `defensa`, `loot1`/`loot2` (nombre del objeto), `prob1`/`prob2` (probabilidad 0-99, default 70/30).
 
-### heroe.json
+### heroe.json (archivo original, solo lectura)
 
 ```json
 { "nombre": "...", "salud": 100, "ataque": 15, "defensa": 10, "nivel": 1, "pociones": 3, "mana": 50 }
+```
+
+### heroe.json (caché, `cache/heroe.json` — estado completo de la partida)
+
+```json
+{
+    "nombre": "Heroe",
+    "salud": 85,
+    "saludMaxima": 100,
+    "ataque": 25,
+    "defensa": 15,
+    "nivel": 2,
+    "pociones": 2,
+    "mana": 40,
+    "manaMaxima": 60,
+    "posX": 5,
+    "posY": 7,
+    "exp": 120,
+    "expMax": 300,
+    "arma": "Espada Gallo",
+    "inventario": [
+        { "nombre": "Pocion Milagrosa", "cant": 2 },
+        { "nombre": "Adblock", "cant": 1 }
+    ]
+}
 ```
 
 ## EnemyFactory — Fábrica de enemigos
@@ -151,9 +176,23 @@ probabilidad = min(probabilidad, CAP)
 MAIN_MENU → OVERWORLD → (BATTLE anidado) → OVERWORLD o GAME_OVER
 ```
 
-1. **MAIN_MENU**: Pantalla de título con instrucciones, espera Enter
-2. **OVERWORLD**: Loop de exploración con renderizado top-down del mapa, movimiento WASD, eventos de tiles, encuentros aleatorios
-3. **GAME_OVER**: Jugador murió, fin de partida
+### MAIN_MENU
+
+El menú principal ofrece 3 opciones:
+
+| Opción | Acción |
+|---|---|
+| **1. Nueva Partida** | `CacheManager::limpiar()` → carga mapa original + héroe default → `CacheManager::crearPartida()` → OVERWORLD |
+| **2. Continuar** | Si existe `cache/partida.flag`: `CacheManager::cargarMapa()` + `CacheManager::cargarHeroe(objetos)` → OVERWORLD. Si no, muestra mensaje y vuelve al menú. |
+| **3. Salir** | Termina el juego |
+
+### OVERWORLD
+
+Loop de exploración con renderizado top-down del mapa, movimiento WASD, eventos de tiles, encuentros aleatorios.
+
+### GAME_OVER
+
+Jugador murió, fin de partida.
 
 El estado BATTLE es síncrono y anidado dentro de OVERWORLD: `iniciarCombate()` o `iniciarCombateJefe()` llaman a `batalla()`, que bloquea hasta que termina el combate.
 
@@ -165,8 +204,10 @@ OVERWORLD
   ├─ WASD ──────────→ mover jugador
   │                     │
   │                     ├─ tile 'B' ──→ crearJefe(nivel) → batalla()
+  │                     │               ├─ victoria → mapa.setTile('.') → guardarMapa()
+  │                     │               └─ derrota  → GAME_OVER
   │                     ├─ tile 'K' ──→ haGanado = true
-  │                     ├─ tile 'H' ──→ usar poción, tile → '.'
+  │                     ├─ tile 'H' ──→ usar poción → tile → '.' → guardarMapa()
   │                     └─ tile '.' ──→ EncounterManager::checkEncounter()
   │                                       │
   │                                       ├─ true  → crearEnemigo(nivel) → batalla()
@@ -176,7 +217,10 @@ OVERWORLD
   │                                       │
   │                                       └─ false → OVERWORLD (sigue)
   │
-  └─ 'Q' ──→ salir
+  └─ 'Q' ──→ guardarPartida() → salir
+  │           ├─ CacheManager::guardarHeroe()
+  │           └─ CacheManager::guardarMapa()
+  └─ muerte en batalla ──→ CacheManager::guardarHeroe() → GAME_OVER
 ```
 
 ## Flujo de datos
@@ -184,33 +228,48 @@ OVERWORLD
 ```
 main.cpp → GameManager::run()
   │
-  ├── Constructor:
+  ├── Constructor (solo datos estáticos):
   │     ├── DataManager::cargarObjetos()     → json/objetos.json
-  │     ├── DataManager::cargarEnemigos()    → json/enemigos.json
-  │     ├── DataManager::cargarHeroe()       → json/heroe.json
-  │     ├── Mapa::cargar()                   → mapas/nivel1.txt
-  │     ├── EnemyFactory (usa enemigos.json internamente)
-  │     └── equipar arma inicial "Espada Gallo"
+  │     ├── EnemyFactory::cargarDesdeJSON()  → json/enemigos.json
+  │     └── Buscar spawn 'P' en mapa original
   │
-  └── loop (OVERWORLD):
+  ├── MAIN_MENU:
+  │     ├─ Opción 1 (Nueva Partida):
+  │     │     ├── CacheManager::limpiar()
+  │     │     ├── Mapa::cargar()             → mapas/nivel1.txt (original)
+  │     │     ├── Jugador("Heroe")           → stats base
+  │     │     ├── equipar "Espada Gallo"
+  │     │     └── CacheManager::crearPartida() → cache/ (flag + mapa + héroe)
+  │     │
+  │     ├─ Opción 2 (Continuar):
+  │     │     ├── CacheManager::cargarMapa() → cache/mapa_cache.txt
+  │     │     └── CacheManager::cargarHeroe() → cache/heroe.json (con posición, inventario, arma)
+  │     │
+  │     └─ Opción 3 (Salir) → return
+  │
+  └── OVERWORLD:
         ├── tile '.' + encuentro random → EnemyFactory::crearEnemigo() → batalla()
+        │                                                     └── CacheManager::guardarHeroe()
         ├── tile 'B' → EnemyFactory::crearJefe() → batalla()
-        ├── tile 'H' → jugador.usarPocion()
+        │               └── victoria → mapa.setTile('.') → CacheManager::guardarMapa()
+        ├── tile 'H' → jugador.usarPocion() → mapa.setTile('.') → CacheManager::guardarMapa()
         ├── tile 'K' → victoria
-        └── 'Q' → salir
+        └── 'Q' → CacheManager::guardarHeroe() + CacheManager::guardarMapa() → salir
 ```
 
 ## Dependencias entre archivos
 
 ```
-GameManager → DataManager, batalla.hpp, mapa.hpp, jugador.hpp,
-              enemyFactory.hpp, encounterManager.hpp
-DataManager → Config, json.hpp, objeto.hpp, enemigo.hpp, jugador.hpp
-EnemyFactory → Config, json.hpp, enemigo.hpp, objeto.hpp
+GameManager   → DataManager, CacheManager, batalla.hpp, mapa.hpp,
+                jugador.hpp, enemyFactory.hpp, encounterManager.hpp
+DataManager   → Config, json.hpp, objeto.hpp, enemigo.hpp, jugador.hpp
+CacheManager  → Config, json.hpp, jugador.hpp, mapa.hpp
+EnemyFactory  → Config, json.hpp, enemigo.hpp, objeto.hpp
 EncounterManager → (standalone, solo random)
-CacheManager → Config, json.hpp  (independiente del combate)
-batalla.hpp → enemigo.hpp, jugador.hpp  (ya NO incluye json.hpp)
-main.cpp → GameManager.hpp
+batalla.hpp   → enemigo.hpp, jugador.hpp, CacheManager.hpp
+Jugador       → Personaje, Objeto
+Mapa          → (standalone, solo iostream/fstream)
+main.cpp      → GameManager.hpp
 ```
 
 ## Arte ASCII de enemigos
@@ -233,10 +292,11 @@ El arte ASCII proviene del campo `ascii` (array de 6 strings) en `json/enemigos.
 
 | Tecla | Acción |
 |---|---|
+| **1/2/3** | Menú principal: Nueva Partida / Continuar / Salir |
 | **W/A/S/D** | Moverse (arriba/izquierda/abajo/derecha) |
 | **I** | Abrir inventario |
-| **Q** | Salir del juego |
-| **Enter** | Comenzar desde pantalla de título |
+| **Q** | Guardar partida y salir del juego |
+| **Enter** | Ir al menú desde pantalla de título |
 | **W/S** (en combate) | Navegar opciones del menú |
 | **SPACE** (en combate) | Confirmar opción seleccionada |
 
@@ -287,84 +347,63 @@ proyecto/
 ├── mapas/             ← originales (lectura)
 │   └── nivel1.txt
 └── cache/             ← generado en tiempo de juego (escritura)
-    ├── heroe.json     ← guardado del héroe
-    ├── mapa_cache.txt ← estado actualizado del mapa (con E/H marcados como .)
-    └── partida.json   ← metadatos de la partida
+    ├── heroe.json     ← estado completo del héroe (14 campos + inventario)
+    ├── mapa_cache.txt ← estado actualizado del mapa (con B/H marcados como .)
+    └── partida.flag   ← flag de existencia de partida (archivo vacío)
 ```
 
-#### Flujo de carga
-main():
-1. Cargar JSONs desde json/ (originales, read-only)
-2. Cargar mapa desde mapas/nivel1.txt (original, read-only)
-3. Si existe cache/heroe.json → cargar héroe desde caché
-4. Si existe cache/mapa_cache.txt → cargar mapa desde caché
-   (así se conservan los cambios: E eliminados, H recogidas)
-5. Si no existe caché → copiar originales a caché
+#### Flujo de carga (GameManager — implementación actual)
 
-#### Cómo implementar la caché del mapa
-Paso 1 — Crear **CacheManager** (``lib/CacheManager.hpp``)
+```
+            GameManager::run()
+                  │
+            mostrarMenuPrincipal()
+              ├─ "1. Nueva Partida"
+              │     inicializarNuevaPartida()
+              │       ├─ CacheManager::limpiar()         → borra cache/
+              │       ├─ Mapa::cargar("mapas/nivel1.txt") → original
+              │       ├─ Jugador("Heroe") + equipar arma inicial
+              │       └─ CacheManager::crearPartida()    → escribe cache/
+              │
+              ├─ "2. Continuar"
+              │     cargarPartidaExistente()
+              │       ├─ if (!CacheManager::existePartida()) → mensaje, vuelve al menú
+              │       ├─ CacheManager::cargarMapa()         → cache/mapa_cache.txt
+              │       └─ CacheManager::cargarHeroe(objetos) → cache/heroe.json
+              │
+              └─ "3. Salir"
+                    → return
+```
+
+#### Cuándo se guarda cada cosa (estado actual)
+
+| Evento | Se guarda en caché |
+|--------|-------------------|
+| Derrotar jefe (tile 'B' → '.') | `guardarMapa()` |
+| Recoger poción (tile 'H' → '.') | `guardarMapa()` |
+| Terminar combate (victoria) | `guardarHeroe()` (desde `batalla()`) |
+| Salir del juego con 'Q' | `guardarHeroe()` + `guardarMapa()` |
+
+#### API de CacheManager
+
 ```cpp
 namespace CacheManager {
-    bool existePartida();
-    void crearPartida(const Mapa& mapa, const Jugador& jugador);
+    bool existePartida();                    // cache/partida.flag existe?
+    void crearPartida(const Mapa&, const Jugador&);  // flag + mapa + héroe
+    void limpiar();                          // borra todo cache/
     
-    // Mapa
-    bool guardarMapa(const Mapa& mapa);
-    bool cargarMapa(Mapa& mapa);  // si falla, cargar del original
+    bool guardarMapa(const Mapa&);           // escribe cache/mapa_cache.txt
+    bool cargarMapa(Mapa&);                  // lee cache/mapa_cache.txt
     
-    // Héroe
-    void guardarHeroe(const Jugador& jugador);
-    Jugador cargarHeroe();
-    
-    // Limpiar caché (para nueva partida)
-    void limpiar();
+    void guardarHeroe(const Jugador&);       // escribe cache/heroe.json
+    Jugador cargarHeroe(const map<string, shared_ptr<Objeto>>&);  // lee cache/heroe.json
 }
 ```
-Paso 2 — Flujo en ``main()``
-```
-1. Cargar archivos originales (JSON, mapa)
-2. if (existePartida()) {
-       cargarMapa desde caché      → refleja E/H ya gastados
-       cargarHeroe desde caché
-   } else {
-       crearPartida()              → copia originales a caché
-   }
-3. Bucle de juego:
-   - Al vencer enemigo en 'E':
-       mapa.setTile(x, y, '.')     → modifica en memoria
-       CacheManager::guardarMapa(mapa)  → persiste el cambio
-   - Al recoger poción en 'H':
-       mapa.setTile(x, y, '.')
-       CacheManager::guardarMapa(mapa)
-       jugador.usarPocion()
-   - Al salir del juego o girar turno:
-       CacheManager::guardarHeroe(jugador)
-```
 
-Paso 3 — Formato de la caché del mapa
+#### Formato del mapa en caché
 
-El ``mapa_cache.txt`` puede ser idéntico al original (``vector<string>``), solo que con los tiles modificados. La clase ``Mapa`` ya tiene ``getTile/setTile``. Solo falta un método ``guardar(archivo)``:
-```cpp
-// En Mapa.hpp
-bool guardar(const std::string& archivo) const;
+`cache/mapa_cache.txt` es idéntico al original (`vector<string>`), solo que con los tiles modificados (B/H → `.`). Usa `Mapa::guardar(archivo)` que serializa línea por línea.
 
-// En Mapa.cpp
-bool Mapa::guardar(const std::string& archivo) const {
-    std::ofstream file(archivo);
-    if (!file.is_open()) return false;
-    for (const auto& linea : grid) {
-        file << linea << '\n';
-    }
-    return true;
-}
-```
-3. Cuándo se guarda cada cosa
-Evento	Se guarda en caché
-Derrotar enemigo (tile 'E' → '.')	mapa_cache.txt
-Recoger poción (tile 'H' → '.')	mapa_cache.txt
-Cambiar de nivel / sala	mapa_cache.txt + heroe.json
-Recibir daño en mapa (trampa 'T')	heroe.json
-Subir de nivel en combate	heroe.json (ya lo hace guardarHeroe en batalla)
-Salir del juego con 'Q'	heroe.json + mapa_cache.txt
+#### Método especial: `Jugador::agregarObjetoSilencioso()`
 
-> **Nota:** El sistema de caché (`CacheManager`) está implementado pero actualmente el juego carga/guarda directamente desde `json/heroe.json` sin pasar por la capa de caché. La integración completa (cargar desde `cache/` si existe partida guardada) está pendiente.
+Agrega un objeto al inventario sin mostrar el prompt de equipar (necesario al cargar una partida desde caché, donde no hay interacción del usuario).
