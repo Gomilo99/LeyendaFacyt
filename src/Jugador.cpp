@@ -111,6 +111,12 @@ void Jugador::agregarObjeto(std::shared_ptr<Objeto> objeto){
     }
 }
 
+void Jugador::agregarObjetoSilencioso(std::shared_ptr<Objeto> objeto){
+    std::string nombre = objeto->getNombre();
+    inventario[nombre]++;
+    objetosInventario[nombre] = objeto;
+}
+
 void Jugador::eliminarObjeto(const std::string& nombre){
     auto it = inventario.find(nombre);
     if (it != inventario.end()) {

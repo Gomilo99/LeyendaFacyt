@@ -4,6 +4,7 @@
 #include <algorithm>
 #include "../lib/GameManager.hpp"
 #include "../lib/DataManager.hpp"
+#include "../lib/CacheManager.hpp"
 #include "../lib/Batalla.hpp"
 #include "../lib/Config.hpp"
 #include "../lib/ArtLoader.hpp"
@@ -11,16 +12,12 @@
 /**
  * Constructor del motor del juego.
  *
- * Flujo de inicialización:
- * 1. Carga objetos desde objetos.json
- * 2. Carga plantillas de enemigos desde enemigos.json (EnemyFactory)
- * 3. Carga el mapa desde mapas/nivel1.txt
- * 4. Si existe heroe.json, restaura la partida guardada
- * 5. Busca el tile 'P' en el mapa para colocar al jugador
- * 6. Equipa la "Espada Gallo" por defecto si existe en el JSON
+ * Solo carga datos estaticos (objetos, enemigos) y encuentra
+ * el spawn point del mapa original. La eleccion entre
+ * Nueva Partida / Continuar se hace en mostrarMenuPrincipal().
  */
 GameManager::GameManager()
-    : jugador("Heroe"), state(GameState::MAIN_MENU)
+    : jugador("Heroe"), state(GameState::MAIN_MENU), spawnX(1), spawnY(1)
 {
     objetos = DataManager::cargarObjetos();
     if (objetos.empty()) {
@@ -29,58 +26,125 @@ GameManager::GameManager()
 
     enemyFactory.cargarDesdeJSON(Config::enemigosPath(), objetos);
 
-    if(!mapa.cargar(Config::mapaPath())){
-        std::cerr << "No se pudo cargar el mapa. ERROR: Archivo no encontrado.\n";
-    }
-
-    std::ifstream heroeFile(Config::heroePath());
-    if(heroeFile.is_open()) {
-        jugador = DataManager::cargarHeroe();
-    }
-    heroeFile.close();
-
-    for(int y = 0; y < mapa.getAlto(); y++){
-        for(int x = 0; x < mapa.getAncho(); x++){
-            if(mapa.getTile(x, y) == 'P'){
-                jugador.setPos(x, y);
+    // Buscar spawn point 'P' del mapa original
+    Mapa mapaTemp;
+    if (mapaTemp.cargar(Config::mapaPath())){
+        for (int y = 0; y < mapaTemp.getAlto(); y++){
+            for (int x = 0; x < mapaTemp.getAncho(); x++){
+                if (mapaTemp.getTile(x, y) == 'P'){
+                    spawnX = x;
+                    spawnY = y;
+                }
             }
         }
+    } else {
+        std::cerr << "No se pudo cargar el mapa original.\n";
     }
+}
+
+/**
+ * Pantalla de titulo con menu de 3 opciones:
+ * 1. Nueva Partida — borra cache, crea partida fresca
+ * 2. Continuar    — carga desde cache si existe
+ * 3. Salir        — cierra el juego
+ */
+void GameManager::mostrarMenuPrincipal() {
+    while (true) {
+        limpiarPantalla();
+        auto arte = ArtLoader::cargarArte("assets/title.txt");
+
+        for (const auto& linea : arte)
+            std::cout << "\033[93m" << linea << "\033[0m\n";
+
+        std::cout << "\033[36m\n  1. Nueva Partida\033[0m\n";
+        std::cout << "\033[36m  2. Continuar\033[0m\n";
+        std::cout << "\033[36m  3. Salir\033[0m\n";
+        std::cout << "\033[92m\n  Elige una opcion: \033[0m";
+
+        int opcion;
+        std::cin >> opcion;
+
+        switch (opcion) {
+            case 1:
+                inicializarNuevaPartida();
+                return;
+            case 2:
+                if (cargarPartidaExistente())
+                    return;
+                std::cout << "\033[91mNo hay partida guardada.\033[0m\n";
+                std::cout << "Presiona Enter para volver al menu...";
+                limpiarBuffer();
+                std::cin.get();
+                break;
+            case 3:
+                state = GameState::GAME_OVER;
+                return;
+            default:
+                continue;
+        }
+    }
+}
+
+/**
+ * Inicializa una partida nueva:
+ * 1. Limpia cache/
+ * 2. Carga mapa fresco del archivo original
+ * 3. Crea heroe con estadisticas base
+ * 4. Equipa Espada Gallo
+ * 5. Pide nombre al jugador
+ * 6. Guarda todo en cache
+ */
+void GameManager::inicializarNuevaPartida() {
+    CacheManager::limpiar();
+
+    if (!mapa.cargar(Config::mapaPath())){
+        std::cerr << "No se pudo cargar el mapa.\n";
+        return;
+    }
+
+    jugador = Jugador("Heroe");
+    jugador.setPos(spawnX, spawnY);
 
     auto itEspada = objetos.find("Espada Gallo");
     if (itEspada != objetos.end()) {
         jugador.equiparArma(std::dynamic_pointer_cast<Arma>(itEspada->second), true);
     }
+
+    std::cout << "\033[36mIngresa tu nombre (Enter para 'Heroe'): \033[0m";
+    std::string nombreInput;
+    limpiarBuffer();
+    std::getline(std::cin, nombreInput);
+    if (!nombreInput.empty())
+        jugador.setNombre(nombreInput);
+
+    CacheManager::crearPartida(mapa, jugador);
+    state = GameState::OVERWORLD;
 }
 
 /**
- * Renderiza la pantalla de título principal.
- * Muestra el nombre del juego, instrucciones básicas
- * y espera a que el jugador presione Enter para comenzar.
- * Luego transiciona al estado OVERWORLD.
+ * Carga una partida existente desde cache/.
+ * Retorna true si se pudo cargar correctamente.
  */
-void GameManager::mostrarMenuPrincipal() {
-    limpiarPantalla();
-    auto arte = ArtLoader::cargarArte("assets/title.txt");
+bool GameManager::cargarPartidaExistente() {
+    if (!CacheManager::existePartida())
+        return false;
 
-    for (const auto& linea : arte)
-        std::cout << "\033[93m" << linea << "\033[0m\n";
-
-    std::cout << "\033[36m\n  Explora, lucha contra criaturas\033[0m\n";
-    std::cout << "\033[36m  y encuentra la llave magica!\033[0m\n";
-    std::cout << "\033[37m\n  [WASD] Mover  [I] Inventario  [Q] Salir\033[0m\n";
-    std::cout << "\033[92m\n  Presiona Enter para comenzar...\033[0m";
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    std::cin.get();
-
-    if (jugador.getNombre() == "Heroe") {
-        std::cout << "\033[36mIngresa tu nombre (Enter para 'Heroe'): \033[0m";
-        std::string nombreInput;
-        std::getline(std::cin, nombreInput);
-        if (!nombreInput.empty())
-            jugador.setNombre(nombreInput);
+    if (!CacheManager::cargarMapa(mapa)) {
+        std::cerr << "Error al cargar el mapa guardado.\n";
+        return false;
     }
+
+    jugador = CacheManager::cargarHeroe(objetos);
     state = GameState::OVERWORLD;
+    return true;
+}
+
+/**
+ * Guarda el estado actual del heroe y el mapa en cache/.
+ */
+void GameManager::guardarPartida() {
+    CacheManager::guardarHeroe(jugador);
+    CacheManager::guardarMapa(mapa);
 }
 
 /**
@@ -182,7 +246,7 @@ void GameManager::moverJugador(int dx, int dy) {
 }
 
 /**
- * Procesa tiles especiales del mapa.
+ * Procesa tiles especiales del mapa y persiste los cambios en cache.
  *
  * B: Inicia combate contra el jefe del nivel
  * K: Marca victoria (jugador encontró la llave)
@@ -193,6 +257,7 @@ void GameManager::handleTile(char tile) {
         iniciarCombateJefe();
         if (jugador.estaVivo()){
             mapa.setTile(jugador.getPosX(), jugador.getPosY(), '.');
+            CacheManager::guardarMapa(mapa);
         }
     }
     if (tile == 'K'){
@@ -202,6 +267,7 @@ void GameManager::handleTile(char tile) {
     if (tile == 'H'){
         jugador.usarPocion();
         mapa.setTile(jugador.getPosX(), jugador.getPosY(), '.');
+        CacheManager::guardarMapa(mapa);
     }
 }
 
@@ -238,13 +304,16 @@ void GameManager::iniciarCombateJefe() {
 }
 
 /**
- * Bucle principal del juego con máquina de estados explícita.
+ * Bucle principal del juego con maquina de estados explicita.
  *
  * MAIN_MENU → OVERWORLD → (BATTLE anidado) → OVERWORLD o GAME_OVER
  *
- * El estado BATTLE se maneja dentro de iniciarCombate()/iniciarCombateJefe()
- * que llaman a batalla() de forma síncrona; al terminar el combate
- * se retorna al bucle OVERWORLD.
+ * OVERWORLD:
+ *   - WASD para mover
+ *   - I para inventario
+ *   - Q guarda la partida y sale
+ *   - Al morir → GAME_OVER
+ *   - Al ganar → mensaje de victoria
  */
 void GameManager::run() {
     state = GameState::MAIN_MENU;
@@ -253,6 +322,8 @@ void GameManager::run() {
         switch (state) {
             case GameState::MAIN_MENU:
                 mostrarMenuPrincipal();
+                if (state == GameState::GAME_OVER)
+                    return;
                 break;
 
             case GameState::OVERWORLD:
@@ -270,7 +341,9 @@ void GameManager::run() {
                     case 'a': case 'A': dx = -1; break;
                     case 'd': case 'D': dx = 1; break;
                     case 'i': case 'I': mostrarInventario(); continue;
-                    case 'q': case 'Q': return;
+                    case 'q': case 'Q':
+                        guardarPartida();
+                        return;
                     default: continue;
                     }
 

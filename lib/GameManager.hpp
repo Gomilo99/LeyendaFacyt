@@ -37,20 +37,24 @@ public:
     void run();
 
 private:
-    Mapa mapa;                              ///< Grid del nivel actual
-    Jugador jugador;                        ///< Personaje del jugador
-    std::map<std::string, std::shared_ptr<Objeto>> objetos; ///< Catálogo de objetos del JSON
-    EnemyFactory enemyFactory;              ///< Fábrica de enemigos (lectura JSON + creación)
-    EncounterManager encounterMgr;          ///< Gestor de encuentros aleatorios
-    GameState state;                        ///< Estado actual de la máquina
+    Mapa mapa;
+    Jugador jugador;
+    std::map<std::string, std::shared_ptr<Objeto>> objetos;
+    EnemyFactory enemyFactory;
+    EncounterManager encounterMgr;
+    GameState state;
+    int spawnX, spawnY;                     ///< Posición inicial en el mapa original
 
-    void mostrarMenuPrincipal();            ///< Renderiza el título y espera Enter
-    void renderMapa();                      ///< Dibuja el mapa top-down con @ para el jugador
-    void moverJugador(int dx, int dy);      ///< Mueve al jugador y chequea eventos
-    void handleTile(char tile);             ///< Procesa el tile pisado (B, K, H)
-    void mostrarInventario();               ///< Delega en Jugador::mostrarInventario
-    void iniciarCombate();                  ///< Crea enemigo aleatorio y entra en batalla
-    void iniciarCombateJefe();              ///< Busca el jefe del nivel y entra en batalla
+    void mostrarMenuPrincipal();
+    void inicializarNuevaPartida();
+    bool cargarPartidaExistente();
+    void guardarPartida();
+    void renderMapa();
+    void moverJugador(int dx, int dy);
+    void handleTile(char tile);
+    void mostrarInventario();
+    void iniciarCombate();
+    void iniciarCombateJefe();
 };
 
 #endif

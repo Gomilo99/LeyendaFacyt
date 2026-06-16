@@ -10,6 +10,7 @@
 #endif
 #include "../lib/batalla.hpp"
 #include "../lib/DataManager.hpp"
+#include "../lib/CacheManager.hpp"
 
 // Limpia el buffer de entrada: descarta hasta encontrar \n
 void limpiarBuffer() {
@@ -588,7 +589,7 @@ void batalla(Jugador& jugador, Enemigo& enemigo) {
 
     if (!jugador.estaVivo()) {
         std::cout << "\nHas sido derrotado por " << enemigo.getNombre() << "!\n";
-        DataManager::guardarHeroe(jugador);
+        CacheManager::guardarHeroe(jugador);
         std::cout << "Presiona Enter para continuar...";
         limpiarBuffer();
         std::cin.get();
@@ -629,7 +630,7 @@ void batalla(Jugador& jugador, Enemigo& enemigo) {
         jugador.agregarObjeto(lootGanado);
     }
 
-    DataManager::guardarHeroe(jugador);
+    CacheManager::guardarHeroe(jugador);
     std::cout << "Presiona Enter para continuar...";
     limpiarBuffer();
     std::cin.get();

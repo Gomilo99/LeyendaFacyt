@@ -1,10 +1,13 @@
-obj/CacheManager.o: src/CacheManager.cpp src/../lib/cacheManager.hpp \
- src/../lib/mapa.hpp src/../lib/jugador.hpp src/../lib/personaje.hpp \
- src/../lib/objeto.hpp src/../lib/config.hpp src/../lib/json.hpp
-src/../lib/cacheManager.hpp:
-src/../lib/mapa.hpp:
-src/../lib/jugador.hpp:
+obj/CacheManager.o: src/CacheManager.cpp src/../lib/CacheManager.hpp \
+ src/../lib/Mapa.hpp src/../lib/Jugador.hpp src/../lib/personaje.hpp \
+ src/../lib/objeto.hpp src/../lib/Objeto.hpp src/../lib/Config.hpp \
+ src/../lib/json.hpp src/../lib/Jugador.hpp
+src/../lib/CacheManager.hpp:
+src/../lib/Mapa.hpp:
+src/../lib/Jugador.hpp:
 src/../lib/personaje.hpp:
 src/../lib/objeto.hpp:
-src/../lib/config.hpp:
+src/../lib/Objeto.hpp:
+src/../lib/Config.hpp:
 src/../lib/json.hpp:
+src/../lib/Jugador.hpp:

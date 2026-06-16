@@ -1,4 +1,92 @@
 ## Log
+### Log 15/06/2026 (sesión 3) — Sistema de guardado con caché
+
+#### Cambios realizados
+
+| # | Cambio | Archivos afectados |
+|---|--------|--------------------|
+| 1 | **CacheManager con estado completo** — `guardarHeroe()` ahora persiste: posición (posX, posY), saludMax, manaMax, exp, expMax, arma equipada e inventario completo (array de `{nombre, cant}`). `cargarHeroe()` recibe el catálogo de objetos para resolver nombres del inventario. | `lib/CacheManager.hpp`, `src/CacheManager.cpp` |
+| 2 | **`agregarObjetoSilencioso()`** — Nuevo método en Jugador que agrega objetos al inventario sin prompt de equipar (necesario para cargar partida desde caché sin interacción del usuario). | `lib/Jugador.hpp`, `src/Jugador.cpp` |
+| 3 | **`batalla()` guarda en caché** — Las llamadas a `DataManager::guardarHeroe()` (que escribía sobre `json/heroe.json`) se reemplazan por `CacheManager::guardarHeroe()` (escribe en `cache/heroe.json`). El archivo original `json/heroe.json` ya no se modifica. | `src/Batalla.cpp` |
+| 4 | **GameManager: menú Nueva Partida / Continuar / Salir** — `mostrarMenuPrincipal()` ahora muestra 3 opciones. "Nueva Partida" limpia `cache/`, carga mapa original + héroe default. "Continuar" carga mapa y héroe desde `cache/`. "Salir" termina el juego. El constructor ya no carga héroe desde `json/heroe.json`. | `lib/GameManager.hpp`, `src/GameManager.cpp` |
+| 5 | **Persistencia en tiles del mapa** — `handleTile()` ahora llama a `CacheManager::guardarMapa()` después de modificar tiles 'B' (jefe derrotado → '.') y 'H' (poción recogida → '.'). | `src/GameManager.cpp` |
+| 6 | **Guardado al salir con Q** — La tecla 'Q' en OVERWORLD ahora llama a `guardarPartida()` que persiste héroe + mapa antes de salir. | `src/GameManager.cpp` |
+| 7 | **Bugfix `esTransitable`** — Corregido `'p'` (minúscula) → `'P'` (mayúscula) para que el tile de spawn sea transitable. | `src/Mapa.cpp` |
+| 8 | **Variables sin uso removidas** — Eliminadas `saludMaxima` y `manaMaxima` en `CacheManager::cargarHeroe()` que se leían del JSON pero nunca se usaban. | `src/CacheManager.cpp` |
+
+#### Por qué se hicieron
+
+**1-2. Estado completo del héroe**
+Antes `CacheManager::guardarHeroe()` solo guardaba 6 campos básicos (nombre, salud, ataque, defensa, nivel, pociones). Al cargar una partida, el jugador perdía: posición en el mapa, inventario de objetos, arma equipada, experiencia acumulada y maná. Ahora se guardan 14 campos incluyendo el inventario como array JSON y el nombre del arma. `cargarHeroe()` reconstruye el jugador usando el catálogo de objetos para resolver nombres a `shared_ptr<Objeto>`.
+
+**3. batalla() escribe en caché**
+Antes `batalla()` llamaba a `DataManager::guardarHeroe()` que escribía en `json/heroe.json`, contaminando los archivos originales. Ahora escribe en `cache/heroe.json`, dejando los JSONs originales intactos para futuras partidas nuevas.
+
+**4-6. Flujo completo de partidas**
+Antes no existía distinción entre "nueva partida" y "continuar". El juego siempre cargaba desde `json/heroe.json`, haciéndolo incompatible con múltiples partidas o con un sistema de guardado persistente. Ahora:
+- `cache/` almacena exclusivamente el estado de la partida en curso
+- `json/` y `mapas/` son solo lectura (orígenes de datos)
+- El menú permite elegir entre empezar de cero o retomar
+
+**7. Bugfix**
+`esTransitable()` tenía `'p'` en minúscula pero el mapa usa `'P'` mayúscula para el spawn. Esto causaba que la casilla de inicio no fuera transitable después de moverse, aunque el bug no se manifestaba porque el jugador nunca necesitaba volver a pisar la 'P' original.
+
+#### Flujo de guardado actual
+
+```
+INICIO → Menú (Nueva Partida / Continuar / Salir)
+          │
+          ├─ "Nueva Partida"
+          │   ├─ CacheManager::limpiar()           → borra cache/
+          │   ├─ mapa.cargar(original)              → mapa fresco
+          │   ├─ Jugador("Heroe") + equipar armas   → héroe default
+          │   └─ CacheManager::crearPartida()       → crea cache/ con estado inicial
+          │
+          ├─ "Continuar"
+          │   ├─ CacheManager::existePartida()?     → busca cache/partida.flag
+          │   ├─ CacheManager::cargarMapa()         → mapa con tiles modificados
+          │   └─ CacheManager::cargarHeroe(objetos)  → héroe con inventario y posición
+          │
+          └─ "Salir" → return
+
+DURANTE EL JUEGO
+  ├─ Pisar tile 'B' (jefe) → batalla() → mapa.setTile('.') → CacheManager::guardarMapa()
+  ├─ Pisar tile 'H' (poción) → usarPocion() → mapa.setTile('.') → CacheManager::guardarMapa()
+  ├─ Combate aleatorio → batalla() → CacheManager::guardarHeroe()  (dentro de batalla)
+  └─ Tecla 'Q' → guardarPartida() → CacheManager::guardarHeroe() + guardarMapa() → salir
+```
+
+#### Formato del archivo `cache/heroe.json`
+```json
+{
+    "nombre": "Heroe",
+    "salud": 85,
+    "saludMaxima": 100,
+    "ataque": 25,
+    "defensa": 15,
+    "nivel": 2,
+    "pociones": 2,
+    "mana": 40,
+    "manaMaxima": 60,
+    "posX": 5,
+    "posY": 7,
+    "exp": 120,
+    "expMax": 300,
+    "arma": "Espada Gallo",
+    "inventario": [
+        { "nombre": "Pocion Milagrosa", "cant": 2 },
+        { "nombre": "Adblock", "cant": 1 }
+    ]
+}
+```
+
+#### Dependencias actualizadas
+```
+CacheManager → Config, json.hpp, Mapa.hpp, Jugador.hpp, Objeto.hpp
+GameManager  → DataManager, CacheManager, Batalla, Config, ArtLoader
+Batalla      → ... CacheManager  (nuevo include)
+```
+
 ### Log 15/06/2026 (sesión 2) — Separación de Managers
 
 #### Cambios realizados

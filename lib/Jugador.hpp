@@ -61,6 +61,7 @@ public:
     }
 
     void agregarObjeto(std::shared_ptr<Objeto> objeto);
+    void agregarObjetoSilencioso(std::shared_ptr<Objeto> objeto);
     void eliminarObjeto(const std::string& nombre);
     void equiparArma(std::shared_ptr<Arma> nuevaArma, bool silencioso = false);
 
