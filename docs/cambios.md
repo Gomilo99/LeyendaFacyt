@@ -1,3 +1,62 @@
+### Log 15/06/2026 (sesión 2) — Separación de Managers
+
+#### Cambios realizados
+
+| # | Cambio | Archivos afectados |
+|---|--------|--------------------|
+| 1 | **DataManager** — Nuevo namespace que centraliza toda la carga/guarda de datos JSON (objetos, enemigos, héroe). Reemplaza las funciones libres `cargarObjetosDesdeJSON`, `cargarEnemigosDesdeJSON`, `cargarHeroe`, `guardarHeroe`, `generarEnemigoPorNivel` que estaban en `batalla.hpp/.cpp`. Usa `Config` para todos los paths. | `lib/DataManager.hpp` (nuevo), `src/DataManager.cpp` (nuevo) |
+| 2 | **GameManager** — Nueva clase que orquesta el loop principal del juego. Encapsula: carga de datos, renderizado del mapa, movimiento WASD, eventos de tiles (E/H/K/B), inicio de combate, inventario, condición de victoria. `main.cpp` se reduce a 4 líneas. | `lib/GameManager.hpp` (nuevo), `src/GameManager.cpp` (nuevo) |
+| 3 | **batalla.hpp/.cpp limpiado** — Eliminadas todas las funciones de carga de datos (`cargarObjetosDesdeJSON`, `cargarEnemigosDesdeJSON`, `cargarHeroe`, `guardarHeroe`, `generarEnemigoPorNivel`, `dataPath()`, `rng()`). `batalla()` ahora acepta `Enemigo&` directamente en vez del mapa de enemigos. Eliminado `#include "json.hpp"`. | `lib/batalla.hpp`, `src/batalla.cpp` |
+| 4 | **CacheManager desacoplado** — Ya no depende de `batalla.hpp` para heroe IO. Implementa su propia serialización JSON contra `Config::heroeCachePath()`. No incluye ningún header de combate. | `lib/cacheManager.hpp`, `src/cacheManager.cpp` |
+| 5 | **Dead code eliminado** — Removidos `cargadorArchivos.hpp`/`.cpp` (nunca usado) y `Jugador::mostrarMenu()` (menú de combate antiguo, no llamado por nada). | `lib/cargadorArchivos.hpp` (eliminado), `src/cargadorArchivos.cpp` (eliminado), `lib/jugador.hpp`, `src/jugador.cpp` |
+| 6 | **Paths unificados** — `Config::heroePath()` ahora apunta a `json/heroe.json` (antes era `cache/heroe.json`). Agregado `Config::heroeCachePath()` para el path de cache separado. | `lib/config.hpp` |
+| 7 | **Makefile** — Target renombrado de `batalla.exe` a `leyenda.exe`. | `Makefile` |
+
+#### Por qué se hicieron
+
+**1. DataManager**
+Antes las funciones de carga JSON estaban mezcladas en `batalla.hpp/.cpp` junto con la lógica de combate (ScreenBuffer, Renderer, BattleSystem). Cualquier archivo que necesitara cargar datos (como `cacheManager.cpp`) tenía que incluir toda la maquinaria de batalla. Ahora `DataManager` es un namespace independiente con una responsabilidad única: lectura/escritura de datos desde JSON.
+
+**2. GameManager**
+`main.cpp` tenía 131 líneas con el loop principal, paths hardcodeados, carga de datos, renderizado y lógica de movimiento todo mezclado. Ahora `GameManager` encapsula el ORQUESTADOR del juego, liberando a `main.cpp` para que sea solo el punto de entrada. Cada responsabilidad (render, movimiento, tiles) es un método separado.
+
+**3. batalla.hpp/.cpp limpiado**
+El archivo pasó de ~869 líneas (con data loading) a ~728 líneas (solo combate). La separación reduce el acoplamiento: un cambio en el formato JSON ya no requiere tocar el código de combate, y viceversa. La nueva firma `batalla(Jugador&, Enemigo&)` es más simple — el caller ya eligió el enemigo.
+
+**4. CacheManager desacoplado**
+Antes incluía `batalla.hpp` solo para llamar a `::guardarHeroe()` y `::cargarHeroe()`, arrastrando toda la cadena de includes (json.hpp, objeto.hpp, enemigo.hpp, jugador.hpp, combate). Ahora es autónomo: serializa JSON directamente y solo depende de `config.hpp`.
+
+**5. Dead code**
+`cargadorArchivos.hpp/.cpp` era un struct `Cargador` con `archivoExiste()` y `cargarJSON()` que nunca se llamaba desde ningún archivo. `Jugador::mostrarMenu()` era el menú de combate del sistema anterior (1. Atacar, 2. Magia, 3. Usar pocion...) reemplazado por `BattleSystem` + `InputHandler`.
+
+#### Dependencias finales
+
+```
+DataManager → Config, json.hpp, objeto.hpp, enemigo.hpp, jugador.hpp
+GameManager → DataManager, batalla.hpp, config.hpp, mapa.hpp, jugador.hpp
+CacheManager → Config, json.hpp
+batalla.hpp → enemigo.hpp, jugador.hpp  (ya NO incluye json.hpp)
+main.cpp → GameManager.hpp  (4 líneas)
+```
+
+`CacheManager` y `batalla.hpp` ya no tienen dependencia mutua.
+
+#### Diagrama de archivos actual
+
+```
+src/
+├── main.cpp              # 4 líneas: crea GameManager y corre
+├── GameManager.cpp       # Loop principal, movimiento, eventos
+├── DataManager.cpp       # Carga/guarda JSON (objetos, enemigos, héroe)
+├── batalla.cpp           # Solo combate (ScreenBuffer, Renderer, BattleSystem)
+├── cacheManager.cpp      # Solo cache de partida (independiente)
+├── config.cpp            # Paths de datos
+├── jugador.cpp           # Jugador, inventario, nivelación
+├── Enemigo.cpp           # Enemigo, loot
+├── mapa.cpp              # Mapa 2D, colisiones
+└── (cargadorArchivos.cpp eliminado)
+```
+
 ### Log 15/06/2026 — Enemy Factory, Encuentros Aleatorios, Máquina de Estados
 
 #### Cambios realizados
