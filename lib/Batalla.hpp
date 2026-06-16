@@ -4,12 +4,12 @@
 #include <string>
 #include <vector>
 #include <sstream>
-#include "enemigo.hpp"
-#include "jugador.hpp"
+#include "Enemigo.hpp"
+#include "Jugador.hpp"
 
 // Dimensiones fijas del buffer de pantalla de combate
-const int SCREEN_WIDTH = 56;
-const int SCREEN_HEIGHT = 22;
+const int SCREEN_WIDTH = 70;
+const int SCREEN_HEIGHT = 30;
 
 // Maquina de estados del combate por turnos
 enum class BattleState {

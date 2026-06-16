@@ -58,25 +58,19 @@ GameManager::GameManager()
  * Luego transiciona al estado OVERWORLD.
  */
 void GameManager::mostrarMenuPrincipal() {
-    //limpiarPantalla();
-    ScreenBuffer menuBuf;
-    ScreenBuffer::hideCursor();
-
+    limpiarPantalla();
     auto arte = ArtLoader::cargarArte("assets/title.txt");
 
-    menuBuf.clear();
-    menuBuf.drawBox(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT - 1, COL_CYAN);
-    ArtLoader::dibujarArteCentrado(menuBuf, arte, COL_BYELLOW);
-    // Instrucciones al pie
-    menuBuf.drawString(10, 18, "Explora, lucha y encuentra la llave magica!", COL_CYAN);
-    menuBuf.drawString(12, 20, "[WASD] Mover [I] Inventario [Q] Salir", COL_WHITE);
-    menuBuf.drawString(14, 21, "Presiona Enter para comenzar...", COL_BGREEN);
-    menuBuf.render();
+    for (const auto& linea : arte)
+        std::cout << "\033[93m" << linea << "\033[0m\n";
+
+    std::cout << "\033[36m\n  Explora, lucha contra criaturas\033[0m\n";
+    std::cout << "\033[36m  y encuentra la llave magica!\033[0m\n";
+    std::cout << "\033[37m\n  [WASD] Mover  [I] Inventario  [Q] Salir\033[0m\n";
+    std::cout << "\033[92m\n  Presiona Enter para comenzar...\033[0m";
 
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     std::cin.get();
-    ScreenBuffer::showCursor();
-
     state = GameState::OVERWORLD;
 }
 
