@@ -1,3 +1,107 @@
+### Log 15/06/2026 — Enemy Factory, Encuentros Aleatorios, Máquina de Estados
+
+#### Cambios realizados
+
+| # | Cambio | Archivos afectados |
+|---|--------|--------------------|
+| 1 | **Nuevo formato JSON de enemigos** — Cambiado de array plano a objeto con `"enemigos"` que agrupa por nivel. Cada enemigo tiene `id`, `peso`, `ascii` (array de 6 líneas), `botin` (array de objetos con `nombre` + `probabilidad`), `boss` (bool). Eliminados campos viejos `loot1`/`loot2`/`prob1`/`prob2`. | `json/enemigos.json` |
+| 2 | **Enemigo extendido** — Nuevos miembros: `id`, `asciiArt[6]`, `vector<Drop> botin`. Eliminados `loot1`/`loot2`/`prob1`/`prob2`. `Drop` cambia de `shared_ptr<Objeto>` + `int probabilidad`. | `lib/Enemigo.hpp`, `src/Enemigo.cpp` |
+| 3 | **EnemyFactory** — Nueva clase que carga `json/enemigos.json`, almacena `EnemyTemplate` por nivel en `map<int, vector<EnemyTemplate>>`. Métodos: `crearEnemigo(nivel)` y `crearJefe(nivel)`. Selección ponderada por ruleta (`peso`). Búsqueda de jefe escanea desde el nivel actual hacia abajo. | `lib/EnemyFactory.hpp` (nuevo), `src/EnemyFactory.cpp` (nuevo) |
+| 4 | **EncounterManager** — Nueva clase maneja encuentros aleatorios. 4 terrenos: `BOSQUE` (8%), `CAVERNA` (10%), `MAZMORRA` (15%), `ABISMO` (18%). Grace period de 3 pasos sin encuentros, +3% por paso extra, cap 40%. Contador y terreno configurables. | `lib/EncounterManager.hpp` (nuevo), `src/EncounterManager.cpp` (nuevo) |
+| 5 | **GameManager con FSM explícita** — `GameState` enum (`MAIN_MENU`, `OVERWORLD`, `GAME_OVER`). Integra `EnemyFactory` y `EncounterManager`. Check aleatorio en cada paso después de eventos de tile (H/K/E/B skip). Tile `'B'` dispara jefe. Battle es sub-estado sincrónico de OVERWORLD. | `lib/GameManager.hpp`, `src/GameManager.cpp` |
+| 6 | **Batalla usa datos nuevos** — `asciiArt` se copia desde `enemigo.getAsciiArt()` (6 líneas). Loot itera `vector<Drop>` con probabilidad acumulada. Eliminada `generateEnemyArt()`. | `lib/Batalla.hpp`, `src/batalla.cpp` |
+| 7 | **DataManager limpiado** — Eliminados `cargarEnemigos()` y `generarEnemigoPorNivel()`. Conserva `rng()`, `cargarObjetos()`, `cargarHeroe()`, `guardarHeroe()`. | `lib/DataManager.hpp`, `src/DataManager.cpp` |
+| 8 | **Tile jefe en mapa** — `'B'` agregado a `nivel1.txt` en (10,7). `esTransitable()` acepta `'B'`. | `mapas/nivel1.txt`, `src/Mapa.cpp` |
+| 9 | **Documentación enemigos** — Nuevo documento que cubre: arquitectura, EnemyFactory (carga, selección ponderada, creación), EncounterManager (terrenos, fórmula, integración), formato JSON, máquina de estados, flujo completo de encuentro aleatorio y de jefe. | `docs/enemigos.md` (nuevo) |
+| 10 | **Comentarios Doxygen** — Documentación estilo Doxygen en español agregada a todos los headers y sources nuevos/modificados. | `lib/EnemyFactory.hpp`, `src/EnemyFactory.cpp`, `lib/EncounterManager.hpp`, `src/EncounterManager.cpp`, `lib/Enemigo.hpp`, `src/Enemigo.cpp`, `lib/GameManager.hpp`, `src/GameManager.cpp` |
+
+#### Por qué se hicieron
+
+**1-3. Enemy Factory**
+El sistema viejo hardcodeaba la generación de enemigos en `DataManager::generarEnemigoPorNivel()` con un `switch` estático. Cada nuevo enemigo requería recompilar. La factoría es data-driven: los enemigos se definen en JSON, se cargan en tiempo de ejecución, y la selección ponderada por `peso` permite balancear frecuencias sin tocar código. La búsqueda de jefe hacia abajo permite tener jefes solo en niveles específicos sin eliminar enemigos de niveles superiores.
+
+**4. Encounter Manager**
+Antes no existían encuentros aleatorios — el jugador pisaba `'E'` y siempre había batalla. Ahora cada paso tiene una probabilidad que: (a) depende del terreno del mapa, (b) tiene un período de gracia para evitar encuentros inmediatos al cambiar de piso, (c) aumenta progresivamente para evitar sequías largas, (d) tiene un tope para no ser abrumador.
+
+**5. FSM explícita**
+`main.cpp` tenía un loop plano con banderas sueltas. `GameManager` ahora centraliza el flujo con una máquina de estados: menú principal → exploración → (batalla anidada) → game over. Esto facilita agregar estados nuevos (INVENTARIO, TIENDA, etc.).
+
+**6. Batalla actualizada**
+El nuevo `asciiArt` de 6 líneas desde JSON reemplaza `generateEnemyArt()` que generaba monstruos de forma procedural pero limitada. El loot ahora usa probabilidades específicas por enemigo en vez de valores fijos 70/30.
+
+#### Detalle técnico: Selección ponderada (ruleta)
+
+El algoritmo suma todos los `peso` del nivel y genera un entero aleatorio en `[0, totalPeso)`. Luego itera los enemigos restando su peso hasta que la tirada llega a 0:
+
+```
+Rango [0, totalPeso) con pesos: Goblin=10, Orco=8, Slime=7, Murciélago=9, Zombie=6
+
+     Goblin(10)   Orco(8)  Slime(7)  Murciélago(9)  Zombie(6)
+   ┌──────────┬────────┬─────────┬──────────────┬─────────┐
+   0          10       18        25             34        39
+
+   Roll 0-9  → Goblin      (peso 10)
+   Roll 10-17 → Orco        (peso 8)
+   Roll 18-24 → Slime       (peso 7)
+   Roll 25-33 → Murciélago (peso 9)
+   Roll 34-39 → Zombie     (peso 6)
+```
+
+Cada enemigo ocupa exactamente `peso` valores en el rango. La tirada acotada garantiza que todos los segmentos son alcanzables.
+
+#### Detalle técnico: Fórmula de encuentro
+
+```
+probabilidad = baseTerreno + max(0, pasosSinEncuentro - GRACE_PERIOD) * INCREMENTO_POR_PASO
+probabilidad = min(probabilidad, CAP)
+```
+
+Con valores: GRACE_PERIOD=3, INCREMENTO=3%, CAP=40%:
+- Pasos 1-3: probabilidad = baseTerreno (sin encuentros)
+- Paso 4: +3%
+- Paso 5: +6%
+- ...hasta máximo 40%
+
+El contador se resetea al ocurrir un encuentro. Terrenos: BOSQUE=8%, CAVERNA=10%, MAZMORRA=15%, ABISMO=18%.
+
+#### Detalle técnico: Búsqueda de jefe
+
+`crearJefe(nivel)` busca desde `nivel` hacia abajo hasta 1:
+```cpp
+for (int l = nivel; l >= 1; --l) {
+    for (const auto& tplantilla : nivelTemplates[l]) {
+        if (tplantilla.esJefe) return crearDesdeTemplate(tplantilla);
+    }
+}
+```
+
+Si no encuentra jefe en ningún nivel, lanza `std::runtime_error`.
+
+#### Flujo de encuentro aleatorio
+
+```
+OVERWORLD
+  │
+  ├─ WASD ──────────→ mover jugador
+  │                     │
+  │                     ├─ tile 'B' ──→ crearJefe(nivel) → batalla()
+  │                     ├─ tile 'K','E','H' → evento directo (sin random)
+  │                     └─ tile '.' ──→ EncounterManager::checkEncounter()
+  │                                       │
+  │                                       ├─ true  → crearEnemigo(nivel) → batalla()
+  │                                       │           │
+  │                                       │           └─ victoria → OVERWORLD
+  │                                       │           └─ muerte  → GAME_OVER
+  │                                       │
+  │                                       └─ false → OVERWORLD (sigue)
+  │
+  └─ 'Q' ──→ guardar → salir
+```
+
+#### Estrategia
+
+El sistema de enemigos pasó de estático con switch a 100% data-driven. Agregar un enemigo nuevo es solo añadirlo a `json/enemigos.json` con su `peso`, `ascii`, `botin` y nivel correspondiente. La probabilidad de encuentro por paso evita sequías y se adapta al terreno del mapa. La FSM desacopla los estados del juego y prepara el terreno para agregar inventario, tiendas, etc.
+
 ### Log 10/06/2026 — Correcciones de bugs, calidad y estructura
 
 #### Cambios realizados

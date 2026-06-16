@@ -1,0 +1,9 @@
+{
+    "ataque": 35,
+    "defensa": 20,
+    "mana": 50,
+    "nivel": 2,
+    "nombre": "Heroe",
+    "pociones": 3,
+    "salud": 200
+}
