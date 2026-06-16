@@ -1,3 +1,2 @@
-obj/config.o: src/config.cpp src/../lib/config.hpp src/../lib/json.hpp
-src/../lib/config.hpp:
-src/../lib/json.hpp:
+obj/Config.o: src/Config.cpp src/../lib/Config.hpp
+src/../lib/Config.hpp:

@@ -1,4 +1,4 @@
-#include "../lib/enemigo.hpp"
+#include "../lib/Enemigo.hpp"
 #include <iostream>
 #include <cstring>
 

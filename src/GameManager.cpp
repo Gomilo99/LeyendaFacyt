@@ -2,8 +2,9 @@
 #include <fstream>
 #include "../lib/GameManager.hpp"
 #include "../lib/DataManager.hpp"
-#include "../lib/batalla.hpp"
-#include "../lib/config.hpp"
+#include "../lib/Batalla.hpp"
+#include "../lib/Config.hpp"
+#include "../lib/ArtLoader.hpp"
 
 /**
  * Constructor del motor del juego.
@@ -57,18 +58,25 @@ GameManager::GameManager()
  * Luego transiciona al estado OVERWORLD.
  */
 void GameManager::mostrarMenuPrincipal() {
-    limpiarPantalla();
-    std::cout << "========================================\n";
-    std::cout << "       LEYENDA DEL CAMPUS\n";
-    std::cout << "       La Leyenda FACYT\n";
-    std::cout << "========================================\n";
-    std::cout << "\n  Un RPG de mazmorras en ASCII\n";
-    std::cout << "\n  Explora, lucha contra criaturas\n";
-    std::cout << "  y encuentra la llave magica!\n";
-    std::cout << "\n  [WASD] Mover  [I] Inventario  [Q] Salir\n";
-    std::cout << "\n  Presiona Enter para comenzar...";
+    //limpiarPantalla();
+    ScreenBuffer menuBuf;
+    ScreenBuffer::hideCursor();
+
+    auto arte = ArtLoader::cargarArte("assets/title.txt");
+
+    menuBuf.clear();
+    menuBuf.drawBox(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT - 1, COL_CYAN);
+    ArtLoader::dibujarArteCentrado(menuBuf, arte, COL_BYELLOW);
+    // Instrucciones al pie
+    menuBuf.drawString(10, 18, "Explora, lucha y encuentra la llave magica!", COL_CYAN);
+    menuBuf.drawString(12, 20, "[WASD] Mover [I] Inventario [Q] Salir", COL_WHITE);
+    menuBuf.drawString(14, 21, "Presiona Enter para comenzar...", COL_BGREEN);
+    menuBuf.render();
+
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     std::cin.get();
+    ScreenBuffer::showCursor();
+
     state = GameState::OVERWORLD;
 }
 
