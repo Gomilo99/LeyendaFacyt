@@ -4,6 +4,7 @@
 /.vscode/
 /.idea/
 /.dist/
+/obj-dist/
 /a
 
 /batalla.exe
