@@ -1,5 +1,6 @@
 #include "../lib/Inventario.hpp"
 #include "../lib/Jugador.hpp"
+#include "../lib/Platform.hpp"
 
 /* Implementación de Métodos de InvRenderer - DRAW
 - drawBakckground
@@ -323,10 +324,8 @@ void InventoryUI::run(){
     while(state != InvState::CLOSED){
         render();
 
-        char key;
-        if(std::cin.get(key)){
-            processInput(key);
-        }
+        char key = Platform::getKey();
+        processInput(key);
     }
 
     ScreenBuffer::showCursor();

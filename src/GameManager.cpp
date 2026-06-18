@@ -9,6 +9,7 @@
 #include "../lib/Config.hpp"
 #include "../lib/ArtLoader.hpp"
 #include "../lib/Inventario.hpp"
+#include "../lib/Platform.hpp"
 
 /**
  * Constructor del motor del juego.
@@ -62,8 +63,9 @@ void GameManager::mostrarMenuPrincipal() {
         std::cout << "\033[36m  3. Salir\033[0m\n";
         std::cout << "\033[92m\n  Elige una opcion: \033[0m";
 
-        int opcion;
-        std::cin >> opcion;
+        int opcion = 0;
+        char c = Platform::getKey();
+        if (c >= '1' && c <= '3') opcion = c - '0';
 
         switch (opcion) {
             case 1:
@@ -113,8 +115,9 @@ void GameManager::inicializarNuevaPartida() {
 
     std::cout << "\033[36mIngresa tu nombre (Enter para 'Heroe'): \033[0m";
     std::string nombreInput;
-    limpiarBuffer();
+    Platform::echoOn();
     std::getline(std::cin, nombreInput);
+    Platform::echoOff();
     if (!nombreInput.empty())
         jugador.setNombre(nombreInput);
 
@@ -309,7 +312,7 @@ void GameManager::iniciarCombateJefe() {
     } else {
         std::cout << "Aun no hay un jefe para tu nivel...\n";
         std::cout << "Un enemigo aparece de todas formas!\n";
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        std::cout << "Presiona Enter para continuar...";
         std::cin.get();
         iniciarCombate();
     }
@@ -344,8 +347,7 @@ void GameManager::run() {
                     renderMapa();
 
                     std::cout << "\nWASD para mover, I inventario, Q salir: ";
-                    char input;
-                    std::cin >> input;
+                    char input = Platform::getKey();
                     int dx = 0, dy = 0;
                     switch (input) {
                     case 'w': case 'W': dy = -1; break;
@@ -353,7 +355,6 @@ void GameManager::run() {
                     case 'a': case 'A': dx = -1; break;
                     case 'd': case 'D': dx = 1; break;
                     case 'i': case 'I': 
-                        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                         mostrarInventario(); 
                         continue;
                     case 'q': case 'Q':

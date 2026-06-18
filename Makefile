@@ -1,14 +1,28 @@
 CXX          := g++
 CXXFLAGS     := -std=c++17 -Wall -Wextra -Wpedantic -I. -MMD -MP
 LDFLAGS      :=
-STATIC_LDFLAGS := -static-libgcc -static-libstdc++ -static
 SRCDIR       := src
 OBJDIR       := obj
 OBJDIR_DIST  := obj-dist
-TARGET       := leyenda.exe
+TARGET       := leyenda
 DISTDIR      := .dist
 DISTTARGET   := $(DISTDIR)/$(TARGET)
 DATA_DIRS    := json mapas assets
+
+# Platform detection
+ifeq ($(OS),Windows_NT)
+TARGET       := leyenda.exe
+STATIC_LIBS  := -static-libgcc -static-libstdc++ -static
+MKDIR = if not exist "$(1)" mkdir "$(1)"
+RMDIR = if exist "$(1)" rmdir /s /q "$(1)"
+DEL   = if exist "$(1)" del /f /q "$(1)"
+else
+TARGET       := leyenda
+STATIC_LIBS  := -static-libgcc -static-libstdc++
+MKDIR = mkdir -p "$(1)"
+RMDIR = rm -rf "$(1)"
+DEL   = rm -f "$(1)"
+endif
 
 SRCS := $(wildcard $(SRCDIR)/*.cpp)
 OBJS := $(patsubst $(SRCDIR)/%.cpp, $(OBJDIR)/%.o, $(SRCS))
@@ -26,22 +40,29 @@ $(TARGET): $(OBJS)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $^
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
-	@if not exist "$(OBJDIR)" mkdir "$(OBJDIR)"
+	@$(call MKDIR,$(OBJDIR))
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 # Distribution build (statically linked, optimized)
 $(DISTTARGET): $(OBJS_DIST)
-	@if not exist "$(DISTDIR)" mkdir "$(DISTDIR)"
-	$(CXX) $(CXXFLAGS) -O2 $(STATIC_LDFLAGS) -o $@ $^
+	@$(call MKDIR,$(DISTDIR))
+	$(CXX) $(CXXFLAGS) -O2 $(STATIC_LIBS) -o $@ $^
 
 $(OBJDIR_DIST)/%.o: $(SRCDIR)/%.cpp
-	@if not exist "$(OBJDIR_DIST)" mkdir "$(OBJDIR_DIST)"
+	@$(call MKDIR,$(OBJDIR_DIST))
 	$(CXX) $(CXXFLAGS) -O2 -c -o $@ $<
 
 dist: $(DISTTARGET)
+ifeq ($(OS),Windows_NT)
 	@if exist "json" (if not exist "$(DISTDIR)/json" mkdir "$(DISTDIR)/json") & copy /y "json\*" "$(DISTDIR)/json\" >nul
 	@if exist "mapas" (if not exist "$(DISTDIR)/mapas" mkdir "$(DISTDIR)/mapas") & copy /y "mapas\*" "$(DISTDIR)/mapas\" >nul
 	@if exist "assets" (if not exist "$(DISTDIR)/assets" mkdir "$(DISTDIR)/assets") & copy /y "assets\*" "$(DISTDIR)/assets\" >nul
+else
+	@mkdir -p $(DISTDIR)/json $(DISTDIR)/mapas $(DISTDIR)/assets
+	@cp json/* $(DISTDIR)/json/ 2>/dev/null || true
+	@cp mapas/* $(DISTDIR)/mapas/ 2>/dev/null || true
+	@cp assets/* $(DISTDIR)/assets/ 2>/dev/null || true
+endif
 	@echo.
 	@echo ===========================================
 	@echo Distribution package created in .dist/
@@ -50,9 +71,9 @@ dist: $(DISTTARGET)
 	@echo ===========================================
 
 clean:
-	if exist "$(OBJDIR)" rmdir /s /q "$(OBJDIR)"
-	if exist "$(OBJDIR_DIST)" rmdir /s /q "$(OBJDIR_DIST)"
-	if exist "$(TARGET)" del /f /q "$(TARGET)"
+	$(call RMDIR,$(OBJDIR))
+	$(call RMDIR,$(OBJDIR_DIST))
+	$(call DEL,$(TARGET))
 
 run: $(TARGET)
-	$(TARGET)
+	./$(TARGET)

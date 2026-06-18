@@ -6,7 +6,7 @@ obj/GameManager.o: src/GameManager.cpp src/../lib/GameManager.hpp \
  src/../lib/CacheManager.hpp src/../lib/Mapa.hpp src/../lib/Jugador.hpp \
  src/../lib/Batalla.hpp src/../lib/Enemigo.hpp src/../lib/Config.hpp \
  src/../lib/ArtLoader.hpp src/../lib/Batalla.hpp \
- src/../lib/Inventario.hpp
+ src/../lib/Inventario.hpp src/../lib/Platform.hpp
 src/../lib/GameManager.hpp:
 src/../lib/mapa.hpp:
 src/../lib/jugador.hpp:
@@ -27,3 +27,4 @@ src/../lib/Config.hpp:
 src/../lib/ArtLoader.hpp:
 src/../lib/Batalla.hpp:
 src/../lib/Inventario.hpp:
+src/../lib/Platform.hpp:

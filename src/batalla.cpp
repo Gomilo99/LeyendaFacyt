@@ -5,9 +5,7 @@
 #include <random>
 #include <thread>
 #include <chrono>
-#ifdef _WIN32
-#include <windows.h>
-#endif
+#include "../lib/Platform.hpp"
 #include "../lib/batalla.hpp"
 #include "../lib/DataManager.hpp"
 #include "../lib/CacheManager.hpp"
@@ -168,26 +166,14 @@ void ScreenBuffer::showCursor() {
     std::cout.flush();
 }
 
-// Consulta el ancho de la terminal via Win32 Console API. Fallback a 80.
+// Consulta el ancho de la terminal. Fallback a 80.
 int ScreenBuffer::getTerminalWidth() {
-    #ifdef _WIN32
-    CONSOLE_SCREEN_BUFFER_INFO csbi;
-    if (GetStdHandle(STD_OUTPUT_HANDLE) != INVALID_HANDLE_VALUE &&
-        GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi))
-        return csbi.srWindow.Right - csbi.srWindow.Left + 1;
-    #endif
-    return 80;
+    return Platform::getTerminalWidth();
 }
 
-// Consulta el alto de la terminal via Win32 Console API. Fallback a 24.
+// Consulta el alto de la terminal. Fallback a 24.
 int ScreenBuffer::getTerminalHeight() {
-    #ifdef _WIN32
-    CONSOLE_SCREEN_BUFFER_INFO csbi;
-    if (GetStdHandle(STD_OUTPUT_HANDLE) != INVALID_HANDLE_VALUE &&
-        GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi))
-        return csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
-    #endif
-    return 24;
+    return Platform::getTerminalHeight();
 }
 
 // ==================== RENDERER ====================
@@ -361,17 +347,15 @@ void BattleSystem::setLog(const std::string& msg) {
 void BattleSystem::processInput() {
     if (currentState != BattleState::PLAYER_TURN) return;
 
-    char key;
-    if (std::cin.get(key)) {
-        if (key == 'w' || key == 'W') {
-            inputHandler.moveUp();
-            renderer.setSelectedOption(inputHandler.getSelectedOption());
-        } else if (key == 's' || key == 'S') {
-            inputHandler.moveDown();
-            renderer.setSelectedOption(inputHandler.getSelectedOption());
-        } else if (key == ' ') {
-            currentState = BattleState::PLAYER_ACTION;
-        }
+    char key = Platform::getKey();
+    if (key == 'w' || key == 'W') {
+        inputHandler.moveUp();
+        renderer.setSelectedOption(inputHandler.getSelectedOption());
+    } else if (key == 's' || key == 'S') {
+        inputHandler.moveDown();
+        renderer.setSelectedOption(inputHandler.getSelectedOption());
+    } else if (key == ' ') {
+        currentState = BattleState::PLAYER_ACTION;
     }
 }
 
@@ -547,7 +531,6 @@ void batalla(Jugador& jugador, Enemigo& enemigo) {
         std::cout << "Un " << enemigo.getNombre() << " ha aparecido!\n";
     }
     std::cout << "Presiona Enter para comenzar la batalla...";
-    limpiarBuffer();
     std::cin.get();
 
     BattleSystem system(jugador, enemigo);
@@ -555,7 +538,6 @@ void batalla(Jugador& jugador, Enemigo& enemigo) {
 
     if (system.hasFled()) {
         std::cout << "\nHas escapado del combate.\nPresiona Enter para continuar...";
-        limpiarBuffer();
         std::cin.get();
         return;
     }
@@ -564,7 +546,6 @@ void batalla(Jugador& jugador, Enemigo& enemigo) {
         std::cout << "\nHas sido derrotado por " << enemigo.getNombre() << "!\n";
         CacheManager::guardarHeroe(jugador);
         std::cout << "Presiona Enter para continuar...";
-        limpiarBuffer();
         std::cin.get();
         return;
     }
@@ -605,6 +586,5 @@ void batalla(Jugador& jugador, Enemigo& enemigo) {
 
     CacheManager::guardarHeroe(jugador);
     std::cout << "Presiona Enter para continuar...";
-    limpiarBuffer();
     std::cin.get();
 }
