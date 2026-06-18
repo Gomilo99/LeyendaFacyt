@@ -1,6 +1,16 @@
 #include "../lib/Inventario.hpp"
 #include "../lib/Jugador.hpp"
 
+/* Implementación de Métodos de InvRenderer - DRAW
+- drawBakckground
+- drawCategoryTabs
+- drawItemList
+- drawItemDetails
+- drawPlayerStats
+- renderALL
+- render
+*/
+
 void InvRenderer::drawBackground(){
     buf.drawString(0, 0, "=== LEYENDA DEL CAMPUS - INVENTARIO ===", COL_BYELLOW);
     buf.drawHLine(0, 1, SCREEN_WIDTH, '-', COL_CYAN);
@@ -80,36 +90,123 @@ void InvRenderer::drawItemDetails() {
     std::string desc = obj->getDescripcion();
     for (int i = 0; i < 3 && (int)desc.size() > i * (detW - 4); i++){
         std::string line = desc.substr(i * (detW - 4), detW - 4); // Falta explicación de por que se resta esos números y por que i debe ser menor que 3
-        buf.drawString(detX + 2, detY + 4 + i, line, COL_DEFAULT);
+        buf.drawString(detX + 2, detY + 4 + i, line, COL_DEFAULT); // detW - 4 por los bordes(2) y los espacios padding(2)
     }
 }
 
 void InvRenderer::drawPlayerStats(){
-    int statX = 2, statY = 14, statW = SCREEN_WIDTH - 4, statH = 3;
+    int statX = 2, statY = 14, statW = SCREEN_WIDTH - 4, statH = 5;
     buf.drawBox(statX, statY, statW, statH, COL_CYAN);
 
-    // Nombre del jugador
+    // Línea 1: Nombre + HP bar + MP bar
     buf.drawString(statX + 2, statY + 1, playerName, COL_BWHITE);
 
-    // Barra de HP
-    buf.drawString(statX + 2 + playerName.size() + 1, statY + 1, "HP", COL_GREEN);
-    int hpPct = (playerMaxHP > 0) ? (playerHP * 100 / playerMaxHP) : 0;
-    int hpColor = (hpPct > 50) ? COL_GREEN : (hpPct > 25) ? COL_YELLOW : COL_RED;
-    buf.drawBar(statX + 2 + playerName.size() + 4, statY + 1, 12, playerHP, playerMaxHP, hpColor);
+    int xCursor = statX + 2 + playerName.size() + 1;
+    buf.drawString(xCursor, statY + 1, "HP", COL_GREEN);
+    int hpPct = (playerHP > 0) ? (playerHP * 100 / playerMaxHP) : 0;
+    int hpColor = (hpPct > 50 ) ? COL_GREEN : (hpPct > 25) ? COL_YELLOW : COL_RED;
+    buf.drawBar(xCursor + 3, statY + 1, 10, playerHP, playerMaxHP, hpColor);
 
     std::string hpStr = std::to_string(playerHP) + "/" + std::to_string(playerMaxHP);
-    buf.drawString(statX + 2 + playerName.size() + 4 + 13, statY + 1, hpStr, hpColor);
+    buf.drawString(xCursor + 3 + 11, statY + 1, hpStr, hpColor);
 
-    // Arma Equipada
-    if(!equippedWeaponName.empty()){
-        std::string wpn = "Arma: " + equippedWeaponName + "(+" + std::to_string(equippedWeaponDmg) + ")";
-        buf.drawString(statX + 2, statY + 2, wpn, COL_YELLOW);
+    // MP a la derecha
+    int mpX = statX + statW - 22;
+    buf.drawString(mpX, statY + 1, "MP", COL_BLUE);
+    buf.drawBar(mpX + 3, statY + 1, 10, playerMP, playerMaxMP, COL_BLUE);
+
+    std::string mpStr = std::to_string(playerMP) + "/" + std::to_string(playerMaxMP);
+    buf.drawString(mpX + 3 + 11, statY + 1, mpStr, COL_BLUE);
+
+    // Línea 2: ATK, DEF, NIV
+    std::string statsLine = "ATK: " + std::to_string(playerAtk) 
+                            + " DEF: " + std::to_string(playerDef)
+                            + "NIV: " + std::to_string(playerLevel);
+    buf.drawString(statX + 2, statY + 2, statsLine, COL_WHITE);
+
+    // Línea 3: EXP + ARMA
+    std::string expStr = "EXP: " + std::to_string(playerExp)
+                        + "/" + std::to_string(playerMaxExp);
+    buf.drawString(statX + 2, statY + 3, expStr, COL_YELLOW);
+
+    if (!equippedWeaponName.empty()) {
+        std::string wpn = "ARMA: " + equippedWeaponName
+                        + " (+" + std::to_string(equippedWeaponDmg) + ")";
+        buf.drawString(statX + 2 + expStr.size() + 4, statY + 3, wpn, COL_YELLOW);
     }
-    // NOTA: Falta Representar el resto de estadisticas
 }
 
-void InventarioUI::processInput(char key) {
-    auto& items = renderer.currentItems;
+void InvRenderer::drawFooter(){
+    std::string footer = "[W/S] Navegar [A/D] Categoria [SPACE] OK [Q] Salir";
+    int cx = SCREEN_WIDTH / 2;
+    buf.drawString(cx - (int)footer.size() / 2, SCREEN_HEIGHT - 1, footer, COL_CYAN);
+}
+
+void InvRenderer::renderAll(){
+    buf.clear();
+    drawBackground();
+    drawCategoryTabs();
+    drawItemList();
+    drawItemDetails();
+    drawPlayerStats();
+    drawFooter();
+    if (!logMsg.empty()){
+        buf.drawString(2, SCREEN_HEIGHT - 2, logMsg, COL_BYELLOW);
+    }
+    buf.render();
+}
+
+void InventoryUI::render(){
+    // Pasar datos del jugador al renderer
+    renderer.setPlayerInfo(
+        player->getSalud(), player->getSaludMaxima(),
+        player->getMana(), player->getManaMaxima(),
+        player->getNombre(), player->getNivel(),
+        player->getAtaque(), player->getDefensa(),
+        player->getExperiencia(), player->getExperienciaNecesaria(),
+        player->getArmaNombre(), player->getArmaDano()
+    );
+    renderer.setLogMessage(logMessage);
+    renderer.renderAll();
+}
+/* Implementación de Métodos InventoryUI
+- buildItemList
+- processInput
+- doAction
+- render
+- setLog
+*/
+
+std::vector<ItemEntry> InventoryUI::buildItemList(ItemCategory cat){
+    std::vector<ItemEntry> result;
+    const auto &objetos = player->getObjetosInventario();
+    const auto &cantidades = player->getInventario();
+
+    for (const auto &par : objetos){
+        const std::string &nombre = par.first;
+        auto obj = par.second;
+
+        bool matches = false;
+        switch (cat)
+        {
+            case ItemCategory::ARMAS:       matches = (obj->getTipo() == "Arma");       break;
+            case ItemCategory::POCIONES:    matches = (obj->getTipo() == "Pocion");     break;
+            case ItemCategory::CLAVE:       matches = (obj->getTipo() == "Objeto Clave"); break;
+        }
+
+        if (matches){
+            int cant = 1;
+            auto it = cantidades.find(nombre);
+            if (it != cantidades.end()) cant = it->second;
+            result.push_back({nombre, obj, cant});
+        }
+    }
+
+    return result;
+}
+
+void InventoryUI::processInput(char key) {
+    const auto& items = renderer.getItems();
 
     switch (state) {
     case InvState::BROWSING:
@@ -167,6 +264,28 @@ void InventarioUI::processInput(char key) {
             state = InvState::BROWSING;
         }
         break;
+    }
+}
+void InventoryUI::doAction() {
+    const auto &items = renderer.getItems();
+    if (selectedIndex < 0 || selectedIndex >= (int)items.size()) return;
+
+    auto &entry = items[selectedIndex];
+    auto obj = entry.objeto;
+
+    if (auto arma = std::dynamic_pointer_cast<Arma>(obj)){
+        // Equipar Arma
+        player->equiparArma(arma);
+        logMessage = "Has equipado: " + arma->getNombre();
+    }else if (auto pocion = std::dynamic_pointer_cast<Pocion>(obj)){
+        // Usar pocion
+        player->usarPocion(pocion.get());
+        player->eliminarObjeto(entry.nombre);
+        logMessage = "Has usado: " + pocion->getNombre();
+        // Reconstruir lista porque se modificó el inventario
+        renderer.setItems(buildItemList(currentCategory));
+    }else{
+        logMessage = obj->getDescripcion();
     }
 }
 

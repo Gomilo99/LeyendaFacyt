@@ -41,24 +41,33 @@ class InvRenderer {
         int playerMP, playerMaxMP;
         std::string playerName;
         int playerLevel;
+        int playerExp, playerMaxExp;
+        int playerAtk, playerDef;
         std::string equippedWeaponName;
         int equippedWeaponDmg;
 
     public:
-        InvRenderer(ScreenBuffer &buffer) : buf(buffer) {}; // Constructor
+        // Constructor
+        InvRenderer(ScreenBuffer &buffer) : buf(buffer) {}; 
 
-        void setItems(const std::vector<ItemEntry> &items);
+        const std::vector<ItemEntry>& getItems() const { return currentItems; }
+
+        void setItems(const std::vector<ItemEntry> &items){ currentItems = items; }
         void setSelectedIndex(int idx) { selectedIndex = idx; }
         void setCategory(ItemCategory cat) { currentCategory = cat; }
         void setPlayerInfo(int pHP, int pMaxHP, int pMP, int pMaxMP, std::string pName, 
-            int pLevel, std::string eqWeaName, int eqWeaDmg){
+            int pLevel, int pExp, int pMaxExp, int pAtk, int pDef, std::string eqWeaName, int eqWeaDmg){
             playerHP = pHP;
             playerMaxHP = pMaxHP;
             playerMP = pMP;
             playerMaxMP = pMaxMP;
             playerName = pName;
             playerLevel = pLevel;
-            equippedWeaponName = equippedWeaponName;
+            playerExp = pExp;
+            playerMaxExp = pMaxExp;
+            playerAtk = pAtk;
+            playerDef = pDef;
+            equippedWeaponName = eqWeaName;
             equippedWeaponDmg = eqWeaDmg;
         }
         void setLogMessage(const std::string &msg) { logMsg = msg; }
@@ -81,16 +90,17 @@ class InventoryUI {
         ItemCategory currentCategory;
         int selectedIndex;
         bool closed;
-        std::string LogMessage;
+        std::string logMessage;
 
         std::vector<ItemEntry> buildItemList(ItemCategory cat);
         void processInput(char key);
         void doAction();
         void render();
-        void setLong(const std::string &msg);
+
+        void setLog(const std::string &msg){ logMessage = msg; }
 
     public:
-        InventoryUI(Jugador &p) : player(&p) {};
+        InventoryUI(Jugador &p) : player(&p), renderer(screenBuffer) {};
         void run(); // bucle principal, igual que BattleSystem::run()
         bool isClosed() const { return closed; }
 

@@ -378,6 +378,7 @@ void BattleSystem::processInput() {
 // Ejecuta la accion correspondiente segun la opcion seleccionada (0-3)
 void BattleSystem::doPlayerAction() {
     int opt = inputHandler.getSelectedOption();
+    InventoryUI invUI(*player);
     switch (opt) {
         case 0: // Atacar
             setLog(player->getNombre() + " ataca a " + currentEnemy->getNombre() + "!");
@@ -426,7 +427,6 @@ void BattleSystem::doPlayerAction() {
 
         case 2: // Inventario: muestra estado e inventario, permite usar objetos por nombre
             suppressCout();
-            InventoryUI invUI(*player);
             invUI.run();
             restoreCout();
             screenBuffer.forceRedraw();
