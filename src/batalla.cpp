@@ -426,9 +426,9 @@ void BattleSystem::doPlayerAction() {
             break;
 
         case 2: // Inventario: muestra estado e inventario, permite usar objetos por nombre
-            suppressCout();
+            //suppressCout();
             invUI.run();
-            restoreCout();
+            //restoreCout();
             screenBuffer.forceRedraw();
             currentState = BattleState::PLAYER_TURN;
             break;
