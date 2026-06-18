@@ -108,8 +108,66 @@ void InvRenderer::drawPlayerStats(){
     // NOTA: Falta Representar el resto de estadisticas
 }
 
-void InventoryUI::processInput(char key){
+void InventarioUI::processInput(char key) {
+    auto& items = renderer.currentItems;
 
+    switch (state) {
+    case InvState::BROWSING:
+        if (key == 'w' || key == 'W') {
+            if (selectedIndex > 0) selectedIndex--;
+            else selectedIndex = items.size() - 1; // circular
+            renderer.setSelectedIndex(selectedIndex);
+        } else if (key == 's' || key == 'S') {
+            if (selectedIndex < (int)items.size() - 1) selectedIndex++;
+            else selectedIndex = 0;
+            renderer.setSelectedIndex(selectedIndex);
+        } else if (key == 'a' || key == 'A') {
+            // cambiar categoría anterior
+            int cat = (int)currentCategory;
+            cat = (cat - 1 + 3) % 3;
+            currentCategory = (ItemCategory)cat;
+            renderer.setCategory(currentCategory);
+            renderer.setItems(buildItemList(currentCategory));
+            selectedIndex = 0;
+            renderer.setSelectedIndex(0);
+        } else if (key == 'd' || key == 'D') {
+            // cambiar categoría siguiente
+            int cat = (int)currentCategory;
+            cat = (cat + 1) % 3;
+            currentCategory = (ItemCategory)cat;
+            renderer.setCategory(currentCategory);
+            renderer.setItems(buildItemList(currentCategory));
+            selectedIndex = 0;
+            renderer.setSelectedIndex(0);
+        } else if (key == ' ') {
+            if (!items.empty()) state = InvState::ITEM_ACTIONS;
+        } else if (key == 'q' || key == 'Q') {
+            state = InvState::CLOSED;
+        }
+        break;
+
+    case InvState::ITEM_ACTIONS:
+        // Submenú simple: [Usar] [Equipar] [Info] [Volver]
+        // Se maneja igual que el menú de combate: w/s y space
+        if (key == ' ') {
+            doAction(); // ejecuta la acción seleccionada
+            state = InvState::BROWSING;
+        } else if (key == 'q' || key == 'Q' || key == 27) {
+            state = InvState::BROWSING;
+        }
+        break;
+
+    case InvState::CONFIRM_ACTION:
+        if (key == 'w' || key == 's') {
+            // toggle sí/no
+        } else if (key == ' ') {
+            // ejecutar
+            state = InvState::BROWSING;
+        } else if (key == 'q') {
+            state = InvState::BROWSING;
+        }
+        break;
+    }
 }
 
 void InventoryUI::run(){
