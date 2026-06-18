@@ -24,8 +24,8 @@ public:
     virtual ~Personaje() {}
     virtual void atacar(Personaje* objetivo) = 0;
 
-    void recibirDano(int dano) {
-        int danoReal = (dano <= defensa) ? 0 : std::max(1, dano - defensa);
+    void recibirDano(int atk_atacante) {
+        int danoReal = atk_atacante - (this->defensa / 2);
         salud -= danoReal;
         std::cout << nombre << " recibe " << danoReal << " de dano!\n";
     }

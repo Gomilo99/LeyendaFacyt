@@ -25,6 +25,7 @@ private:
     std::string id;            ///< Identificador único (snake_case)
     std::string asciiArt[6];   ///< 6 líneas de arte ASCII del JSON
     std::vector<Drop> botin;   ///< Array extensible de objetos+probabilidad
+    int exp_base;
 
 public:
     /**
@@ -39,7 +40,7 @@ public:
      * @param drops Vector de objetos con probabilidad de drop
      */
     Enemigo(std::string id, std::string nom, int hp, int atk, int def, int lvl,
-            const std::string art[6], const std::vector<Drop>& drops);
+            const std::string art[6], const std::vector<Drop>& drops, int exp_base);
 
     /// Constructor copia (útil para instanciar desde plantillas)
     Enemigo(const Enemigo& copia);
@@ -50,6 +51,9 @@ public:
     std::string getId() const { return id; }
     const std::string* getAsciiArt() const { return asciiArt; }
     const std::vector<Drop>& getBotin() const { return botin; }
+    int getExpBase() const {return exp_base; }
+
+    void setExpBase(int new_exp_base){ exp_base = new_exp_base; }
 };
 
 #endif

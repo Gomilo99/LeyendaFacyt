@@ -70,7 +70,8 @@ private:
         int peso;                ///< Probabilidad relativa de aparición
         std::string asciiArt[6]; ///< 6 líneas de arte ASCII
         std::vector<Drop> botin; ///< Array de objetos con probabilidad
-        bool boss;               ///< true si es el jefe del nivel
+        bool boss;              ///< true si es el jefe del nivel
+        int exp_base;           ///< Experiencia Base del enemigo
     };
 
     /// Almacén principal: nivel -> vector de plantillas

@@ -3,9 +3,9 @@
     {
       "id": "goblin",
       "nombre": "Goblin",
-      "salud": 40,
+      "salud": 30,
       "ataque": 8,
-      "defensa": 3,
+      "defensa": 2,
       "peso": 10,
       "ascii": [
         "     /\\",
@@ -19,15 +19,16 @@
         { "nombre": "Pocion Milagrosa", "prob": 70 },
         { "nombre": "Aire siniestro", "prob": 30 }
       ],
-      "boss": false
+      "boss": false,
+      "exp": 30
     },
     {
       "id": "orco",
       "nombre": "Orco",
-      "salud": 60,
+      "salud": 45,
       "ataque": 12,
-      "defensa": 5,
-      "peso": 8,
+      "defensa": 4,
+      "peso": 7,
       "ascii": [
         "    /^^^\\",
         "   | . . |",
@@ -40,15 +41,16 @@
         { "nombre": "Pocion Milagrosa", "prob": 60 },
         { "nombre": "Sopladora", "prob": 40 }
       ],
-      "boss": false
+      "boss": false,
+      "exp": 40
     },
     {
       "id": "slime_cafe",
       "nombre": "Slime de Cafe Vencido",
-      "salud": 70,
-      "ataque": 10,
+      "salud": 35,
+      "ataque": 7,
       "defensa": 3,
-      "peso": 7,
+      "peso": 8,
       "ascii": [
         "     .-.",
         "    (o o)",
@@ -61,14 +63,15 @@
         { "nombre": "Expreso", "prob": 80 },
         { "nombre": "Expreso", "prob": 20 }
       ],
-      "boss": false
+      "boss": false,
+      "exp": 20
     },
     {
       "id": "murcielago",
       "nombre": "Murcielago Rascao",
-      "salud": 65,
-      "ataque": 9,
-      "defensa": 2,
+      "salud": 25,
+      "ataque": 10,
+      "defensa": 1,
       "peso": 9,
       "ascii": [
         "     /\\",
@@ -82,15 +85,16 @@
         { "nombre": "Alka-Seltzer", "prob": 75 },
         { "nombre": "Alka-Seltzer", "prob": 25 }
       ],
-      "boss": false
+      "boss": false,
+      "exp": 25
     },
     {
       "id": "zombie_lunes",
       "nombre": "Zombie del Lunes",
-      "salud": 80,
+      "salud": 50,
       "ataque": 12,
-      "defensa": 6,
-      "peso": 6,
+      "defensa": 3,
+      "peso": 5,
       "ascii": [
         "     ___",
         "    / . \\",
@@ -103,16 +107,17 @@
         { "nombre": "Expreso", "prob": 65 },
         { "nombre": "La Taza de Cafe Rancia", "prob": 35 }
       ],
-      "boss": false
+      "boss": false,
+      "exp": 50
     }
   ],
   "2": [
     {
       "id": "fantasma",
       "nombre": "Fantasma",
-      "salud": 85,
-      "ataque": 13,
-      "defensa": 4,
+      "salud": 50,
+      "ataque": 16,
+      "defensa": 3,
       "peso": 8,
       "ascii": [
         "       .-.",
@@ -126,13 +131,14 @@
         { "nombre": "Expreso", "prob": 55 },
         { "nombre": "El Llavero Perdido", "prob": 45 }
       ],
-      "boss": false
+      "boss": false,
+      "exp": 40
     },
     {
-      "id": "fantasma_visto",
-      "nombre": "Fantasma del Visto",
-      "salud": 90,
-      "ataque": 15,
+      "id": "fantasma_remuerto",
+      "nombre": "Fantasma Re-Muerto",
+      "salud": 55,
+      "ataque": 14,
       "defensa": 4,
       "peso": 6,
       "ascii": [
@@ -147,12 +153,13 @@
         { "nombre": "Pocion de Pensamiento Critico", "prob": 50 },
         { "nombre": "El Telefono Sin Bateria", "prob": 50 }
       ],
-      "boss": false
+      "boss": false,
+      "exp": 45
     },
     {
       "id": "esqueleto",
       "nombre": "Esqueleto",
-      "salud": 95,
+      "salud": 55,
       "ataque": 14,
       "defensa": 5,
       "peso": 7,
@@ -168,14 +175,15 @@
         { "nombre": "Expreso", "prob": 55 },
         { "nombre": "El Reloj Detenido", "prob": 45 }
       ],
-      "boss": false
+      "boss": false,
+      "exp": 45
     },
     {
       "id": "carlos",
       "nombre": "Carlos",
       "salud": 100,
-      "ataque": 15,
-      "defensa": 5,
+      "ataque": 10,
+      "defensa": 3,
       "peso": 5,
       "ascii": [
         "     /\\",
@@ -189,14 +197,15 @@
         { "nombre": "Pocion Milagrosa", "prob": 50 },
         { "nombre": "Dildo", "prob": 50 }
       ],
-      "boss": false
+      "boss": false,
+      "exp": 70
     },
     {
       "id": "golem_plastilina",
       "nombre": "Golem de Plastilina Seca",
-      "salud": 85,
-      "ataque": 14,
-      "defensa": 6,
+      "salud": 65,
+      "ataque": 12,
+      "defensa": 7,
       "peso": 6,
       "ascii": [
         "      ___________",
@@ -210,13 +219,14 @@
         { "nombre": "Suavitel", "prob": 45 },
         { "nombre": "El Rodillo de Amasar", "prob": 55 }
       ],
-      "boss": false
+      "boss": false,
+      "exp": 50
     },
     {
       "id": "golem_facturas",
       "nombre": "Golem de Facturas",
-      "salud": 90,
-      "ataque": 10,
+      "salud": 65,
+      "ataque": 7,
       "defensa": 12,
       "peso": 5,
       "ascii": [
@@ -231,7 +241,8 @@
         { "nombre": "Adblock", "prob": 35 },
         { "nombre": "La Pluma de la Deuda", "prob": 65 }
       ],
-      "boss": false
+      "boss": false,
+      "exp": 50
     },
     {
       "id": "bruja",
@@ -252,7 +263,8 @@
         { "nombre": "Pocion de Lagrimas Cachondas", "prob": 40 },
         { "nombre": "La Cuchara de la Desesperaci\u00f3n", "prob": 60 }
       ],
-      "boss": false
+      "boss": false,
+      "exp": 50
     },
     {
       "id": "cajero",
@@ -273,7 +285,8 @@
         { "nombre": "Tarjeta de Credito Ilimitada", "prob": 30 },
         { "nombre": "El Lector de Tarjetas", "prob": 70 }
       ],
-      "boss": false
+      "boss": false,
+      "exp": 50
     },
     {
       "id": "gargola_wifi",
@@ -294,7 +307,8 @@
         { "nombre": "Expreso", "prob": 45 },
         { "nombre": "El Router Roto", "prob": 55 }
       ],
-      "boss": false
+      "boss": false,
+      "exp": 50
     },
     {
       "id": "caballero_control",
@@ -315,7 +329,8 @@
         { "nombre": "Expreso", "prob": 40 },
         { "nombre": "La Espada del Zapping", "prob": 60 }
       ],
-      "boss": false
+      "boss": false,
+      "exp": 50
     },
     {
       "id": "caballero_basura",
@@ -336,7 +351,8 @@
         { "nombre": "Suavitel", "prob": 40 },
         { "nombre": "La Pala de Recogida", "prob": 60 }
       ],
-      "boss": false
+      "boss": false,
+      "exp": 50
     },
     {
       "id": "caballero_cebolla",
@@ -357,7 +373,8 @@
         { "nombre": "Pocion de Lagrimas Cachondas", "prob": 35 },
         { "nombre": "Espada del Descongelamiento", "prob": 65 }
       ],
-      "boss": false
+      "boss": false,
+      "exp": 70
     }
   ],
   "3": [
@@ -380,7 +397,8 @@
         { "nombre": "Suavitel", "prob": 35 },
         { "nombre": "El Aspirador del Vacio", "prob": 65 }
       ],
-      "boss": false
+      "boss": false,
+      "exp": 80
     },
     {
       "id": "golem_ropa",
@@ -401,7 +419,8 @@
         { "nombre": "Suavitel", "prob": 35 },
         { "nombre": "La Lavadora de Almas", "prob": 65 }
       ],
-      "boss": false
+      "boss": false,
+      "exp": 70
     },
     {
       "id": "ogro_procrastinador",
@@ -422,7 +441,8 @@
         { "nombre": "Adblock", "prob": 30 },
         { "nombre": "El Mazo", "prob": 70 }
       ],
-      "boss": false
+      "boss": false,
+      "exp": 70
     },
     {
       "id": "duende_cable",
@@ -443,7 +463,8 @@
         { "nombre": "Alka-Seltzer", "prob": 70 },
         { "nombre": "Alka-Seltzer", "prob": 30 }
       ],
-      "boss": false
+      "boss": false,
+      "exp": 70
     },
     {
       "id": "ciclope",
@@ -464,7 +485,8 @@
         { "nombre": "Pocion de Pensamiento Critico", "prob": 30 },
         { "nombre": "Ojo miope", "prob": 70 }
       ],
-      "boss": false
+      "boss": false,
+      "exp": 80
     },
     {
       "id": "espectro_rojo",
@@ -485,16 +507,17 @@
         { "nombre": "Adblock", "prob": 45 },
         { "nombre": "El Banner Ineludible", "prob": 55 }
       ],
-      "boss": false
+      "boss": false,
+      "exp": 60
     }
   ],
   "4": [
     {
       "id": "admin_servidor",
       "nombre": "El Gran Administrador del Servidor Caido",
-      "salud": 500,
-      "ataque": 40,
-      "defensa": 25,
+      "salud": 200,
+      "ataque": 30,
+      "defensa": 12,
       "peso": 10,
       "ascii": [
         "     /\\/\\/\\/\\/\\/\\/\\/\\",
@@ -508,7 +531,8 @@
         { "nombre": "Pocion Cubana", "prob": 40 },
         { "nombre": "La Espada del Codigo Fuente", "prob": 60 }
       ],
-      "boss": true
+      "boss": true,
+      "exp": 200
     }
   ]
 }

@@ -48,6 +48,7 @@ void EnemyFactory::cargarDesdeJSON(
             t.peso = item.value("peso", 5);
             t.nivel = nivel;
             t.boss = item.value("boss", false);
+            t.exp_base = item["exp"];
 
             // Copia las 6 líneas de arte ASCII
             for (int i = 0; i < 6 && i < (int)item["ascii"].size(); i++)
@@ -112,7 +113,7 @@ const EnemyFactory::EnemyTemplate& EnemyFactory::seleccionarPlantilla(int nivel)
  */
 Enemigo EnemyFactory::crearEnemigo(int nivel) {
     const auto& t = seleccionarPlantilla(nivel);
-    return Enemigo(t.id, t.nombre, t.salud, t.ataque, t.defensa, t.nivel, t.asciiArt, t.botin);
+    return Enemigo(t.id, t.nombre, t.salud, t.ataque, t.defensa, t.nivel, t.asciiArt, t.botin, t.exp_base);
 }
 
 /**
@@ -126,7 +127,7 @@ Enemigo EnemyFactory::crearJefe(int nivel) {
         if (it == plantillas.end()) continue;
         for (const auto& t : it->second) {
             if (t.boss)
-                return Enemigo(t.id, t.nombre, t.salud, t.ataque, t.defensa, t.nivel, t.asciiArt, t.botin);
+                return Enemigo(t.id, t.nombre, t.salud, t.ataque, t.defensa, t.nivel, t.asciiArt, t.botin, t.exp_base);
         }
     }
     throw std::runtime_error("No hay jefe definido para el nivel " + std::to_string(nivel));
