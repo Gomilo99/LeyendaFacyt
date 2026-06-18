@@ -29,7 +29,7 @@ El combate es por turnos con interfaz gráfica ASCII en tiempo real:
 |---|---|
 | **Atacar** | Ataque físico: `jugador.atacar(enemigo)` usando el ataque base + daño del arma equipada |
 | **Magia** | Hechizo que cuesta 10 MP. Daño = `ataque * 2 + nivel * 5`. Requiere mínimo 10 MP |
-| **Inventario** | Muestra estado y lista de objetos. Permite usar pociones escribiendo el nombre exacto |
+| **Inventario** | Abre `InventoryUI` con navegación W/S/A/D/SPACE/Q. Permite equipar armas, usar pociones y ver información de objetos sin limpiar la pantalla de combate |
 | **Huir** | 50% de probabilidad de éxito. Si falla, el enemigo ataca |
 
 ### Estadísticas del jugador
@@ -57,6 +57,121 @@ Durante el combate, las funciones `Jugador::atacar()`, `Jugador::usarMagia()`, `
 3. `BattleSystem::restoreCout()` restaura el buffer original
 
 Esto permite que las clases de personaje no necesiten saber si hay un BattleSystem activo — el silenciamiento es transparente.
+
+## Sistema de inventario (InventoryUI)
+
+El inventario usa la misma arquitectura que el combate: `ScreenBuffer` (56x22), renderizado por secciones, input por teclado con navegación W/S/A/D/SPACE/Q.
+
+### Clases
+
+| Clase | Responsabilidad |
+|---|---|
+| **`InvRenderer`** | Dibuja cada sección del inventario (fondo, pestañas, lista de items, detalle, stats, footer) sobre un `ScreenBuffer` |
+| **`InventoryUI`** | Orquestador con máquina de estados (`BROWSING` → `ITEM_ACTIONS` → `CONFIRM_ACTION` → `CLOSED`). Gestiona input, construye listas filtradas y ejecuta acciones. |
+
+### Layout del frame
+
+```
+L0:  === LEYENDA DEL CAMPUS - INVENTARIO ===   (BYELLOW)
+L1:  ────────────────────────────────────────   (CYAN)
+L2:   [Armas] [Consumibles] [Clave]            (pestañas)
+L3:  ┌──────────────────┬────────────────────┐
+L4:  │ items (scroll)    │  detalle del item  │
+L5:  │ ▲/▼               │  stats/tipo        │
+L6:  │                   │  descripción       │
+L7:  │                   │  arma equipada     │
+L8:  │                   │                    │
+L9:  │                   │                    │
+L10: │                   │                    │
+L11: └──────────────────┴────────────────────┘
+L12: ┌─ stats del jugador ──────────────────────┐
+L13: │ HP ▓▓▓▓▓▓ 30/40  MP ▓▓▓▓▓▓ 20/30      │
+L14: │ ATK: 15  DEF: 10  NIV: 3               │
+L15: │ EXP: 150/300  ARMA: Daga (+8)          │
+L16: └───────────────────────────────────────────┘
+L21: [W/S] Navegar [A/D] Categoria [SPACE] OK [Q] Salir
+```
+
+### Estados (máquina de estados)
+
+```cpp
+enum class InvState {
+    BROWSING,        // navegando la lista — W/S items, A/D categorías, SPACE acción, Q salir
+    ITEM_ACTIONS,    // submenú — SPACE ejecuta, Q o ESC vuelve
+    CONFIRM_ACTION,  // confirmación — W/S sí/no, SPACE confirma, Q cancelar
+    CLOSED           // salir del bucle
+};
+```
+
+### Controles
+
+| Tecla | BROWSING | ITEM_ACTIONS |
+|---|---|---|
+| **W/S** | Navegar items (circular) | (reservado) |
+| **A/D** | Cambiar categoría | — |
+| **SPACE** | Abrir acciones del item | Ejecutar acción |
+| **Q** | Cerrar inventario | Volver a BROWSING |
+
+### Filtrado por categoría
+
+`InventoryUI::buildItemList(ItemCategory cat)` recorre `Jugador::getObjetosInventario()` y filtra por `Objeto::getTipo()`:
+
+| Categoría | `getTipo()` |
+|---|---|
+| `ARMAS` | `"Arma"` |
+| `POCIONES` | `"Pocion"` |
+| `CLAVE` | `"Objeto Clave"` |
+
+### Acciones contextuales (`doAction()`)
+
+| Tipo de item | Acción | Efecto |
+|---|---|---|
+| `Arma` | Equipar | Llama `Jugador::equiparArma()`, actualiza ataque |
+| `Pocion` | Usar | Llama `Jugador::usarPocion()`, elimina del inventario, reconstruye lista |
+| `ObjClave` | Mostrar info | Muestra la descripción del objeto |
+
+### Integración desde combate
+
+```cpp
+// batalla.cpp — case 2 (Inventario):
+InventoryUI invUI(*player);
+invUI.run();
+screenBuffer.forceRedraw();  // restaurar frame de combate
+currentState = BattleState::PLAYER_TURN;
+```
+
+No usa `suppressCout()`. El ScreenBuffer del inventario escribe directamente a `std::cout` mediante ANSI — es independiente del buffer de combate.
+
+### Integración desde overworld
+
+```cpp
+// GameManager.cpp:
+void GameManager::mostrarInventario() {
+    InventoryUI invUI(jugador);
+    invUI.run();
+    limpiarPantalla();
+    renderMapa();
+}
+```
+
+Se requiere `std::cin.ignore(numeric_limits<streamsize>::max(), '\n')` antes de abrir porque `std::cin >>` deja `\n` residual.
+
+### Scroll
+
+- Panel de items: 26x9, contenido visible = listH - 2 = 7 items
+- `visibleStart` se ajusta cuando `selectedIndex` supera el rango visible
+- Indicadores `▲`/`▼` en la última columna del contenido (columna `listX + listW - 2`)
+- Si la categoría está vacía, muestra "(Sin objetos)" centrado
+
+### Dependencias
+
+```
+Inventario.hpp → Batalla.hpp (ScreenBuffer, colores), Jugador.hpp, Objeto.hpp
+Inventario.cpp → Inventario.hpp, Jugador.hpp
+batalla.cpp    → ... Inventario.hpp (nuevo include)
+GameManager.cpp → ... Inventario.hpp (nuevo include)
+Makefile       → wildcard $(SRCDIR)/*.cpp lo incluye automáticamente
+```
 
 ## Sistema de loot
 
@@ -298,7 +413,11 @@ El arte ASCII proviene del campo `ascii` (array de 6 strings) en `json/enemigos.
 | **Q** | Guardar partida y salir del juego |
 | **Enter** | Ir al menú desde pantalla de título |
 | **W/S** (en combate) | Navegar opciones del menú |
+| **W/S** (en inventario) | Navegar items (circular) |
+| **A/D** (en inventario) | Cambiar categoría (Armas/Consumibles/Clave) |
 | **SPACE** (en combate) | Confirmar opción seleccionada |
+| **SPACE** (en inventario) | Ejecutar acción sobre item seleccionado |
+| **Q** (en inventario) | Cerrar inventario |
 
 ## Formato de enemigos.json
 
