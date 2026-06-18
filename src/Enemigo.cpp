@@ -17,8 +17,8 @@
  * @param drops Vector de objetos con probabilidad de drop
  */
 Enemigo::Enemigo(std::string id, std::string nom, int hp, int atk, int def, int lvl,
-                 const std::string art[6], const std::vector<Drop>& drops)
-    : Personaje(nom, hp, atk, def, lvl), id(id), botin(drops) {
+                const std::string art[6], const std::vector<Drop>& drops, int exp_base)
+    : Personaje(nom, hp, atk, def, lvl), id(id), botin(drops), exp_base(exp_base) {
     for (int i = 0; i < 6; i++) asciiArt[i] = art[i];
 }
 
