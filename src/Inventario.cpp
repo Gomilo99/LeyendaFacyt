@@ -35,6 +35,12 @@ void InvRenderer::drawItemList(){
     if (selectedIndex >= visibleStart + visibleCount)
         visibleStart = selectedIndex - visibleCount + 1;
 
+    if (currentItems.empty()){
+        std::string msg = "Sin objetos..";
+        buf.drawString(listX + (listW - msg.size()) / 2, listY + listH / 2, msg, COL_MAGENTA);
+        return;
+    }
+
     // 1. Dibujar items primero
     for (int i = 0; i < visibleCount && i < (int)currentItems.size(); i++){
         int idx = visibleStart + i;
@@ -208,16 +214,27 @@ void InventoryUI::processInput(char key) {
 
     switch (state) {
     case InvState::BROWSING:
-        if (items.empty()) break; // no hace nada si no hay items
+        if (key == 'q' || key == 'Q') {
+            state = InvState::CLOSED;
+            break;
+        }
         
+        // w/s navegan circular pero no pasa nada si items está vacío (0-1 = size_t wrap...)
+        // Movimiento entre objetos
         if (key == 'w' || key == 'W') {
-            if (selectedIndex > 0) selectedIndex--;
-            else selectedIndex = items.size() - 1; // circular
-            renderer.setSelectedIndex(selectedIndex);
+            if (!items.empty()) {
+                if (selectedIndex > 0) selectedIndex--;
+                else selectedIndex = items.size() - 1;
+                renderer.setSelectedIndex(selectedIndex);
+            }
         } else if (key == 's' || key == 'S') {
-            if (selectedIndex < (int)items.size() - 1) selectedIndex++;
-            else selectedIndex = 0;
-            renderer.setSelectedIndex(selectedIndex);
+            if (!items.empty()) {
+                if (selectedIndex < (int)items.size() - 1) selectedIndex++;
+                else selectedIndex = 0;
+                renderer.setSelectedIndex(selectedIndex);
+            }
+
+            // Cambio de Categorias
         } else if (key == 'a' || key == 'A') {
             // cambiar categoría anterior
             int cat = (int)currentCategory;
@@ -227,6 +244,7 @@ void InventoryUI::processInput(char key) {
             renderer.setItems(buildItemList(currentCategory));
             selectedIndex = 0;
             renderer.setSelectedIndex(0);
+
         } else if (key == 'd' || key == 'D') {
             // cambiar categoría siguiente
             int cat = (int)currentCategory;
@@ -236,11 +254,11 @@ void InventoryUI::processInput(char key) {
             renderer.setItems(buildItemList(currentCategory));
             selectedIndex = 0;
             renderer.setSelectedIndex(0);
+
         } else if (key == ' ') {
             if (!items.empty()) state = InvState::ITEM_ACTIONS;
-        } else if (key == 'q' || key == 'Q') {
-            state = InvState::CLOSED;
         }
+
         break;
 
     case InvState::ITEM_ACTIONS:
@@ -292,6 +310,7 @@ void InventoryUI::doAction() {
 
 void InventoryUI::run(){
     ScreenBuffer::hideCursor();
+    //limpiarBuffer();
     state = InvState::BROWSING;
     currentCategory = ItemCategory::ARMAS;
     selectedIndex = 0;

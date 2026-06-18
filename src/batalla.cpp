@@ -253,7 +253,7 @@ void Renderer::drawEnemyHealthBar() {
 void Renderer::drawCombatMenu() {
     int menuX = 3;
     int menuY = 12;
-    int menuW = 26;
+    int menuW = 22; // Probando, antes estaba en 22, se cambio a 26
     int menuH = 7;
 
     buf.drawBox(menuX, menuY, menuW, menuH, COL_CYAN);

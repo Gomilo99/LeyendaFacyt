@@ -352,7 +352,10 @@ void GameManager::run() {
                     case 's': case 'S': dy = 1; break;
                     case 'a': case 'A': dx = -1; break;
                     case 'd': case 'D': dx = 1; break;
-                    case 'i': case 'I': mostrarInventario(); continue;
+                    case 'i': case 'I': 
+                        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                        mostrarInventario(); 
+                        continue;
                     case 'q': case 'Q':
                         guardarPartida();
                         return;

@@ -1,4 +1,137 @@
 ## Log
+### Log 18/06/2026 (sesión 4) — Renovación total del inventario
+
+#### Cambios realizados
+
+| # | Cambio | Archivos afectados |
+|---|--------|--------------------|
+| 1 | **`InvRenderer` + `InventoryUI`** — Nuevo sistema de inventario con UI tipo combate (ScreenBuffer, ANSI, redibujado diferencial). Panel con lista scrolleable, detalle del item, stats del jugador, pestañas de categoría (Armas/Consumibles/Clave), navegación por teclado (W/S/A/D/SPACE/Q), overlay sobre la pantalla actual sin limpiar. | `lib/Inventario.hpp` (nuevo), `src/Inventario.cpp` (nuevo) |
+| 2 | **`batalla.cpp`: integración del inventario en combate** — Reemplazado el viejo sistema de `std::cout`/`std::cin` + `limpiarPantalla()` por `InventoryUI`. Eliminados `suppressCout()`/`restoreCout()` alrededor del inventario (no aplica porque InventoryUI usa su propio ScreenBuffer). | `src/batalla.cpp` |
+| 3 | **`batalla.cpp`: ancho del menú reducido** — `menuW` cambiado de 26 a 22 para evitar solapamiento con el panel de información del jugador (columna 28 compartida causaba corrimiento visual al navegar). | `src/batalla.cpp` |
+| 4 | **`GameManager.cpp`: integración del inventario en overworld** — Reemplazado `Jugador::mostrarInventario()` por `InventoryUI`. Agregado `std::cin.ignore()` antes de abrir el inventario para consumir el `\n` residual de `std::cin >>`. | `src/GameManager.cpp` |
+| 5 | **`Enemigo.cpp`: constructor faltaba `exp_base`** — El header declaraba 9 parámetros pero la implementación solo tenía 8 (faltaba `int exp_base`). Causaba error de compilación "ninguna instancia de función sobrecargada coincide". | `src/Enemigo.cpp` |
+| 6 | **`Inventario.hpp`: correcciones del header** — Constructor ahora inicializa `renderer(screenBuffer)`. `setPlayerInfo()` corregido: `equippedWeaponName = equippedWeaponName` (auto-asignación) → `eqWeaName`. Agregados campos `playerExp`, `playerMaxExp`, `playerAtk`, `playerDef`. Agregado getter `getItems()`. `setLong` renombrado a `setLog`. | `lib/Inventario.hpp` |
+| 7 | **Mensaje "Sin objetos" en categorías vacías** — Cuando una categoría no tiene items, `drawItemList()` muestra "(Sin objetos)" centrado en el panel en vez de dejar el box vacío. | `src/Inventario.cpp` |
+| 8 | **Scroll indicators en margen derecho** — `▲`/`▼` movidos a la última columna de contenido (`listX + listW - 2`) y dibujados **después** de los items para evitar solapamiento. | `src/Inventario.cpp` |
+| 9 | **Corregido orden de parámetros en `setPlayerInfo()`** — La llamada en `InventoryUI::render()` intercambiaba `getAtaque()`/`getDefensa()` con `getExperiencia()`/`getExperienciaNecesaria()`. Las stats aparecían mezcladas en el panel. | `src/Inventario.cpp` |
+
+#### Por qué se hicieron
+
+**1. InventoryUI**
+El inventario antiguo usaba `std::cout`/`std::cin` directo con entrada de texto por nombre ("Escribe el nombre del objeto"), limpiaba toda la pantalla y no tenía ningún diseño visual. No seguía el patrón del sistema de combate (ScreenBuffer, navegación W/S, colores ANSI). El nuevo sistema:
+- Reutiliza `ScreenBuffer` (doble buffer 56x22, redibujado diferencial, ANSI)
+- Navegación por teclado (W/S items, A/D categorías, SPACE acción, Q salir)
+- Overlay: no limpia pantalla, dibuja sobre el frame actual y al salir se restaura
+- Muestra stats del jugador en todo momento (HP, MP, ATK, DEF, NIV, EXP, arma)
+- Scroll para inventarios grandes con indicadores visuales
+- Acciones contextuales según tipo de item (equipar arma, usar poción, ver info)
+
+**2-4. Integración**
+El viejo inventario en combate usaba `limpiarPantalla()` + `std::cout`, rompiendo el frame de batalla. El nuevo `InventoryUI` es un overlay: escribe sobre el buffer de combate y al salir se restaura con `forceRedraw()`. En el overworld, el flujo es igual: `limpiarPantalla()` + `renderMapa()` después de cerrar el inventario.
+
+**5. Constructor de Enemigo**
+`EnemyFactory` llamaba al constructor con `exp_base` pero la implementación no lo aceptaba, error de compilación.
+
+**6. Bugfixes del header**
+El constructor no inicializaba `renderer` (no tiene default constructor). Auto-asignación en `setPlayerInfo` ignoraba el parámetro `eqWeaName`.
+
+**7-8. UX de la lista**
+Categorías vacías ahora muestran feedback visual. Scroll indicators ya no se pisaban con los items.
+
+**9. Stats mezcladas**
+`getAtaque()` iba a `pExp` y `getExperiencia()` a `pAtk`, mostrando números en campos incorrectos.
+
+#### Layout del inventario
+
+```
+L0:  === LEYENDA DEL CAMPUS - INVENTARIO ===   (BYELLOW)
+L1:  ────────────────────────────────────────   (CYAN)
+L2:   [Armas] [Consumibles] [Clave]            (tabs, seleccionada en BYELLOW)
+L3:  ┌──────────────────┬────────────────────┐
+L4:  │ > Espada Leyenda  │  Daño: +20         │
+L5:  │   Daga Plateada   │  "Poderosa espada" │
+L6:  │   Bastón Arcano   │                     │
+L7:  │   Hacha de Guerra │  Equipada: Daga    │
+L8:  │   Espada Gallo    │  (+8)              │
+L9:  │                ▲ │                     │
+L10: │                ▼ │                     │
+L11: └──────────────────┴────────────────────┘
+L12: ┌─ HEROE ──────────────────────────────────┐
+L13: │ HP ▓▓▓▓▓▓▓▓▓░░ 30/40  MP ▓▓▓▓▓▓░░ 20/30│
+L14: │ ATK: 15  DEF: 10  NIV: 3                │
+L15: │ EXP: 150/300  ARMA: Daga (+8)           │
+L16: └───────────────────────────────────────────┘
+L17:
+L18:
+L19:
+L20:
+L21: [W/S] Navegar [A/D] Categoria [SPACE] OK [Q] Salir
+```
+
+#### Clases nuevas
+
+```
+InvRenderer — Renderiza cada sección del inventario sobre un ScreenBuffer
+  - drawBackground()         → título + separador
+  - drawCategoryTabs()       → pestañas Armas/Consumibles/Clave
+  - drawItemList()           → lista scrolleable con scroll indicators
+  - drawItemDetails()        → panel derecho con info del item seleccionado
+  - drawPlayerStats()        → panel inferior con HP, MP, ATK, DEF, NIV, EXP, arma
+  - drawFooter()             → controles en la última línea
+  - renderAll()              → compone todo y llama a buf.render()
+
+InventoryUI — Orquestador del inventario (máquina de estados)
+  - buildItemList(cat)       → filtra objetos del jugador por tipo
+  - processInput(key)        → maneja W/S/A/D/SPACE/Q según el estado
+  - doAction()               → equipa arma, usa poción, o muestra descripción
+  - render()                 → pasa datos del jugador al renderer y dibuja
+  - run()                    → bucle principal (render + input hasta CLOSED)
+```
+
+#### Estados del inventario
+
+```cpp
+enum class InvState {
+    BROWSING,        // navegando la lista de items
+    ITEM_ACTIONS,    // submenú de acciones (Usar/Equipar/Info)
+    CONFIRM_ACTION,  // confirmación "¿Usar X?"
+    CLOSED           // salir del inventario
+};
+```
+
+#### Controles del inventario
+
+| Tecla | Acción |
+|---|---|
+| **W/S** | Navegar items (circular, arriba/abajo) |
+| **A/D** | Cambiar categoría (Armas → Consumibles → Clave) |
+| **SPACE** | Ejecutar acción sobre item seleccionado |
+| **Q** | Cerrar inventario |
+
+#### Integración desde combate
+
+```cpp
+// En batalla.cpp, case 2 (Inventario):
+InventoryUI invUI(*player);
+invUI.run();
+screenBuffer.forceRedraw();  // restaurar frame de combate
+currentState = BattleState::PLAYER_TURN;
+```
+
+No se usa `suppressCout()` porque `InventoryUI` tiene su propio `ScreenBuffer` y escribe directamente a `std::cout` para los ANSI. Solo se silencia si la acción del item (ej. `usarPocion`) llamara a `std::cout`, pero en `doAction()` no hay suppress — los mensajes se capturan en `logMessage` y se muestran en el propio inventario.
+
+#### Integración desde overworld
+
+```cpp
+// En GameManager::mostrarInventario():
+InventoryUI invUI(jugador);
+invUI.run();
+limpiarPantalla();
+renderMapa();
+```
+
+Es necesario `std::cin.ignore()` antes de abrir el inventario porque `std::cin >>` en el loop OVERWORLD deja un `\n` residual.
+
 ### Log 15/06/2026 (sesión 3) — Sistema de guardado con caché
 
 #### Cambios realizados
@@ -13,6 +146,7 @@
 | 6 | **Guardado al salir con Q** — La tecla 'Q' en OVERWORLD ahora llama a `guardarPartida()` que persiste héroe + mapa antes de salir. | `src/GameManager.cpp` |
 | 7 | **Bugfix `esTransitable`** — Corregido `'p'` (minúscula) → `'P'` (mayúscula) para que el tile de spawn sea transitable. | `src/Mapa.cpp` |
 | 8 | **Variables sin uso removidas** — Eliminadas `saludMaxima` y `manaMaxima` en `CacheManager::cargarHeroe()` que se leían del JSON pero nunca se usaban. | `src/CacheManager.cpp` |
+| 9 | **Tile 'P' se elimina al moverse** — Al salir de la casilla de spawn 'P', se reemplaza por '.' y se persiste en caché, para que no quede visible en el mapa tras moverse. | `src/GameManager.cpp` |
 
 #### Por qué se hicieron
 
@@ -30,6 +164,9 @@ Antes no existía distinción entre "nueva partida" y "continuar". El juego siem
 
 **7. Bugfix**
 `esTransitable()` tenía `'p'` en minúscula pero el mapa usa `'P'` mayúscula para el spawn. Esto causaba que la casilla de inicio no fuera transitable después de moverse, aunque el bug no se manifestaba porque el jugador nunca necesitaba volver a pisar la 'P' original.
+
+**9. Tile 'P' se limpia al salir del spawn**
+Antes el tile 'P' permanecía visible en el mapa después de que el jugador se moviera, mostrando una 'P' huérfana en la posición inicial. Ahora `moverJugador()` captura la posición vieja antes de moverse y, si contenía 'P', la reemplaza por '.' y persiste el cambio en `cache/mapa_cache.txt`.
 
 #### Flujo de guardado actual
 
@@ -50,6 +187,7 @@ INICIO → Menú (Nueva Partida / Continuar / Salir)
           └─ "Salir" → return
 
 DURANTE EL JUEGO
+  ├─ Salir de spawn 'P' → mapa.setTile('.') → CacheManager::guardarMapa()
   ├─ Pisar tile 'B' (jefe) → batalla() → mapa.setTile('.') → CacheManager::guardarMapa()
   ├─ Pisar tile 'H' (poción) → usarPocion() → mapa.setTile('.') → CacheManager::guardarMapa()
   ├─ Combate aleatorio → batalla() → CacheManager::guardarHeroe()  (dentro de batalla)
