@@ -11,6 +11,7 @@
 #include "../lib/batalla.hpp"
 #include "../lib/DataManager.hpp"
 #include "../lib/CacheManager.hpp"
+#include "../lib/Inventario.hpp"
 
 // Limpia el buffer de entrada: descarta hasta encontrar \n
 void limpiarBuffer() {
@@ -252,7 +253,7 @@ void Renderer::drawEnemyHealthBar() {
 void Renderer::drawCombatMenu() {
     int menuX = 3;
     int menuY = 12;
-    int menuW = 22;
+    int menuW = 26;
     int menuH = 7;
 
     buf.drawBox(menuX, menuY, menuW, menuH, COL_CYAN);
@@ -424,38 +425,10 @@ void BattleSystem::doPlayerAction() {
             break;
 
         case 2: // Inventario: muestra estado e inventario, permite usar objetos por nombre
-            limpiarPantalla();
-            player->mostrarEstado();
-            std::cout << "\n--- Inventario ---\n";
-            {
-                auto& inv = player->getInventario();
-                if (inv.empty()) {
-                    std::cout << "(vacio)\n";
-                } else {
-                    for (const auto& par : inv) {
-                        std::cout << "- " << par.first << " x" << par.second << "\n";
-                    }
-                }
-            }
-            std::cout << "\nPociones: " << player->getPociones() << "\n";
-            std::cout << "\nEscribe el nombre del objeto a usar, o Enter para volver: ";
-            limpiarBuffer();
-            {
-                std::string nombreObj;
-                std::getline(std::cin, nombreObj);
-                if (!nombreObj.empty()) {
-                    auto it = player->getObjetosInventario().find(nombreObj);
-                    if (it != player->getObjetosInventario().end()) {
-                        player->usarPocion(it->second.get());
-                        player->eliminarObjeto(nombreObj);
-                    } else {
-                        std::cout << "No tienes \"" << nombreObj << "\" en tu inventario.\n";
-                    }
-                    std::cout << "Presiona Enter para continuar...";
-                    limpiarBuffer();
-                    std::cin.get();
-                }
-            }
+            suppressCout();
+            InventoryUI invUI(*player);
+            invUI.run();
+            restoreCout();
             screenBuffer.forceRedraw();
             currentState = BattleState::PLAYER_TURN;
             break;

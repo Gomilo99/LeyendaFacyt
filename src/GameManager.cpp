@@ -8,6 +8,7 @@
 #include "../lib/Batalla.hpp"
 #include "../lib/Config.hpp"
 #include "../lib/ArtLoader.hpp"
+#include "../lib/Inventario.hpp"
 
 /**
  * Constructor del motor del juego.
@@ -272,7 +273,12 @@ void GameManager::handleTile(char tile) {
 }
 
 void GameManager::mostrarInventario() {
-    jugador.mostrarInventario();
+    InventoryUI invUI(jugador);
+    invUI.run();
+    // Al salir, la pantalla tiene basura del inventario
+    // asi que limpias y re-renderizas el mapa
+    limpiarPantalla();
+    renderMapa();
 }
 
 /**

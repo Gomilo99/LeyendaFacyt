@@ -1,4 +1,4 @@
-#include "../lib/jugador.hpp"
+#include "../lib/Jugador.hpp"
 #include <iostream>
 #include <algorithm>
 
@@ -138,6 +138,14 @@ void Jugador::equiparArma(std::shared_ptr<Arma> nuevaArma, bool silencioso){
     ataque += nuevaArma->getDano();
     if (!silencioso)
         std::cout << "Has equipado el arma: " << nuevaArma->getNombre() << "\n";
+}
+
+std::vector<std::pair<std::string, std::shared_ptr<Objeto> >> Jugador::getItemsList() const {
+    std::vector<std::pair<std::string, std::shared_ptr<Objeto> >> items;
+    for (const auto &par : objetosInventario){
+        items.push_back(par);
+    }
+    return items;
 }
 
 void Jugador::obtenerExperiencia(int cantidad) {
