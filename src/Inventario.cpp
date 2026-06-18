@@ -264,6 +264,7 @@ void InventoryUI::processInput(char key) {
             state = InvState::BROWSING;
         }
         break;
+    default: break;
     }
 }
 void InventoryUI::doAction() {

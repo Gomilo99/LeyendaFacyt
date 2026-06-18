@@ -1,0 +1,22 @@
+{
+    "arma": "Espada Gallo",
+    "ataque": 32,
+    "defensa": 20,
+    "exp": 250,
+    "expMax": 300,
+    "inventario": [
+        {
+            "cant": 1,
+            "nombre": "Alka-Seltzer"
+        }
+    ],
+    "mana": 50,
+    "manaMaxima": 50,
+    "nivel": 2,
+    "nombre": "Yisu",
+    "pociones": 3,
+    "posX": 6,
+    "posY": 2,
+    "salud": 200,
+    "saludMaxima": 200
+}

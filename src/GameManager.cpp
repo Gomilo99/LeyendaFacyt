@@ -232,7 +232,13 @@ void GameManager::moverJugador(int dx, int dy) {
     int nuevoY = jugador.getPosY() + dy;
 
     if (mapa.esTransitable(nuevoX, nuevoY)){
+        int viejoX = jugador.getPosX();
+        int viejoY = jugador.getPosY();
         jugador.setPos(nuevoX, nuevoY);
+        if (mapa.getTile(viejoX, viejoY) == 'P'){
+            mapa.setTile(viejoX, viejoY, '.');
+            CacheManager::guardarMapa(mapa);
+        }
         char tile = mapa.getTile(nuevoX, nuevoY);
         handleTile(tile);
 
