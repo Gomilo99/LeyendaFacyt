@@ -1,5 +1,5 @@
 ## Log
-### Log 18/06/2026 (sesión 4) — Renovación total del inventario
+### Log 18/06/2026 — Renovación total del inventario
 
 #### Cambios realizados
 
@@ -131,6 +131,171 @@ renderMapa();
 ```
 
 Es necesario `std::cin.ignore()` antes de abrir el inventario porque `std::cin >>` en el loop OVERWORLD deja un `\n` residual.
+
+---
+
+### Explicación detallada de funciones y clases
+
+#### `InvRenderer` — Renderizador del inventario
+
+```
+InvRenderer(ScreenBuffer &buffer) : buf(buffer) {}
+```
+
+Recibe una referencia a un `ScreenBuffer` (el mismo que usa combate, pero `InventoryUI` crea el suyo propio independiente). Dibuja 7 secciones:
+
+| Función | Líneas | Contenido |
+|---|---|---|
+| `drawBackground()` | 0-1 | Título "=== LEYENDA DEL CAMPUS - INVENTARIO ===" en `COL_BYELLOW`, separador de guiones en `COL_CYAN` |
+| `drawCategoryTabs()` | 2 | Tres pestañas: `[Armas] [Consumibles] [Clave]`. La pestaña activa se pinta en `COL_BYELLOW`, las inactivas en `COL_CYAN`. Posición calculada dinámicamente según el ancho de cada string |
+| `drawItemList()` | 4-11 | Box de 26x9. Calcula `visibleStart` para scroll (si `selectedIndex` sale del rango visible, desplaza el inicio). Itera items visibles, pinta ` > nombre xN` para el seleccionado y `   nombre xN` para los no seleccionados. Trunca a `listW - 3 = 23` caracteres reemplazando con `..`. Draws scroll indicators `▲`/`▼` en la última columna de contenido (`listX + listW - 2`) **después** de los items para evitar solapamiento |
+| `drawItemDetails()` | 4-11 (panel derecho) | Box de 25x9. Mediante `dynamic_pointer_cast` detecta el tipo real del objeto: `Arma` → muestra "Daño: +X" en amarillo, `Pocion` → muestra "Cura: +X HP" en verde. Descripción con word-wrap manual (3 líneas de `detW - 4 = 21` caracteres cada una). Si `selectedIndex` está fuera de rango o la lista vacía, no hace nada (early return) |
+| `drawPlayerStats()` | 14-16 | Box de 52x5. Tres líneas: (1) Nombre + HP bar (10 chars, color según %: verde >50%, amarillo >25%, rojo) + numérico HP, MP bar (10 chars, azul) + numérico MP. (2) "ATK: X DEF: X NIV: X" en blanco. (3) "EXP: X/Y" en amarillo + "ARMA: nombre (+X)" en amarillo si hay arma equipada |
+| `drawFooter()` | 21 | "[W/S] Navegar [A/D] Categoria [SPACE] OK [Q] Salir" centrado en `COL_CYAN` |
+| `renderAll()` | — | `buf.clear()`, llama a las 6 funciones anteriores en orden, y finalmente `buf.render()` que vuelca a terminal con redibujado diferencial |
+
+#### `InventoryUI` — Orquestador del inventario
+
+```
+InventoryUI(Jugador &p) : player(&p), renderer(screenBuffer) {}
+```
+
+Crea su propio `ScreenBuffer` (independiente del de combate). `run()` es el bucle principal:
+
+```
+run()
+  ├─ hideCursor()
+  ├─ state = BROWSING, currentCategory = ARMAS, selectedIndex = 0
+  ├─ buildItemList(ARMAS) → carga items iniciales
+  ├─ while(state != CLOSED):
+  │     render()              → dibuja frame completo
+  │     cin.get(key)          → espera tecla
+  │     processInput(key)     → navega o ejecuta acción
+  └─ showCursor()
+```
+
+**`buildItemList(ItemCategory cat)`**:
+Recorre `jugador->getObjetosInventario()` (un `map<string, shared_ptr<Objeto>>`). Para cada par, compara `objeto->getTipo()` contra la categoría actual:
+- `"Arma"` → `ARMAS`
+- `"Pocion"` → `POCIONES`
+- `"Objeto Clave"` → `CLAVE`
+
+Si coincide, busca la cantidad en `jugador->getInventario()` (el `map<string, int>` paralelo) y construye un `ItemEntry{nombre, objeto, cantidad}`. Retorna `vector<ItemEntry>`.
+
+**`processInput(char key)`**:
+Máquina de estados interna:
+
+- **`BROWSING`**:
+  - `q/Q` → `state = CLOSED` **(se chequea antes que items.empty() para poder salir aunque no haya objetos)**
+  - `w/W` → navega hacia arriba (circular: si está en 0, va al último). Si `items` vacío, no hace nada
+  - `s/S` → navega hacia abajo (circular). Si items vacío, no hace nada
+  - `a/A` → `currentCategory = (currentCategory - 1 + 3) % 3`, reconstruye lista con `buildItemList()`, reset `selectedIndex = 0`
+  - `d/D` → `currentCategory = (currentCategory + 1) % 3`, igual que A
+  - `SPACE` → si `!items.empty()`, `state = ITEM_ACTIONS`
+- **`ITEM_ACTIONS`**:
+  - `SPACE` → `doAction()`, vuelve a `BROWSING`
+  - `q/Q/ESC` → vuelve a `BROWSING`
+- **`CONFIRM_ACTION`**: (reservado para futura confirmación de uso/descarte)
+- **`default`**: `break` (silencia warning de switch incompleto)
+
+**`doAction()`**:
+Obtiene `items[selectedIndex]` y usa `dynamic_pointer_cast` para determinar el tipo:
+- `Arma` → `jugador->equiparArma(arma)` (hereda de `Objeto` que no es polimórfico en el parámetro `equiparArma`, pero el método acepta `shared_ptr<Arma>` directamente). Setea `logMessage = "Has equipado: " + nombre`
+- `Pocion` → `jugador->usarPocion(pocion.get())` (pasa raw pointer obtenido con `.get()`) + `jugador->eliminarObjeto(nombre)` (decrementa cantidad, si llega a 0 borra la entrada del inventario). Reconstruye la lista visible con `buildItemList(currentCategory)` porque el inventario cambió
+- Otro (ObjClave, etc.) → `logMessage = obj->getDescripcion()`
+
+**`render()`**:
+Pasa los 12 campos del jugador al renderer:
+```
+setPlayerInfo(
+    salud, saludMax, mana, manaMax, nombre, nivel,
+    exp, expMax, ataque, defensa, armaNombre, armaDmg
+)
+```
+Luego `setLogMessage(logMessage)` y `renderer.renderAll()`.
+
+#### Integración con el sistema de combate
+
+**En `BattleSystem::doPlayerAction()`, case 2: Inventario**:
+
+```cpp
+InventoryUI invUI(*player);
+invUI.run();
+screenBuffer.forceRedraw();
+currentState = BattleState::PLAYER_TURN;
+```
+
+El flujo completo:
+
+```
+Combate (PLAYER_TURN)
+  → Jugador presiona SPACE en "Inventario" (opción 2)
+  → currentState = PLAYER_ACTION
+  → doPlayerAction() case 2:
+      1. Se crea InventoryUI con el *player actual
+      2. InventoryUI::run() toma control total de la terminal
+         - Oculta el cursor
+         - Bucle: renderiza frame del inventario → espera tecla → procesa
+         - El ScreenBuffer del inventario escribe sobre las mismas líneas
+           que ocupaba el frame de combate (líneas 0-21)
+         - El frame de combate NO se restaura durante el inventario
+         - Al presionar Q, state = CLOSED, sale del bucle
+      3. screenBuffer.forceRedraw() invalida el caché del buffer de combate
+      4. currentState = PLAYER_TURN (vuelve al bucle principal de combate)
+      5. En la siguiente iteración, BattleSystem::render() redibuja
+         el frame de combate completo (forceRedraw causó firstFrame=true)
+```
+
+**Por qué NO se usa `suppressCout()` aquí:**
+- `InventoryUI` usa su propio `ScreenBuffer` que escribe ANSI directamente a `std::cout` mediante `ScreenBuffer::render()`. Si `suppressCout()` estuviera activo, esos ANSI irían al `ostringstream` y el usuario **no vería el inventario** (vería el frame de combate congelado).
+- Dentro de `doAction()`, `jugador->usarPocion()` y `jugador->equiparArma()` tienen `std::cout` internos, pero como el inventario se renderiza inmediatamente después, esos mensajes se pierden en la terminal sin afectar el buffer. No causan desincronización porque el `ScreenBuffer` del inventario sobrescribe completamente las líneas relevantes en cada frame.
+
+**Diferencia con el inventario antiguo en combate:**
+- Antes: `limpiarPantalla()` + `jugador->mostrarEstado()` + `cout << "Inventario"` + `getline(cin, nombre)` → rompía el frame de combate por completo
+- Ahora: overlay en el mismo buffer → `forceRedraw()` restaura el frame → transición invisible
+
+#### Integración con el overworld
+
+**En `GameManager::mostrarInventario()`**:
+
+```cpp
+InventoryUI invUI(jugador);
+invUI.run();
+limpiarPantalla();
+renderMapa();
+```
+
+El flujo:
+
+```
+Overworld (loop de exploración)
+  → Jugador presiona 'I'
+  → GameManager::mostrarInventario():
+      1. Se crea InventoryUI con el jugador
+      2. InventoryUI::run() toma control
+         - Escribe sobre las líneas 0-21 usando su ScreenBuffer
+         - El mapa renderizado previamente con std::cout queda debajo
+           (el ScreenBuffer solo reescribe las líneas que cambian)
+      3. Al salir, se llama limpiarPantalla() + renderMapa()
+         porque el mapa no usa ScreenBuffer — es std::cout directo.
+         No hay un "frame anterior" que restaurar como en combate.
+```
+
+**Problema del `\n` residual:**
+- El loop OVERWORLD usa `std::cin >> input;` que consume un carácter pero deja el `\n` en el buffer
+- `InventoryUI::run()` usa `std::cin.get(key)` que lee un solo carácter
+- Si no se ignora el `\n` antes, el primer `cin.get()` del inventario se traga el `\n`, y el usuario tiene que presionar DOS teclas para la primera acción
+- Solución: `std::cin.ignore(numeric_limits<streamsize>::max(), '\n')` justo antes de abrir el inventario
+
+#### Diferencia clave: overlay en combate vs overworld
+
+| Aspecto | En combate | En overworld |
+|---|---|---|
+| Qué hay debajo | Frame de combate (ScreenBuffer 56x22) | Mapa renderizado con `std::cout` directo |
+| Cómo se restaura | `screenBuffer.forceRedraw()` → BattleSystem::render() redibuja todo | `limpiarPantalla()` + `renderMapa()` desde cero |
+| ScreenBuffer del inventario | Crea su propio buffer independiente, escribe sobre la terminal en las mismas coordenadas | Ídem |
+| Sin limpiar pantalla | Sí — es overlay real, el frame de combate se restaura sin borrar | No del todo — se requiere `limpiarPantalla()` al salir porque el mapa no tiene buffer propio |
+| Input fantasma | No hay `\n` residual (combate usa `cin.get()` consistentemente) | Sí, requiere `cin.ignore()` |
 
 ### Log 15/06/2026 (sesión 3) — Sistema de guardado con caché
 

@@ -69,7 +69,7 @@ void InvRenderer::drawItemList(){
 
 // Panel Derecho (26x9)
 void InvRenderer::drawItemDetails() {
-    int detX = 29, detY = 4, detW = 25, detH = 9;
+    int detX = 29, detY = 4, detW = 37, detH = 9;
     buf.drawBox(detX, detY, detW, detH, COL_CYAN);
 
     if (selectedIndex < 0 || selectedIndex >= (int)currentItems.size()) return;
@@ -218,7 +218,7 @@ void InventoryUI::processInput(char key) {
             state = InvState::CLOSED;
             break;
         }
-        
+
         // w/s navegan circular pero no pasa nada si items está vacío (0-1 = size_t wrap...)
         // Movimiento entre objetos
         if (key == 'w' || key == 'W') {
