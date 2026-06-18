@@ -24,8 +24,8 @@ public:
     virtual ~Personaje() {}
     virtual void atacar(Personaje* objetivo) = 0;
 
-    void recibirDano(int dano) {
-        int danoReal = (dano <= defensa) ? 0 : std::max(1, dano - defensa);
+    void recibirDano(int atk_atacante) {
+        int danoReal = atk_atacante - (this->defensa / 2);
         salud -= danoReal;
         std::cout << nombre << " recibe " << danoReal << " de dano!\n";
     }
@@ -37,7 +37,9 @@ public:
 
     bool estaVivo() const { return salud > 0; }
     std::string getNombre() const { return nombre; }
+    void setNombre(const std::string& nuevoNombre) { nombre = nuevoNombre; }
     int getSalud() const { return salud; }
+    int getSaludMaxima() const { return saludMaxima; }
     int getAtaque() const { return ataque; }
     int getDefensa() const { return defensa; }
     int getNivel() const { return nivel; }

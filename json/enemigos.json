@@ -1,253 +1,538 @@
 {
   "1": [
     {
+      "id": "goblin",
       "nombre": "Goblin",
-      "salud": 40,
+      "salud": 30,
       "ataque": 8,
-      "defensa": 3,
-      "loot1": "Pocion Milagrosa",
-      "prob1": 70,
-      "loot2": "Aire siniestro",
-      "prob2": 30
-    },
-    {
-      "nombre": "Orco",
-      "salud": 60,
-      "ataque": 12,
-      "defensa": 5,
-      "loot1": "Pocion Milagrosa",
-      "prob1": 60,
-      "loot2": "Sopladora",
-      "prob2": 40
-    },
-    {
-      "nombre": "Slime de Cafe Vencido",
-      "salud": 70,
-      "ataque": 10,
-      "defensa": 3,
-      "loot1": "Expreso",
-      "prob1": 80,
-      "loot2": "Expreso",
-      "prob2": 20
-    },
-    {
-      "nombre": "Murcielago Rascao",
-      "salud": 65,
-      "ataque": 9,
       "defensa": 2,
-      "loot1": "Alka-Seltzer",
-      "prob1": 75,
-      "loot2": "Alka-Seltzer",
-      "prob2": 25
+      "peso": 10,
+      "ascii": [
+        "     /\\",
+        "    /  \\",
+        "   | <> |",
+        "   | <> |",
+        "   /    \\",
+        "  /______\\"
+      ],
+      "botin": [
+        { "nombre": "Pocion Milagrosa", "prob": 70 },
+        { "nombre": "Aire siniestro", "prob": 30 }
+      ],
+      "boss": false,
+      "exp": 30
     },
     {
-      "nombre": "Zombie del Lunes",
-      "salud": 80,
+      "id": "orco",
+      "nombre": "Orco",
+      "salud": 45,
       "ataque": 12,
-      "defensa": 6,
-      "loot1": "Expreso",
-      "prob1": 65,
-      "loot2": "La Taza de Cafe Rancia",
-      "prob2": 35
+      "defensa": 4,
+      "peso": 7,
+      "ascii": [
+        "    /^^^\\",
+        "   | . . |",
+        "   |  _  |",
+        "   | / \\ |",
+        "   |/   \\|",
+        "  _/     \\_"
+      ],
+      "botin": [
+        { "nombre": "Pocion Milagrosa", "prob": 60 },
+        { "nombre": "Sopladora", "prob": 40 }
+      ],
+      "boss": false,
+      "exp": 40
+    },
+    {
+      "id": "slime_cafe",
+      "nombre": "Slime de Cafe Vencido",
+      "salud": 35,
+      "ataque": 7,
+      "defensa": 3,
+      "peso": 8,
+      "ascii": [
+        "     .-.",
+        "    (o o)",
+        "    | ~ |",
+        "    \\___/",
+        "   /     \\",
+        "  /       \\"
+      ],
+      "botin": [
+        { "nombre": "Expreso", "prob": 80 },
+        { "nombre": "Expreso", "prob": 20 }
+      ],
+      "boss": false,
+      "exp": 20
+    },
+    {
+      "id": "murcielago",
+      "nombre": "Murcielago Rascao",
+      "salud": 25,
+      "ataque": 10,
+      "defensa": 1,
+      "peso": 9,
+      "ascii": [
+        "     /\\",
+        "    /  \\",
+        "   | {} |",
+        "   | {} |",
+        "   /    \\",
+        "  /______\\"
+      ],
+      "botin": [
+        { "nombre": "Alka-Seltzer", "prob": 75 },
+        { "nombre": "Alka-Seltzer", "prob": 25 }
+      ],
+      "boss": false,
+      "exp": 25
+    },
+    {
+      "id": "zombie_lunes",
+      "nombre": "Zombie del Lunes",
+      "salud": 50,
+      "ataque": 12,
+      "defensa": 3,
+      "peso": 5,
+      "ascii": [
+        "     ___",
+        "    / . \\",
+        "   |  _  |",
+        "   | / \\ |",
+        "   |/   \\|",
+        "  _/     \\_"
+      ],
+      "botin": [
+        { "nombre": "Expreso", "prob": 65 },
+        { "nombre": "La Taza de Cafe Rancia", "prob": 35 }
+      ],
+      "boss": false,
+      "exp": 50
     }
   ],
-
   "2": [
     {
+      "id": "fantasma",
       "nombre": "Fantasma",
-      "salud": 85,
-      "ataque": 13,
-      "defensa": 4,
-      "loot1": "Expreso",
-      "prob1": 55,
-      "loot2": "El Llavero Perdido",
-      "prob2": 45
+      "salud": 50,
+      "ataque": 16,
+      "defensa": 3,
+      "peso": 8,
+      "ascii": [
+        "       .-.",
+        "      (o o)",
+        "      | O |",
+        "     /|___|\\",
+        "    / /   \\ \\",
+        "   / /     \\ \\"
+      ],
+      "botin": [
+        { "nombre": "Expreso", "prob": 55 },
+        { "nombre": "El Llavero Perdido", "prob": 45 }
+      ],
+      "boss": false,
+      "exp": 40
     },
     {
-      "nombre": "Fantasma del Visto",
-      "salud": 90,
-      "ataque": 15,
+      "id": "fantasma_remuerto",
+      "nombre": "Fantasma Re-Muerto",
+      "salud": 55,
+      "ataque": 14,
       "defensa": 4,
-      "loot1": "Pocion de Pensamiento Critico",
-      "prob1": 50,
-      "loot2": "El Telefono Sin Bateria",
-      "prob2": 50
+      "peso": 6,
+      "ascii": [
+        "       .-.",
+        "      (o o)",
+        "      | O |",
+        "     /|___|\\",
+        "    / /   \\ \\",
+        "   / /     \\ \\"
+      ],
+      "botin": [
+        { "nombre": "Pocion de Pensamiento Critico", "prob": 50 },
+        { "nombre": "El Telefono Sin Bateria", "prob": 50 }
+      ],
+      "boss": false,
+      "exp": 45
     },
     {
+      "id": "esqueleto",
       "nombre": "Esqueleto",
-      "salud": 95,
+      "salud": 55,
       "ataque": 14,
       "defensa": 5,
-      "loot1": "Expreso",
-      "prob1": 55,
-      "loot2": "El Reloj Detenido",
-      "prob2": 45
+      "peso": 7,
+      "ascii": [
+        "      .-.",
+        "     ( . )",
+        "      /|\\",
+        "     / | \\",
+        "       |",
+        "      / \\"
+      ],
+      "botin": [
+        { "nombre": "Expreso", "prob": 55 },
+        { "nombre": "El Reloj Detenido", "prob": 45 }
+      ],
+      "boss": false,
+      "exp": 45
     },
     {
+      "id": "carlos",
       "nombre": "Carlos",
       "salud": 100,
-      "ataque": 15,
-      "defensa": 5,
-      "loot1": "Pocion Milagrosa",
-      "prob1": 50,
-      "loot2": "Dildo",
-      "prob2": 50
-    },
-    {
-      "nombre": "Golem de Plastilina Seca",
-      "salud": 85,
-      "ataque": 14,
-      "defensa": 6,
-      "loot1": "Suavitel",
-      "prob1": 45,
-      "loot2": "El Rodillo de Amasar",
-      "prob2": 55
-    },
-    {
-      "nombre": "Golem de Facturas",
-      "salud": 90,
       "ataque": 10,
-      "defensa": 12,
-      "loot1": "Adblock",
-      "prob1": 35,
-      "loot2": "La Pluma de la Deuda",
-      "prob2": 65
+      "defensa": 3,
+      "peso": 5,
+      "ascii": [
+        "     /\\",
+        "    /  \\",
+        "   | {} |",
+        "   | {} |",
+        "   /    \\",
+        "  /______\\"
+      ],
+      "botin": [
+        { "nombre": "Pocion Milagrosa", "prob": 50 },
+        { "nombre": "Dildo", "prob": 50 }
+      ],
+      "boss": false,
+      "exp": 70
     },
     {
+      "id": "golem_plastilina",
+      "nombre": "Golem de Plastilina Seca",
+      "salud": 65,
+      "ataque": 12,
+      "defensa": 7,
+      "peso": 6,
+      "ascii": [
+        "      ___________",
+        "     /           \\",
+        "    |  O       O  |",
+        "    |      _      |",
+        "    |     |_|     |",
+        "    |___/    \\___|"
+      ],
+      "botin": [
+        { "nombre": "Suavitel", "prob": 45 },
+        { "nombre": "El Rodillo de Amasar", "prob": 55 }
+      ],
+      "boss": false,
+      "exp": 50
+    },
+    {
+      "id": "golem_facturas",
+      "nombre": "Golem de Facturas",
+      "salud": 65,
+      "ataque": 7,
+      "defensa": 12,
+      "peso": 5,
+      "ascii": [
+        "      ___________",
+        "     /           \\",
+        "    |  O       O  |",
+        "    |      _      |",
+        "    |     |_|     |",
+        "    |___/    \\___|"
+      ],
+      "botin": [
+        { "nombre": "Adblock", "prob": 35 },
+        { "nombre": "La Pluma de la Deuda", "prob": 65 }
+      ],
+      "boss": false,
+      "exp": 50
+    },
+    {
+      "id": "bruja",
       "nombre": "Bruja Joe Francisco",
       "salud": 100,
       "ataque": 20,
       "defensa": 5,
-      "loot1": "Pocion de Lagrimas Cachondas",
-      "prob1": 40,
-      "loot2": "La Cuchara de la Desesperación",
-      "prob2": 60
+      "peso": 4,
+      "ascii": [
+        "     ___",
+        "    / . \\",
+        "   |  _  |",
+        "   | / \\ |",
+        "   |/   \\|",
+        "  _/     \\_"
+      ],
+      "botin": [
+        { "nombre": "Pocion de Lagrimas Cachondas", "prob": 40 },
+        { "nombre": "La Cuchara de la Desesperaci\u00f3n", "prob": 60 }
+      ],
+      "boss": false,
+      "exp": 50
     },
     {
+      "id": "cajero",
       "nombre": "Cajero Automatico",
       "salud": 120,
       "ataque": 25,
       "defensa": 8,
-      "loot1": "Tarjeta de Credito Ilimitada",
-      "prob1": 30,
-      "loot2": "El Lector de Tarjetas",
-      "prob2": 70
+      "peso": 3,
+      "ascii": [
+        "  +-----------+",
+        "  | [__] [__] |",
+        "  |  _    _   |",
+        "  | |_|  |_|  |",
+        "  |    ___    |",
+        "  +-----------+"
+      ],
+      "botin": [
+        { "nombre": "Tarjeta de Credito Ilimitada", "prob": 30 },
+        { "nombre": "El Lector de Tarjetas", "prob": 70 }
+      ],
+      "boss": false,
+      "exp": 50
     },
     {
+      "id": "gargola_wifi",
       "nombre": "Gargola del Wi-Fi",
       "salud": 130,
       "ataque": 18,
       "defensa": 7,
-      "loot1": "Expreso",
-      "prob1": 45,
-      "loot2": "El Router Roto",
-      "prob2": 55
+      "peso": 5,
+      "ascii": [
+        "     /\\",
+        "    /  \\",
+        "   | ._.|",
+        "   |_/ \\_|",
+        "    |   |",
+        "   /     \\"
+      ],
+      "botin": [
+        { "nombre": "Expreso", "prob": 45 },
+        { "nombre": "El Router Roto", "prob": 55 }
+      ],
+      "boss": false,
+      "exp": 50
     },
     {
+      "id": "caballero_control",
       "nombre": "Caballero del Control Remoto",
       "salud": 135,
       "ataque": 19,
       "defensa": 9,
-      "loot1": "Expreso",
-      "prob1": 40,
-      "loot2": "La Espada del Zapping",
-      "prob2": 60
+      "peso": 4,
+      "ascii": [
+        "     /\\",
+        "    /  \\",
+        "   | ._.|",
+        "   |_/ \\_|",
+        "    |   |",
+        "   /     \\"
+      ],
+      "botin": [
+        { "nombre": "Expreso", "prob": 40 },
+        { "nombre": "La Espada del Zapping", "prob": 60 }
+      ],
+      "boss": false,
+      "exp": 50
     },
     {
+      "id": "caballero_basura",
       "nombre": "Caballero de la Basura",
       "salud": 140,
       "ataque": 17,
       "defensa": 9,
-      "loot1": "Suavitel",
-      "prob1": 40,
-      "loot2": "La Pala de Recogida",
-      "prob2": 60
+      "peso": 4,
+      "ascii": [
+        "     /\\",
+        "    /  \\",
+        "   | ._.|",
+        "   |_/ \\_|",
+        "    |   |",
+        "   /     \\"
+      ],
+      "botin": [
+        { "nombre": "Suavitel", "prob": 40 },
+        { "nombre": "La Pala de Recogida", "prob": 60 }
+      ],
+      "boss": false,
+      "exp": 50
     },
     {
+      "id": "caballero_cebolla",
       "nombre": "Caballero Cebolla",
       "salud": 150,
       "ataque": 20,
       "defensa": 10,
-      "loot1": "Pocion de Lagrimas Cachondas",
-      "prob1": 35,
-      "loot2": "Espada del Descongelamiento",
-      "prob2": 65
+      "peso": 3,
+      "ascii": [
+        "     /\\",
+        "    /  \\",
+        "   | ._.|",
+        "   |_/ \\_|",
+        "    |   |",
+        "   /     \\"
+      ],
+      "botin": [
+        { "nombre": "Pocion de Lagrimas Cachondas", "prob": 35 },
+        { "nombre": "Espada del Descongelamiento", "prob": 65 }
+      ],
+      "boss": false,
+      "exp": 70
     }
   ],
-
   "3": [
     {
+      "id": "dragon_pubico",
       "nombre": "Dragon Pubico",
       "salud": 160,
       "ataque": 22,
       "defensa": 11,
-      "loot1": "Suavitel",
-      "prob1": 35,
-      "loot2": "El Aspirador del Vacio",
-      "prob2": 65
+      "peso": 5,
+      "ascii": [
+        "     /\\/\\/\\/\\/\\/\\/\\/\\",
+        "    /     BOSS        \\",
+        "   /  /\\          /\\  \\",
+        "  /  /  \\        /  \\  \\",
+        " /  /    \\      /    \\  \\",
+        "/__/______\\____/______\\__\\"
+      ],
+      "botin": [
+        { "nombre": "Suavitel", "prob": 35 },
+        { "nombre": "El Aspirador del Vacio", "prob": 65 }
+      ],
+      "boss": false,
+      "exp": 80
     },
     {
+      "id": "golem_ropa",
       "nombre": "Golem de Ropa Sucia",
       "salud": 165,
       "ataque": 21,
       "defensa": 10,
-      "loot1": "Suavitel",
-      "prob1": 35,
-      "loot2": "La Lavadora de Almas",
-      "prob2": 65
+      "peso": 6,
+      "ascii": [
+        "      ___________",
+        "     /           \\",
+        "    |  O       O  |",
+        "    |      _      |",
+        "    |     |_|     |",
+        "    |___/    \\___|"
+      ],
+      "botin": [
+        { "nombre": "Suavitel", "prob": 35 },
+        { "nombre": "La Lavadora de Almas", "prob": 65 }
+      ],
+      "boss": false,
+      "exp": 70
     },
     {
+      "id": "ogro_procrastinador",
       "nombre": "Ogro Procrastinador",
       "salud": 170,
       "ataque": 24,
       "defensa": 13,
-      "loot1": "Adblock",
-      "prob1": 30,
-      "loot2": "El Mazo",
-      "prob2": 70
+      "peso": 5,
+      "ascii": [
+        "      ___________",
+        "     /           \\",
+        "    |  O       O  |",
+        "    |      _      |",
+        "    |     |_|     |",
+        "    |___/    \\___|"
+      ],
+      "botin": [
+        { "nombre": "Adblock", "prob": 30 },
+        { "nombre": "El Mazo", "prob": 70 }
+      ],
+      "boss": false,
+      "exp": 70
     },
     {
+      "id": "duende_cable",
       "nombre": "Duende Cable Pelao",
       "salud": 60,
       "ataque": 8,
       "defensa": 2,
-      "loot1": "Alka-Seltzer",
-      "prob1": 70,
-      "loot2": "Alka-Seltzer",
-      "prob2": 30
+      "peso": 8,
+      "ascii": [
+        "     /\\",
+        "    /  \\",
+        "   | <> |",
+        "   | <> |",
+        "   /    \\",
+        "  /______\\"
+      ],
+      "botin": [
+        { "nombre": "Alka-Seltzer", "prob": 70 },
+        { "nombre": "Alka-Seltzer", "prob": 30 }
+      ],
+      "boss": false,
+      "exp": 70
     },
     {
+      "id": "ciclope",
       "nombre": "Ciclope miope",
       "salud": 180,
       "ataque": 28,
       "defensa": 15,
-      "loot1": "Pocion de Pensamiento Critico",
-      "prob1": 30,
-      "loot2": "Ojo miope",
-      "prob2": 70
+      "peso": 4,
+      "ascii": [
+        "     ______",
+        "    | O   |",
+        "    |  _  |",
+        "    | | | |",
+        "    |_| |_|",
+        "     /   \\"
+      ],
+      "botin": [
+        { "nombre": "Pocion de Pensamiento Critico", "prob": 30 },
+        { "nombre": "Ojo miope", "prob": 70 }
+      ],
+      "boss": false,
+      "exp": 80
     },
     {
+      "id": "espectro_rojo",
       "nombre": "Espectro Rojo",
       "salud": 75,
       "ataque": 11,
       "defensa": 3,
-      "loot1": "Adblock",
-      "prob1": 45,
-      "loot2": "El Banner Ineludible",
-      "prob2": 55
+      "peso": 7,
+      "ascii": [
+        "       .-.",
+        "      (o o)",
+        "      | O |",
+        "     /|___|\\",
+        "    / /   \\ \\",
+        "   / /     \\ \\"
+      ],
+      "botin": [
+        { "nombre": "Adblock", "prob": 45 },
+        { "nombre": "El Banner Ineludible", "prob": 55 }
+      ],
+      "boss": false,
+      "exp": 60
     }
   ],
-
   "4": [
     {
+      "id": "admin_servidor",
       "nombre": "El Gran Administrador del Servidor Caido",
-      "salud": 500,
-      "ataque": 40,
-      "defensa": 25,
-      "loot1": "Pocion Cubana",
-      "prob1": 40,
-      "loot2": "La Espada del Codigo Fuente",
-      "prob2": 60
+      "salud": 200,
+      "ataque": 30,
+      "defensa": 12,
+      "peso": 10,
+      "ascii": [
+        "     /\\/\\/\\/\\/\\/\\/\\/\\",
+        "    /     BOSS        \\",
+        "   /  /\\          /\\  \\",
+        "  /  /  \\        /  \\  \\",
+        " /  /    \\      /    \\  \\",
+        "/__/______\\____/______\\__\\"
+      ],
+      "botin": [
+        { "nombre": "Pocion Cubana", "prob": 40 },
+        { "nombre": "La Espada del Codigo Fuente", "prob": 60 }
+      ],
+      "boss": true,
+      "exp": 200
     }
   ]
 }

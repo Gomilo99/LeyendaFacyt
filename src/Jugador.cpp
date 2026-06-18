@@ -1,13 +1,14 @@
-#include "../lib/jugador.hpp"
+#include "../lib/Jugador.hpp"
 #include <iostream>
 #include <algorithm>
-#include <limits>
 
 Jugador::Jugador(std::string nombre)
-    : Personaje(nombre, 100, 15, 10, 1), pociones(3), armaEquipada(nullptr), experiencia(0), posX(1), posY(1) {}
+    : Personaje(nombre, 100, 15, 10, 1), pociones(3), mana(50), manaMaxima(50),
+      armaEquipada(nullptr), experiencia(0), posX(1), posY(1) {}
 
 Jugador::Jugador(std::string nom, int hp, int atk, int def, int lvl, int poc)
-    : Personaje(nom, hp, atk, def, lvl), pociones(poc), armaEquipada(nullptr), experiencia(0) {}
+    : Personaje(nom, hp, atk, def, lvl), pociones(poc), mana(50 + lvl * 10), manaMaxima(50 + lvl * 10),
+      armaEquipada(nullptr), experiencia(0) {}
 
 void Jugador::atacar(Personaje* objetivo) {
     std::cout << nombre << " Atacas a " << objetivo->getNombre() << "!\n";
@@ -36,8 +37,21 @@ void Jugador::usarPocion(Objeto* pocion){
     }
 }
 
+void Jugador::usarMagia(Personaje* objetivo) {
+    int costo = 10;
+    if (mana >= costo) {
+        int danoMagico = ataque * 2 + nivel * 5;
+        mana -= costo;
+        std::cout << nombre << " lanza un hechizo a " << objetivo->getNombre() << "!\n";
+        objetivo->recibirDano(danoMagico);
+    } else {
+        std::cout << "No tienes suficiente mana!\n";
+    }
+}
+
 void Jugador::mostrarEstado() const {
     std::cout << "\n" << nombre << " - Salud: " << salud << "/" << saludMaxima
+              << " | Mana: " << mana << "/" << manaMaxima
               << " | Ataque: " << ataque << " | Defensa: " << defensa;
     if (armaEquipada) {
         std::cout << "\nArma equipada: " << armaEquipada->getNombre()
@@ -97,6 +111,12 @@ void Jugador::agregarObjeto(std::shared_ptr<Objeto> objeto){
     }
 }
 
+void Jugador::agregarObjetoSilencioso(std::shared_ptr<Objeto> objeto){
+    std::string nombre = objeto->getNombre();
+    inventario[nombre]++;
+    objetosInventario[nombre] = objeto;
+}
+
 void Jugador::eliminarObjeto(const std::string& nombre){
     auto it = inventario.find(nombre);
     if (it != inventario.end()) {
@@ -110,22 +130,22 @@ void Jugador::eliminarObjeto(const std::string& nombre){
     }
 }
 
-void Jugador::equiparArma(std::shared_ptr<Arma> nuevaArma){
+void Jugador::equiparArma(std::shared_ptr<Arma> nuevaArma, bool silencioso){
     if(armaEquipada){
         ataque -= armaEquipada->getDano();
     }
     armaEquipada = nuevaArma;
     ataque += nuevaArma->getDano();
-    std::cout << "Has equipado el arma: " << nuevaArma->getNombre() << "\n";
+    if (!silencioso)
+        std::cout << "Has equipado el arma: " << nuevaArma->getNombre() << "\n";
 }
 
-void Jugador::mostrarMenu(){
-    std::cout << "\n--- Turno del Jugador ---\n";
-    std::cout << "1. Atacar\n";
-    std::cout << "2. Usar pocion (" << pociones << " restantes)\n";
-    std::cout << "3. Ver inventario\n";
-    std::cout << "4. Ver estado\n";
-    std::cout << "Elige una opcion: ";
+std::vector<std::pair<std::string, std::shared_ptr<Objeto> >> Jugador::getItemsList() const {
+    std::vector<std::pair<std::string, std::shared_ptr<Objeto> >> items;
+    for (const auto &par : objetosInventario){
+        items.push_back(par);
+    }
+    return items;
 }
 
 void Jugador::obtenerExperiencia(int cantidad) {

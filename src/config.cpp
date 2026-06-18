@@ -1,4 +1,4 @@
-#include "../lib/config.hpp"
+#include "../lib/Config.hpp"
 
 const std::string Config::DATA_DIR = "json/";
 const std::string Config::MAPS_DIR = "mapas/";

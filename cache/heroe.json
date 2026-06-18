@@ -1,0 +1,26 @@
+{
+    "arma": "La Pluma de la Deuda",
+    "ataque": 57,
+    "defensa": 35,
+    "exp": 1400,
+    "expMax": 700,
+    "inventario": [
+        {
+            "cant": 1,
+            "nombre": "La Pluma de la Deuda"
+        },
+        {
+            "cant": 1,
+            "nombre": "Pocion Milagrosa"
+        }
+    ],
+    "mana": 50,
+    "manaMaxima": 50,
+    "nivel": 3,
+    "nombre": "Yisu",
+    "pociones": 3,
+    "posX": 6,
+    "posY": 4,
+    "salud": 350,
+    "saludMaxima": 350
+}
