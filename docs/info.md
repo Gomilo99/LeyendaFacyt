@@ -526,3 +526,105 @@ namespace CacheManager {
 #### Método especial: `Jugador::agregarObjetoSilencioso()`
 
 Agrega un objeto al inventario sin mostrar el prompt de equipar (necesario al cargar una partida desde caché, donde no hay interacción del usuario).
+
+## Capa de abstracción multiplataforma
+
+### Platform.hpp
+
+Header-only (`lib/Platform.hpp`) que abstrae diferencias entre Windows (Win32 Console API) y Linux/POSIX (termios, ioctl) para terminal, input y detección de tamaño:
+
+| Función | Windows | Linux |
+|---------|---------|-------|
+| `initTerminal()` | `SetConsoleMode(ENABLE_VT_PROCESSING)` + `SetConsoleOutputCP(CP_UTF8)` | `setlocale()` + raw mode termios |
+| `restoreTerminal()` | no-op | `tcsetattr()` restaurando estado original |
+| `getTerminalWidth()` | `GetConsoleScreenBufferInfo` | `ioctl(TIOCGWINSZ)` -> `getenv("COLUMNS")` -> 80 |
+| `getTerminalHeight()` | `GetConsoleScreenBufferInfo` | `ioctl(TIOCGWINSZ)` -> `getenv("LINES")` -> 24 |
+| `getKey()` | `_getch()` | `read()` con raw mode activo |
+| `echoOn()` | no-op | `tcsetattr(ECHO |= ...)` |
+| `echoOff()` | no-op | `tcsetattr(ECHO &= ~...)` |
+
+### Raw mode en Linux
+
+```cpp
+raw.c_lflag &= ~(ECHO | ICANON);
+raw.c_cc[VMIN] = 1;
+raw.c_cc[VTIME] = 0;
+```
+
+- ECHO off: las teclas no se muestran (el juego tiene su propia UI)
+- ICANON off: modo no-canónico — cada byte disponible inmediatamente
+- VMIN=1: read() retorna con 1 byte disponible
+- orig_termios guardado en initTerminal(), restaurado en restoreTerminal() via atexit
+
+### getKey() cross-platform
+
+```cpp
+// Windows: _getch() de conio.h, retorna inmediato, sin echo
+// Linux: read(STDIN_FILENO, &c, 1) con raw mode activo
+```
+
+Ambos retornan el código ASCII sin mostrar el carácter ni requerir Enter. El menú de combate (W/S/SPACE), overworld (WASD) e inventario (W/S/A/D/SPACE/Q) responden igual en ambos SO.
+
+### echoOn() / echoOff()
+
+En Linux con raw mode, ECHO está desactivado globalmente. Para entrada de texto con echo (nombre del jugador via std::getline), se restaura ECHO temporalmente:
+
+```cpp
+Platform::echoOn();
+std::getline(std::cin, nombreInput);
+Platform::echoOff();
+```
+
+En Windows es no-op porque std::getline maneja echo nativamente.
+
+### Makefile cross-platform
+
+```makefile
+ifeq ($(OS),Windows_NT)
+    TARGET := leyenda.exe
+    STATIC_LIBS := -static-libgcc -static-libstdc++ -static
+else
+    TARGET := leyenda
+    STATIC_LIBS := -static-libgcc -static-libstdc++
+endif
+```
+
+| Característica | Windows | Linux |
+|---|---|---|
+| Binario | `leyenda.exe` | `leyenda` (sin extensión) |
+| Static linking | `-static` (todo incluido) | solo runtime libraries |
+| Crear directorios | `if not exist "x" mkdir "x"` | `mkdir -p "x"` |
+| Copiar archivos | `copy /y` | `cp` |
+| Borrar directorios | `rmdir /s /q` | `rm -rf` |
+| Ejecutar | `leyenda.exe` | `./leyenda` |
+
+### Compilar en Linux
+
+```bash
+# Compilar
+make
+
+# Distribución (estático, optimizado)
+make dist
+
+# Ejecutar
+make run
+
+# Limpiar
+make clean
+```
+
+Requiere g++ con soporte C++17:
+```bash
+sudo apt install g++ make
+```
+
+### Dependencias finales
+
+```
+Platform.hpp  -> (standalone, solo includes del SO)
+main.cpp      -> GameManager.hpp, Platform.hpp
+Batalla.cpp   -> Platform.hpp, ..., Inventario.hpp
+GameManager.cpp -> ..., Platform.hpp
+Inventario.cpp -> ..., Platform.hpp
+```

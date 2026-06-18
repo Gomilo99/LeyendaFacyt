@@ -1,4 +1,123 @@
 ## Log
+### Log 18/06/2026 — Soporte multiplataforma (Linux + Windows)
+
+#### Cambios realizados
+
+| # | Cambio | Archivos afectados |
+|---|--------|--------------------|
+| 1 | **`Platform.hpp`** — Nueva capa de abstracción multiplataforma. Unifica init de terminal, raw mode, terminal size y single-key input. Windows: `SetConsoleMode`/`GetConsoleScreenBufferInfo`/`_getch()`. Linux: `termios` raw mode + `ioctl(TIOCGWINSZ)` + `read()`. | `lib/Platform.hpp` (nuevo) |
+| 2 | **`main.cpp`** simplificado — Eliminado `#include <windows.h>` y las llamadas directas a Win32 API. Ahora `Platform::initTerminal()` + `atexit(Platform::restoreTerminal)` maneja ambos SO. | `src/main.cpp` |
+| 3 | **Input cross-platform** — Reemplazados `std::cin.get(key)` en combate, `std::cin >> input` en overworld, y `std::cin.get(key)` en inventario por `Platform::getKey()`. En Windows usa `_getch()`, en Linux usa `read()` con raw mode. Ya no requiere Enter para las teclas de juego. | `src/Batalla.cpp`, `src/GameManager.cpp`, `src/Inventario.cpp` |
+| 4 | **Terminal size detect cross-platform** — `ScreenBuffer::getTerminalWidth/Height()` ya no usa directamente `GetConsoleScreenBufferInfo`, delega a `Platform::getTerminalWidth/Height()`. | `src/Batalla.cpp` |
+| 5 | **`echoOn()`/`echoOff()`** — Para entrada de texto con echo (nombre del jugador al iniciar partida). En Windows no-op (std::getline maneja echo nativamente), en Linux togglea ECHO flag del termios. | `lib/Platform.hpp`, `src/GameManager.cpp` |
+| 6 | **Makefile cross-platform** — Detección automática con `ifeq ($(OS),Windows_NT)`. Windows: `leyenda.exe`, `copy`, `rmdir`. Linux: `leyenda` (sin extensión), `cp`, `rm -rf`. Static linking condicional (`-static` solo en Windows). | `Makefile` |
+| 7 | **`limpiarBuffer()`** eliminado donde no era necesario — Los `cin.ignore()`/`limpiarBuffer()` previos a `cin.get()` ya no aplican porque `Platform::getKey()` no tiene buffer residual. | `src/Batalla.cpp`, `src/GameManager.cpp` |
+| 8 | **`.gitignore`** — Agregado `obj-dist/` para excluir artefactos de `make dist`. | `.gitignore` |
+
+#### Por qué se hicieron
+
+**1-5. Abstracción multiplataforma**
+El juego original solo funcionaba en Windows con MinGW. Dependía de `windows.h` para activar ANSI (VT processing), detectar tamaño de terminal y leer teclas. En Linux:
+- ANSI funciona nativamente (no requiere `SetConsoleMode`)
+- El tamaño de terminal se obtiene con `ioctl(TIOCGWINSZ)` (no `GetConsoleScreenBufferInfo`)
+- El input single-key requiere raw mode con `termios` (ICANON off, ECHO off)
+- `std::cin.get()` en Linux en modo cooked requiere Enter, lo que hace imposible el juego en tiempo real
+
+`Platform.hpp` centraliza todas estas diferencias detrás de funciones inline simples. El resto del código ya no necesita `#ifdef _WIN32` desperdigados.
+
+**3. Raw mode en Linux**
+`Platform::initTerminal()` en Linux desactiva ICANON y ECHO con `tcsetattr()`. Esto hace que `read()` (usado por `Platform::getKey()`) retorne inmediatamente al presionar una tecla, sin esperar Enter. El juego responde en tiempo real como en Windows con `_getch()`.
+
+**5. echoOn/echoOff para entrada de nombre**
+Con ECHO off globalmente, `std::getline()` para el nombre del jugador no mostraría lo que escribe. `echoOn()` restaura ECHO temporalmente para esa entrada, y `echoOff()` lo vuelve a desactivar después.
+
+**6. Makefile unificado**
+El Makefile ahora detecta automáticamente el SO. En Linux:
+- El binario se llama `leyenda` (sin `.exe`)
+- Usa `mkdir -p`, `cp`, `rm -f` (comandos POSIX estándar)
+- No usa `-static` (los SO modernos manejan dependencias con el package manager)
+- El target `dist` copia archivos con `cp`
+
+#### Detalle técnico: Mecanismo de raw mode en Linux
+
+```cpp
+struct termios raw;
+tcgetattr(STDIN_FILENO, &orig_termios);  // guardar estado original
+raw = orig_termios;
+raw.c_lflag &= ~(ECHO | ICANON);         // sin echo, sin buffering de línea
+raw.c_cc[VMIN] = 1;                      // read() retorna con 1 byte
+raw.c_cc[VTIME] = 0;                     // sin timeout
+tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw); // aplicar
+```
+
+- `ECHO`: evita que lo que se escribe aparezca en pantalla (el juego ya dibuja su propia UI)
+- `ICANON`: modo no-canónico (cada byte está disponible inmediatamente, no se espera a \n)
+- `VMIN=1`: la llamada `read()` retorna tan pronto como haya al menos 1 byte disponible
+- `restoreTerminal()` se llama con `atexit()` para garantizar que la terminal vuelva a su estado normal incluso si el juego crashea
+
+#### Detalle técnico: getKey() cross-platform
+
+```cpp
+// Windows
+return char(_getch());      // conio.h, no requiere Enter, sin echo
+
+// Linux
+char c;
+read(STDIN_FILENO, &c, 1);  // raw mode activo, retorna inmediatamente
+return c;
+```
+
+Ambos retornan el código ASCII de la tecla presionada sin mostrar el carácter en pantalla y sin requerir Enter. El menú de combate con W/S/SPACE y el overworld con WASD responden igual en ambos SO.
+
+#### Detalle técnico: Terminal size en Linux
+
+```cpp
+struct winsize w;
+if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) == 0 && w.ws_col > 0)
+    return w.ws_col;
+// Fallback a variable de entorno COLUMNS
+// Fallback final a 80
+```
+
+`ioctl(TIOCGWINSZ)` consulta el tamaño real de la ventana de terminal. Si falla (redirección, SSH sin PTY, etc.), cae a la variable de entorno `COLUMNS`/`LINES`. Si tampoco existe, retorna 80x24 como valor seguro.
+
+#### Compilar en Linux
+
+```bash
+# Compilar
+make
+
+# Compilar distribución (estático, optimizado)
+make dist
+
+# Ejecutar
+make run
+
+# Limpiar
+make clean
+```
+
+Requiere `g++` con soporte C++17. En distribuciones basadas en Debian:
+```bash
+sudo apt install g++ make
+```
+
+#### Testing en Windows
+
+El juego se compila y prueba en Windows con MinGW (MSYS2). `make all` produce `leyenda.exe` con dependencias dinámicas (necesita DLLs de MinGW). `make dist` produce un ejecutable estático en `.dist/` que solo requiere `KERNEL32.dll` y `msvcrt.dll`.
+
+#### Archivos modified
+
+| Archivo | Cambio |
+|---------|--------|
+| `lib/Platform.hpp` | Nuevo — 112 líneas, header-only |
+| `src/main.cpp` | 17→12 líneas, usa Platform en vez de Win32 directo |
+| `src/Batalla.cpp` | Terminal size via Platform, input via getKey, quitados limpiarBuffer |
+| `src/GameManager.cpp` | Input via getKey, echo on/off para nombre, quitado cin.ignore |
+| `src/Inventario.cpp` | Input loop usa getKey en vez de cin.get |
+| `Makefile` | Detección de SO, comandos separados, run con ./ |
+| `.gitignore` | +obj-dist/ |
+
 ### Log 18/06/2026 — Renovación total del inventario
 
 #### Cambios realizados
