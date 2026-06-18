@@ -27,19 +27,17 @@ void InvRenderer::drawCategoryTabs(){
 }
 
 void InvRenderer::drawItemList(){
-    // Dibujar recuadro de objetos
     int listX = 2, listY = 4, listW = 26, listH = 9;
     buf.drawBox(listX, listY, listW, listH, COL_CYAN);
 
     int visibleStart = 0;
-    int visibleCount = listH - 2; // 7 items visibles
+    int visibleCount = listH - 2;
     if (selectedIndex >= visibleStart + visibleCount)
         visibleStart = selectedIndex - visibleCount + 1;
 
+    // 1. Dibujar items primero
     for (int i = 0; i < visibleCount && i < (int)currentItems.size(); i++){
         int idx = visibleStart + i;
-        //if (idx >= (int)currentItems.size()) break;
-        // Se aplica lógica inversa
         if (idx < (int)currentItems.size()){
             bool selected = (idx == selectedIndex);
             int color = selected ? COL_BYELLOW : COL_CYAN;
@@ -47,7 +45,6 @@ void InvRenderer::drawItemList(){
             std::string line = prefix + currentItems[idx].nombre;
             if (currentItems[idx].cantidad > 1) line += " x" + std::to_string(currentItems[idx].cantidad);
 
-            // Truncar si es muy larga
             int maxW = listW - 3;
             // Se elimina maxW -2 porque el ultimo caracter debe ser el de borde y se añade uno nuevo al final
             if ((int)line.size() > maxW) line = line.substr(0, maxW - 2) + ".."; 
@@ -56,11 +53,12 @@ void InvRenderer::drawItemList(){
         }
     }
 
-    // Indicaciones de scroll
+    // 2. Scroll indicators DESPUES, en el margen derecho (última columna de contenido)
+    int arrowX = listX + listW - 2;  // última columna antes del borde |
     if (visibleStart > 0)
-        buf.drawString(listX + 1, listY + 1, "▲", COL_CYAN);
+        buf.drawString(arrowX, listY + 1, "▲", COL_CYAN);
     if (visibleStart + visibleCount < (int)currentItems.size())
-        buf.drawString(listX + 1, listY + listH - 2, "▼", COL_CYAN);
+        buf.drawString(arrowX, listY + listH - 2, "▼", COL_CYAN);
 }
 
 // Panel Derecho (26x9)
@@ -121,7 +119,7 @@ void InvRenderer::drawPlayerStats(){
     // Línea 2: ATK, DEF, NIV
     std::string statsLine = "ATK: " + std::to_string(playerAtk) 
                             + " DEF: " + std::to_string(playerDef)
-                            + "NIV: " + std::to_string(playerLevel);
+                            + " NIV: " + std::to_string(playerLevel);
     buf.drawString(statX + 2, statY + 2, statsLine, COL_WHITE);
 
     // Línea 3: EXP + ARMA
@@ -162,8 +160,8 @@ void InventoryUI::render(){
         player->getSalud(), player->getSaludMaxima(),
         player->getMana(), player->getManaMaxima(),
         player->getNombre(), player->getNivel(),
-        player->getAtaque(), player->getDefensa(),
         player->getExperiencia(), player->getExperienciaNecesaria(),
+        player->getAtaque(), player->getDefensa(),
         player->getArmaNombre(), player->getArmaDano()
     );
     renderer.setLogMessage(logMessage);
@@ -210,6 +208,8 @@ void InventoryUI::processInput(char key) {
 
     switch (state) {
     case InvState::BROWSING:
+        if (items.empty()) break; // no hace nada si no hay items
+        
         if (key == 'w' || key == 'W') {
             if (selectedIndex > 0) selectedIndex--;
             else selectedIndex = items.size() - 1; // circular
