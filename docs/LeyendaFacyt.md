@@ -13,8 +13,9 @@ base:
 fecha_inicio: 2026-06-19
 fecha_fin_prevista: Finales 2026
 progreso: 50%
+titulo: Leyenda Facyt
 ---
-# [[LeyendaFacyt_backup]]
+# `=this.titulo`
 
 ## Descripción
 Es un videojuego basado en terminal hecho en c++ que nació como prueba personal para entender la programación orientada a objetos y mejorar mis habilidades de programación. Es un juego de rol donde controlas a un personaje que debe enfrentar a diversos enemigos en un mapa con vista de pájaro (top-down) mientras subes de nivel y obtienes objetos.
