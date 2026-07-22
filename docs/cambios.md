@@ -1,3 +1,7 @@
+---
+creado: 18/06/2026
+modificado: 22/07/2026
+---
 ## Log
 ### Log 18/06/2026 — Soporte multiplataforma (Linux + Windows)
 
@@ -253,9 +257,9 @@ Es necesario `std::cin.ignore()` antes de abrir el inventario porque `std::cin >
 
 ---
 
-### Explicación detallada de funciones y clases
+#### Explicación detallada de funciones y clases
 
-#### `InvRenderer` — Renderizador del inventario
+##### `InvRenderer` — Renderizador del inventario
 
 ```
 InvRenderer(ScreenBuffer &buffer) : buf(buffer) {}
@@ -273,7 +277,7 @@ Recibe una referencia a un `ScreenBuffer` (el mismo que usa combate, pero `Inven
 | `drawFooter()` | 21 | "[W/S] Navegar [A/D] Categoria [SPACE] OK [Q] Salir" centrado en `COL_CYAN` |
 | `renderAll()` | — | `buf.clear()`, llama a las 6 funciones anteriores en orden, y finalmente `buf.render()` que vuelca a terminal con redibujado diferencial |
 
-#### `InventoryUI` — Orquestador del inventario
+##### `InventoryUI` — Orquestador del inventario
 
 ```
 InventoryUI(Jugador &p) : player(&p), renderer(screenBuffer) {}
@@ -333,7 +337,7 @@ setPlayerInfo(
 ```
 Luego `setLogMessage(logMessage)` y `renderer.renderAll()`.
 
-#### Integración con el sistema de combate
+##### Integración con el sistema de combate
 
 **En `BattleSystem::doPlayerAction()`, case 2: Inventario**:
 
@@ -373,7 +377,7 @@ Combate (PLAYER_TURN)
 - Antes: `limpiarPantalla()` + `jugador->mostrarEstado()` + `cout << "Inventario"` + `getline(cin, nombre)` → rompía el frame de combate por completo
 - Ahora: overlay en el mismo buffer → `forceRedraw()` restaura el frame → transición invisible
 
-#### Integración con el overworld
+##### Integración con el overworld
 
 **En `GameManager::mostrarInventario()`**:
 
@@ -406,7 +410,7 @@ Overworld (loop de exploración)
 - Si no se ignora el `\n` antes, el primer `cin.get()` del inventario se traga el `\n`, y el usuario tiene que presionar DOS teclas para la primera acción
 - Solución: `std::cin.ignore(numeric_limits<streamsize>::max(), '\n')` justo antes de abrir el inventario
 
-#### Diferencia clave: overlay en combate vs overworld
+##### Diferencia clave: overlay en combate vs overworld
 
 | Aspecto | En combate | En overworld |
 |---|---|---|

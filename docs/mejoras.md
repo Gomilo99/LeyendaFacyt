@@ -1,3 +1,7 @@
+---
+creado: 18/06/2026
+modificado: 22/07/2026
+---
 
 ## Mejoras
 Estado actual del proyecto:
@@ -355,8 +359,6 @@ Mapa 2D ──▶ Integrar combate ──▶ Vista 1ra persona ──▶ Defende
     └──▶ Armadura ──▶ Victoria/multi-nivel ──▶ Pulido
 ```
 Cada fase produce un juego jugable desde el primer momento. No necesitas terminar todo para probar.
-
-
 ### Mejora a implementar
 - Teclear un objeto con espacios para usar en el inventario no funciona. (ej: "pluma no se que").
 - Testear progreso niveles
