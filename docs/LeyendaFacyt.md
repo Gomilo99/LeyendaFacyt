@@ -41,19 +41,41 @@ En este momento este proyecto sirve como medio para entender el desarrollo de vi
 El problema más grande de este proyecto, al igual que el de Unity es convivir con las tareas de la universidad y, en este semestre (5to) con las tareas incesantes de Sistemas Operativos. Adicionalmente, otro factor de riesgo es el abandono producto de plazos laxos y largas esperas entre sesiones de desarrollo.
 
 ## Objetivos
+### Fase A 40% - Renovación total de sistemas
 - [x] Objetivo 25% - Creación y funcionamiento general del videojuego  [completion:: 2026-06-19]
 - [x] Objetivo 40% - Renovación y creación de sistemas responsive y sistemas más funcionales.  [completion:: 2026-06-19]
-- [ ] Objetivo 50% - Establecimiento de diseño de niveles, rutas de progreso, progresión y balanceo de niveles y construcción del mundo.
-	- [ ] Transición entre niveles funcional (nivel 1 -> nivel 2 al derrotar jefe)
-	- [ ] 3+ mapas con diseños distintos y temáticas
-	- [ ] Encuentros aleatorios ajustados por terreno (el código ya tiene `EncounterManager` con 4 terrenos, pero nunca se llama `setTerreno()` desde `GameManager`).
-	- [ ] Curva de dificultad ascendente escalable (jugar nivel 1->2->3 sin morir es posible pero desafiante).
-	- [ ] Magic numbers reemplazados por `constexpr`
-- [ ] Objetivo 75% - Integración de animaciones (CLI) como movimientos de pantalla, efectos de sonido, música y el establecimiento de una historia. Establecimiento de Subjefes y jefe final.
-- [ ] Objetivo 85% - Posible mejora en historia, creación de npc con tienda interactiva, mensajes predeterminados y puzzles.
-- [ ] Objetivo 95% - Revisión total de gameplay, historia, responsive de la ui y sistemas y sobre todo la mejora de las rutas de juego: más diversión. Corrección de errores y playtesting.
-- [ ] Objetivo 100% - Creación de arte para portada y publicación.
-
+### Fase B 50% - Completar con lo Básico 
+- [ ] Transición entre niveles (nivel 1-> 2 -> 3 -> jefe final).
+- [ ] 3+ mapas con diseños distintos y temáticas.
+- [ ] Configuración terreno por mapa en `EncounterManager`, encuentros aleatorios ajustados por terreno.
+- [ ] Reemplazar magic numbers por ``constexpr`` (revisar que significa e implica este cambio)
+- [ ] Balancear curva de dificultad entre niveles, escalable.
+### Fase C - Refactor (deuda técnica)
+- [ ] Extraer UI de `Jugador` (eliminar cout/cin de las clases de modelo)
+- [ ] Limpiar `DataManager:cargarHeroe()`/`guardarHeroe()` (ya reemplazado por CacheManager)
+### Fase D 75% - Features nuevas
+- [ ] Acción Defender en combate
+- [ ] Armadura como equipable
+- [ ] Subjefes y jefe final con lore
+- [ ] Historia básica (texto entre niveles)
+### Fase E 85% - Polish 1
+- [ ] NPC tienda (usa el sistema de inventario existente).
+- [ ] Letra a letra en encuentros con jefes.
+- [ ] Colores por rareza de objetos.
+- [ ] Playtesting general.
+- [ ] Mejora en historia, mensajes predeterminados
+- [ ] Puzzles
+### Fase F 95% - Polish 2
+- [ ] Playtesting y balance final.
+- [ ] Corrección de bugs
+- [ ] Ajuste de historia, UI, Sistemas y rutas de diseño.
+### Fase G 100% - Publicación
+- [ ] Arte de portada
+- [ ] README completo con screenshots
+- [ ] Trailer
+### Features Extras
+- [ ] Integración de animaciones (CLI) como movimientos de pantalla.
+- [ ] Efectos de sonido y música.
 **Fecha prevista de entrega**: Finales de 2026
 ## Tareas
 - [ ] Continuidad entre niveles - nivel2.txt existe pero **el juego siempre carga nivel 1**. No hay transición.
