@@ -1,3 +1,16 @@
+---
+creado: 22/07/2026
+modificado: 22/07/2026
+tipo: Avance
+tags: # deuda-tecnica, idea-loca, bug-critico, bug, refactor
+titulo: Gemini
+proyecto: "[[LeyendaFacyt]]"
+area: Referencia
+estado: Completado
+prioridad: 3
+dificultad: Muy Baja
+version: 1.0.0
+---
 promt:
 ```text
 Quiero crear un videojuego en c++ rpg por turnos. Necesito que me diseñes todos los sistemas y el programa principal para empezar a programar. El juego debe tener una interfaz de ASCII, todo debe ser vía cli. vista en primera persona estilo dungeon crawler. Movimiento por mapas que se carguen desde archivos. El bucle es el siguiente: el jugador se mueve por el mapa y se encuentra con un enemigo, cambia a una escena con la vista del enemigo, su vida y las acciones de combate; el combate es por turnos donde cada entidad puede atacar, defenderse o usar habilidades mágicas; una vez el enemigo muere suelta un loot que va al inventario del jugador donde, si es un arma o una armadura el jugado puede equiparsela, si es un objeto como una poción puede tomarse la para recuperar vida. El juego termina cuando se consigue un objeto especial (una llave mágica) para ganar o se pierde todos los puntos de vida. 

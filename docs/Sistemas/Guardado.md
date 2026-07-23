@@ -1,4 +1,17 @@
-# Sistema de Guardado y Formatos de Datos #sistema/guardado
+---
+creado: 22/07/2026
+modificado: 22/07/2026
+tipo: Avance
+tags: # deuda-tecnica, idea-loca, bug-critico, bug, refactor
+titulo: Guardado y Formatos de Datos
+proyecto: "[[LeyendaFacyt]]"
+area: Sistemas
+estado: En progreso
+prioridad: 2
+dificultad: Alta
+version: 1.0.0
+---
+# Sistema de Guardado y Formatos de Datos
 
 > Archivos: `lib/CacheManager.hpp`, `src/cacheManager.cpp`, `lib/DataManager.hpp`, `src/DataManager.cpp`, `lib/config.hpp`, `src/config.cpp`
 

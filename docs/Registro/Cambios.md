@@ -1,10 +1,22 @@
 ---
-creado: 18/06/2026
-modificado: 22/07/2026
+creado: 22/07/2026
+modificado: 23/07/2026
+tipo: Avance
+tags: # deuda-tecnica, idea-loca, bug-critico, bug, refactor
+titulo: Cambios
+proyecto: "[[LeyendaFacyt]]"
+area: Registro
+estado: En progreso
+prioridad: 0
+dificultad: Media
+version: 1.0.0
 ---
 ## Log
-### Log 18/06/2026 — Soporte multiplataforma (Linux + Windows)
+### Log 23/07/2026 - Eliminación de Magic numbers
+#### Cambios realizados
+Se sustituyo las variables con números mágicos, ahora todo se centraliza en constantes de ![[Balance#Constantes de Balanceo]]
 
+### Log 18/06/2026 — Soporte multiplataforma (Linux + Windows)
 #### Cambios realizados
 
 | # | Cambio | Archivos afectados |

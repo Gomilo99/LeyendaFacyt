@@ -1,4 +1,17 @@
-# Backlog #plan/backlog
+---
+creado: 22/07/2026
+modificado: 22/07/2026
+tipo: Avance
+tags: # deuda-tecnica, idea-loca, bug-critico, bug, refactor
+titulo: Bakcklog
+proyecto: "[[LeyendaFacyt]]"
+area: Planificacion
+estado: En progreso
+prioridad: 0
+dificultad: Media
+version: 1.0.0
+---
+# Backlog
 
 Ideas y mejoras futuras. No están planificadas para un sprint específico. Cuando se planifiquen, mover a [[Sprint]].
 

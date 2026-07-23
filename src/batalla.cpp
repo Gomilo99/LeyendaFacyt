@@ -10,6 +10,7 @@
 #include "../lib/DataManager.hpp"
 #include "../lib/CacheManager.hpp"
 #include "../lib/Inventario.hpp"
+#include "../lib/GameBalance.hpp"
 
 // Limpia el buffer de entrada: descarta hasta encontrar \n
 void limpiarBuffer() {
@@ -384,8 +385,8 @@ void BattleSystem::doPlayerAction() {
             break;
 
         case 1: // Magia: requiere 10 MP minimo
-            if (player->getMana() < 10) {
-                setLog("No tienes suficiente mana! (10 MP)");
+            if (player->getMana() < COSTO_MAGIA) {
+                setLog("No tienes suficiente mana! (" + std::to_string(COSTO_MAGIA) + "MP)");
                 render();
                 std::this_thread::sleep_for(std::chrono::milliseconds(800));
                 currentState = BattleState::PLAYER_TURN;
@@ -561,7 +562,7 @@ void batalla(Jugador& jugador, Enemigo& enemigo) {
     }
 
     // Otorgar experiencia
-    int exp = enemigo.getExpBase() * (enemigo.getNivel() * 10);
+    int exp = enemigo.getExpBase() * (enemigo.getNivel() * (XP_POR_BATALLA / 5));
     jugador.obtenerExperiencia(exp);
 
     // Calcular loot segun probabilidades del enemigo (recorre el vector botin)

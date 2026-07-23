@@ -1,4 +1,17 @@
-# Sistema de Enemigos, Factoría y Encuentros #sistema/enemigos
+---
+creado: 22/07/2026
+modificado: 22/07/2026
+tipo: Avance
+tags: # deuda-tecnica, idea-loca, bug-critico, bug, refactor
+titulo: Enemigos, Factoria y Encuentros
+proyecto: "[[LeyendaFacyt]]"
+area: Sistemas
+estado: En progreso
+prioridad: 2
+dificultad: Media
+version: 1.0.0
+---
+# Sistema de Enemigos, Factoría y Encuentros
 
 > Archivos: `lib/Enemigo.hpp`, `src/Enemigo.cpp`, `lib/EnemyFactory.hpp`, `src/EnemyFactory.cpp`, `lib/EncounterManager.hpp`, `src/EncounterManager.cpp`
 

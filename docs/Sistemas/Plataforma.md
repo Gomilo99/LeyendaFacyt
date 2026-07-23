@@ -1,4 +1,17 @@
-# Capa de Abstracción Multiplataforma #sistema/plataforma
+---
+creado: 22/07/2026
+modificado: 22/07/2026
+tipo: Avance
+tags: # deuda-tecnica, idea-loca, bug-critico, bug, refactor
+titulo: Capa de Abstraccion Multiplataforma
+proyecto: "[[LeyendaFacyt]]"
+area: Sistemas
+estado: En progreso
+prioridad: 2
+dificultad: Media
+version: 1.0.0
+---
+# Capa de Abstracción Multiplataforma
 
 > Archivos: `lib/Platform.hpp` (header-only), `Makefile`
 

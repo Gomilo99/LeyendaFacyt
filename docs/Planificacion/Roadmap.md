@@ -1,4 +1,17 @@
-# Roadmap #plan/roadmap
+---
+creado: 22/07/2026
+modificado: 22/07/2026
+tipo: Avance
+tags: # deuda-tecnica, idea-loca, bug-critico, bug, refactor
+titulo: Roadmap
+proyecto: "[[LeyendaFacyt]]"
+area: Planificacion
+estado: En progreso
+prioridad: 0
+dificultad: Media
+version: 1.0.0
+---
+# Roadmap
 
 Visión general del progreso del proyecto. Cada objetivo tiene tareas concretas con Tags de Tasks plugin.
 

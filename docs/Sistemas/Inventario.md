@@ -1,4 +1,17 @@
-# Sistema de Inventario #sistema/inventario
+---
+creado: 22/07/2026
+modificado: 22/07/2026
+tipo: Avance
+tags: # deuda-tecnica, idea-loca, bug-critico, bug, refactor
+titulo: Inventario
+proyecto: "[[LeyendaFacyt]]"
+area: Sistemas
+estado: En progreso
+prioridad: 2
+dificultad: Muy Alta
+version: 1.0.0
+---
+# Sistema de Inventario
 
 > Archivos: `lib/Inventario.hpp`, `src/Inventario.cpp`
 

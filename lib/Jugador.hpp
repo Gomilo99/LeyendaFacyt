@@ -2,6 +2,7 @@
 #define JUGADOR_HPP
 
 #include "Personaje.hpp"
+#include "GameBalance.hpp"
 #include "Objeto.hpp"
 #include <map>
 #include <memory>
@@ -16,7 +17,7 @@ private:
     std::map<std::string, std::shared_ptr<Objeto>> objetosInventario;
     std::shared_ptr<Arma> armaEquipada;
     int experiencia;
-    int expNecesaria = 100;
+    int expNecesaria = EXP_UMBRAL_BASE;
     bool haGanado = false;
     int posX, posY;
 public:

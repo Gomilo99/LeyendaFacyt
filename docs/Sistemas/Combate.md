@@ -1,5 +1,21 @@
-# Sistema de Combate #sistema/combate
-
+---
+creado: 22/07/2026
+modificado: 23/07/2026
+tipo: Avance
+tags:
+titulo: Combate
+proyecto: "[[LeyendaFacyt]]"
+area: Sistemas
+estado: Completo
+prioridad: 1
+dificultad: Alta
+version: 1.0.0
+---
+## Links
+- Documento Gestor - [[LeyendaFacyt]]
+- Sistema de Mapa - [[Mapa]]
+- Sistema de Combate - [[Combate]]
+# Sistema de Combate 
 > Archivos: `lib/Batalla.hpp`, `src/batalla.cpp`
 
 El combate es por turnos con interfaz gráfica ASCII en tiempo real. Usa un `ScreenBuffer` de doble capa con redibujado diferencial y colores ANSI.
@@ -72,13 +88,14 @@ PLAYER_TURN → PLAYER_ACTION → ENEMY_TURN → PLAYER_TURN (loop)
 ```
 
 ## Acciones en combate
+Variables constantes iniciales BASE para los cálculos (entendiendo que podrían variar en un futuro dentro de la propia partida) [[Balance#Constantes de Balanceo]]
 
-| Opción | Descripción |
-|--------|-------------|
-| **Atacar** | Ataque físico: `jugador.atacar(enemigo)` usando ataque base + daño del arma equipada |
-| **Magia** | Hechizo que cuesta 10 MP. Daño = `ataque * 2 + nivel * 5`. Requiere mínimo 10 MP |
+| Opción             | Descripción                                                                          |
+| ------------------ | ------------------------------------------------------------------------------------ |
+| **Atacar**         | Ataque físico: `jugador.atacar(enemigo)` usando ataque base + daño del arma equipada |
+| **Magia**          | Hechizo que cuesta 10 MP. Daño = `ataque * 2 + nivel * 5`. Requiere mínimo 10 MP     |
 | **[[Inventario]]** | Abre `InventoryUI` con navegación W/S/A/D/SPACE/Q. Overlay sobre el frame de combate |
-| **Huir** | 50% de probabilidad de éxito. Si falla, el enemigo ataca |
+| **Huir**           | 50% de probabilidad de éxito. Si falla, el enemigo ataca                             |
 
 ## Estadísticas del jugador
 
@@ -93,7 +110,11 @@ PLAYER_TURN → PLAYER_ACTION → ENEMY_TURN → PLAYER_TURN (loop)
 
 - Por batalla ganada: XP = `nivel * 50`
 - Al alcanzar la XP necesaria: sube de nivel
-- Al subir: HP_max += 50*(nivel+1), HP se restaura al máximo, ataque += 5*(nivel+1), defensa += 5*(nivel+1), XP_necesaria += 200
+- Al subir: 
+	- HP_max += SALUD_POR_NIVEL * (nivel+1) -> HP se restaura al máximo, 
+	- ataque += ATAQUE_POR_NIVEL * (nivel+1), 
+	- defensa += DEFENSA_POR_NIVEL * (nivel+1), 
+	- XP_necesaria += EXP_INCREMENTO
 - Caso especial: en nivel 3, XP_necesaria se fija en 700
 
 > **Deuda técnica**: Estos valores son magic numbers hardcodeados. Ver [[Registro/Decisiones#Magic Numbers]] para el plan de reemplazo por `constexpr`.
@@ -147,5 +168,5 @@ Ver [[Enemigos#Formato JSON]] para el formato del botín.
 
 ```
 Batalla.hpp → Enemigo.hpp, Jugador.hpp, CacheManager.hpp
-batalla.cpp → ... Inventario.hpp, Platform.hpp, DataManager.hpp
+batalla.cpp → ... Inventario.hpp, Platform.hpp, DataManager.hpp, GameBalance.hpp
 ```

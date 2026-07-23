@@ -1,4 +1,17 @@
-# Decisiones de Diseño #registro/decisión
+---
+creado: 22/07/2026
+modificado: 22/07/2026
+tipo: Avance
+tags: # deuda-tecnica, idea-loca, bug-critico, bug, refactor
+titulo: Desiciones
+proyecto: "[[LeyendaFacyt]]"
+area: Registro
+estado: En progreso
+prioridad: 0
+dificultad: Media
+version: 1.0.0
+---
+# Decisiones de Diseño
 
 Registro de decisiones de diseño tomadas durante el desarrollo. Cada entrada documenta **qué** se decidió, **por qué**, y **qué alternativas** se consideraron.
 

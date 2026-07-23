@@ -1,4 +1,17 @@
-# Sprint Actual #plan/sprint
+---
+creado: 22/07/2026
+modificado: 22/07/2026
+tipo: Avance
+tags: # deuda-tecnica, idea-loca, bug-critico, bug, refactor
+titulo: Sprint
+proyecto: "[[LeyendaFacyt]]"
+area: Planificacion
+estado: En progreso
+prioridad: 0
+dificultad: Media
+version: 1.0.0
+---
+# Sprint Actual
 
 Trabajo planificado para el sprint actual. Al terminar una tarea, marcar como `[x]` y agregar entrada en [[Cambios]].
 

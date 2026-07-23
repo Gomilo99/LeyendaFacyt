@@ -1,4 +1,20 @@
-# Sistema de Mapa y FSM del Juego #sistema/mapa
+---
+creado: 22/07/2026
+modificado: 22/07/2026
+proyecto: "[[LeyendaFacyt]]"
+area: Sistemas
+estado: En Progreso
+prioridad: 2
+tags:
+tipo: Avance
+titulo: Mapa y FSM 
+version: 1.0.0 # La version inicial es 0.1
+dificultad: Media # Muy Baja, Baja, Media, Alta, Muy Alto
+---
+## Links
+- Documento Gestor - [[LeyendaFacyt]]
+- Sistema de Mapa - [[Mapa]]
+# Sistema de Mapa y FSM del Juego
 
 > Archivos: `lib/Mapa.hpp`, `src/Mapa.cpp`, `lib/GameManager.hpp`, `src/GameManager.cpp`
 
@@ -86,7 +102,7 @@ OVERWORLD
   │                     │               ├─ victoria → mapa.setTile('.') → [[Guardado|guardarMapa()]]
   │                     │               └─ derrota  → GAME_OVER
   │                     ├─ tile 'K' ──→ haGanado = true
-  │                     ├─ tile 'H' ──→ usar poción → tile → '.' → [[Guardado|guardarMapa()]]
+  │                     ├─ tile 'H' ──→ usar poción → tile → '.' → 
   │                     └─ tile '.' ──→ [[Enemigos|EncounterManager::checkEncounter()]]
   │                                       │
   │                                       ├─ true  → crearEnemigo(nivel) → [[Combate|batalla()]]

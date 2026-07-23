@@ -3,6 +3,8 @@ alias:
 tags:
   - gamedev
   - JRPG
+  - unity
+  - estudio
 creado: 20/06/2026
 modificado: 22/07/2026
 estado: En progreso
@@ -11,9 +13,10 @@ base:
   - "[[02-Proyectos]]"
   - "[[A-GameDev]]"
 fecha_inicio: 2026-06-19
-fecha_fin_prevista: Finales 2026
+fecha_fin_prevista: 2026-11-20
 progreso: 50%
 titulo: Leyenda Facyt
+version: 1.1a
 ---
 # `=this.titulo`
 ## Descripción
@@ -56,17 +59,32 @@ El problema más grande de este proyecto, al igual que el de Unity es convivir c
 
 ### Sistemas implementados
 
-| Sistema | Estado | Doc |
-|---------|--------|-----|
-| [[Sistemas/Combate]] por turnos con ScreenBuffer | ✅ Completo | [[Sistemas/Combate]] |
-| [[Sistemas/Inventario]] con UI tipo overlay | ✅ Completo | [[Sistemas/Inventario]] |
-| [[Sistemas/Enemigos]] con factory y encuentros | ✅ Completo | [[Sistemas/Enemigos]] |
-| [[Sistemas/Mapa]] 2D top-down + FSM | ✅ 1 nivel | [[Sistemas/Mapa]] |
-| [[Sistemas/Guardado]] con caché | ✅ Completo | [[Sistemas/Guardado]] |
-| [[Sistemas/Plataforma]] multiplataforma | ✅ Completo | [[Sistemas/Plataforma]] |
-
+| Sistema                                          | Estado     | Doc                     |
+| ------------------------------------------------ | ---------- | ----------------------- |
+| [[Sistemas/Combate]] por turnos con ScreenBuffer | ✅ Completo | [[Sistemas/Combate]]    |
+| [[Sistemas/Inventario]] con UI tipo overlay      | ✅ Completo | [[Sistemas/Inventario]] |
+| [[Sistemas/Enemigos]] con factory y encuentros   | ✅ Completo | [[Sistemas/Enemigos]]   |
+| [[Sistemas/Mapa]] 2D top-down + FSM              | ✅ 1 nivel  | [[Sistemas/Mapa]]       |
+| [[Sistemas/Guardado]] con caché                  | ✅ Completo | [[Sistemas/Guardado]]   |
+| [[Sistemas/Plataforma]] multiplataforma          | ✅ Completo | [[Sistemas/Plataforma]] |
+#### 🕒 Actividad Reciente
+```dataview
+LIST 
+FROM "02-Proyectos/LeyendaFacyt"
+WHERE proyecto = [[LeyendaFacyt]]
+SORT file.mday desc
+LIMIT 5
+```
 ---
 ## Navegación del vault
+```dataview
+TABLE without id link(file.link, titulo) as "Título", 
+	"**" + area + "**" as "Área", estado AS "Estado", prioridad AS "Prioridad",
+	tag AS "Tags"
+FROM "02-Proyectos/LeyendaFacyt"
+WHERE proyecto = [[LeyendaFacyt]]
+SORT area ASC, prioridad ASC
+```
 ### Sistemas (documentación técnica)
 - [[Sistemas/Combate]] — ScreenBuffer, BattleSystem, acciones, stats, nivelación
 - [[Sistemas/Inventario]] — InvRenderer, InventoryUI, layout, categorías
@@ -102,7 +120,13 @@ sort by priority
 ```
 
 ---
+## Tareas
 
+- [ ] Continuidad entre niveles - nivel2.txt existe pero **el juego siempre carga nivel 1**. No hay transición.
+- [ ] Acción Defender - Declarada en el roadmap pero nunca implementada.
+- [ ] Armadura equipable - Solo hay slot de arma.
+- [ ] Terreno configurable - EncounterManager tiene 4 terrenos pero GameManager nunca llama setTerreno().
+---
 ## Objetivos
 
 ### Fase A 40% - Renovación total de sistemas
@@ -151,14 +175,6 @@ sort by priority
 **Fecha prevista de entrega**: Finales de 2026
 
 ---
-## Tareas
-
-- [ ] Continuidad entre niveles - nivel2.txt existe pero **el juego siempre carga nivel 1**. No hay transición.
-- [ ] Acción Defender - Declarada en el roadmap pero nunca implementada.
-- [ ] Armadura equipable - Solo hay slot de arma.
-- [ ] Terreno configurable - EncounterManager tiene 4 terrenos pero GameManager nunca llama setTerreno().
-
----
 ## Próximos Pasos
 - Principalmente, empieza por establecer rutas de progreso divertidas, alineadas a un balanceo total con posible recorte de los enemigos y objetos. 
 - A esto se le puse sumar la creación y conexión de nuevos niveles, delimitación de zonas para la generación de enemigos y posible escalado adicional de niveles y dificultad de enemigos. 
@@ -186,17 +202,47 @@ sort by priority
 
 ### Tags
 
-| Tag | Uso |
-|-----|-----|
-| `#sistema/combate` | Sistema de combate |
-| `#sistema/inventario` | Sistema de inventario |
-| `#sistema/enemigos` | Sistema de enemigos |
-| `#sistema/mapa` | Sistema de mapa y FSM |
-| `#sistema/guardado` | Sistema de guardado |
-| `#sistema/plataforma` | Capa multiplataforma |
-| `#registro/cambio` | Log de cambios |
-| `#registro/decisión` | Decisión de diseño |
-| `#plan/roadmap` | Elemento del roadmap |
-| `#plan/sprint` | Tarea del sprint actual |
-| `#plan/backlog` | Idea o mejora futura |
-| `#deuda-tecnica` | Deuda técnica conocida |
+| Tag                   | Uso                                      |
+| --------------------- | ---------------------------------------- |
+| `#sistema/combate`    | Sistema de combate                       |
+| `#sistema/inventario` | Sistema de inventario                    |
+| `#sistema/enemigos`   | Sistema de enemigos                      |
+| `#sistema/mapa`       | Sistema de mapa y FSM                    |
+| `#sistema/guardado`   | Sistema de guardado                      |
+| `#sistema/plataforma` | Capa multiplataforma                     |
+| `#registro/cambio`    | Log de cambios                           |
+| `#registro/decisión`  | Decisión de diseño                       |
+| `#plan/roadmap`       | Elemento del roadmap                     |
+| `#plan/sprint`        | Tarea del sprint actual                  |
+| `#plan/backlog`       | Idea o mejora futura                     |
+| `#deuda-tecnica`      | Deuda técnica conocida                   |
+| `#facyt/bug`          | Algo que rompe el juego                  |
+| `#facyt/refactor`     | Código que funciona pero es feo          |
+| `#idea`               | Idea nueva sin desarrollar para el juego |
+### Gestión de Prioridades
+#### 🔴 Prioridad 1: Bloqueadores y Núcleo (MVP - Producto Mínimo Viable)
+
+**Criterio:** Si este archivo/sistema no funciona o no está definido, el juego **no se puede jugar** o el desarrollo está detenido.
+
+- **Sistemas Críticos:** El `GameManager`, la lógica de colisiones, el sistema de turnos básico.
+- **Bugs Fatales:** Errores de memoria (segmentation faults) o fallos en el `ScreenBuffer`.
+- **Documentación:** La [Arquitectura](obsidian://open?file=02-Proyectos%2FLeyendaFacyt%2FArquitectura.md) entra aquí, porque si no sabes cómo se conectan las clases, escribirás código que luego tendrás que borrar.
+- _Ejemplo actual:_ Implementar la transición de niveles (estás al 50%, sin esto no hay juego completo).
+
+#### 🟡 Prioridad 2: Funcionalidad y Estabilidad (Experiencia de Juego)
+
+**Criterio:** El juego funciona, pero le falta "carne" o el código es difícil de mantener (deuda técnica).
+
+- **Sistemas de Soporte:** El sistema de [Inventario](obsidian://open?file=02-Proyectos%2FLeyendaFacyt%2FSistemas%2FInventario.md), el balanceo de enemigos, nuevos tipos de objetos.
+- **Refactorización Importante:** Extraer la UI de la clase `Jugador` (lo tienes en tu lista de tareas). No impide jugar, pero te hará la vida imposible después si no lo haces.
+- **Contenido Base:** Crear los mapas de los niveles 2 y 3.
+- _Ejemplo actual:_ Reemplazar los _magic numbers_ por `constexpr`.
+
+#### 🔵 Prioridad 3: Pulido y Estética (Polish)
+
+**Criterio:** Cosas que hacen que el juego se vea "profesional" o sea más divertido, pero que no afectan la lógica subyacente.
+
+- **Visuales:** Mejorar el arte ASCII de los enemigos, efectos de "letra a letra" en los textos.
+- **Lore/Historia:** Escribir los diálogos de los NPCs o la historia de fondo.
+- **Features Extra:** El sistema de "Puzzles" o colores por rareza de objetos.
+- _Ejemplo actual:_ El sistema de sonidos (si llegaras a implementarlo) o mensajes de ambiente.

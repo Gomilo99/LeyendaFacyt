@@ -1,14 +1,17 @@
 #include "../lib/Jugador.hpp"
+#include "../lib/GameBalance.hpp"
 #include <iostream>
 #include <algorithm>
 
 Jugador::Jugador(std::string nombre)
-    : Personaje(nombre, 100, 15, 10, 1), pociones(3), mana(50), manaMaxima(50),
-      armaEquipada(nullptr), experiencia(0), posX(1), posY(1) {}
+    : Personaje(nombre, STAT_BASE_SALUD, STAT_BASE_ATAQUE, STAT_BASE_DEFENSA, 1), 
+    pociones(STAT_BASE_POCIONES), mana(STAT_BASE_MANA), manaMaxima(STAT_BASE_MANA),
+    armaEquipada(nullptr), experiencia(0), posX(1), posY(1) {}
 
 Jugador::Jugador(std::string nom, int hp, int atk, int def, int lvl, int poc)
-    : Personaje(nom, hp, atk, def, lvl), pociones(poc), mana(50 + lvl * 10), manaMaxima(50 + lvl * 10),
-      armaEquipada(nullptr), experiencia(0) {}
+    : Personaje(nom, hp, atk, def, lvl), pociones(poc), 
+    mana(STAT_BASE_MANA + lvl * 10), manaMaxima(STAT_BASE_MANA + lvl * 10),
+    armaEquipada(nullptr), experiencia(0) {}
 
 void Jugador::atacar(Personaje* objetivo) {
     std::cout << nombre << " Atacas a " << objetivo->getNombre() << "!\n";
@@ -17,7 +20,7 @@ void Jugador::atacar(Personaje* objetivo) {
 
 void Jugador::usarPocion() {
     if(pociones > 0){
-        int curacion = 30;
+        int curacion = POCION_CURACION_DEFAULT;
         salud = std::min(salud + curacion, saludMaxima);
         pociones--;
         std::cout << "Usas una pocion. Salud recuperdad: +" << curacion << std::endl;
@@ -38,10 +41,9 @@ void Jugador::usarPocion(Objeto* pocion){
 }
 
 void Jugador::usarMagia(Personaje* objetivo) {
-    int costo = 10;
-    if (mana >= costo) {
-        int danoMagico = ataque * 2 + nivel * 5;
-        mana -= costo;
+    if (mana >= COSTO_MAGIA) {
+        int danoMagico = ataque * MULT_DANO_MAGICO + nivel * BONUS_DANO_NIVEL;
+        mana -= COSTO_MAGIA;
         std::cout << nombre << " lanza un hechizo a " << objetivo->getNombre() << "!\n";
         objetivo->recibirDano(danoMagico);
     } else {
@@ -154,13 +156,13 @@ void Jugador::obtenerExperiencia(int cantidad) {
 
     if(experiencia >= expNecesaria){
         std::cout << "Has subido de nivel!\n";
-        saludMaxima += 50 * (nivel + 1);
+        saludMaxima += SALUD_POR_NIVEL * (nivel + 1);
         salud = saludMaxima;
-        defensa += 5 * (nivel + 1);
-        ataque += 5 * (nivel + 1);
+        ataque += ATAQUE_POR_NIVEL * (nivel + 1);
+        defensa += DEFENSA_POR_NIVEL * (nivel + 1);
         nivel++;
-        expNecesaria += 200;
-        if(nivel == 3) expNecesaria = 700;
+        expNecesaria += EXP_INCREMENTO;
+        if(nivel == 3) expNecesaria = EXP_NIVEL_3;
 
         std::cout << "Subida de Estadisticas!!\n";
         std::cout << "Nivel: " << nivel << " | Salud: " << salud << "/" << saludMaxima

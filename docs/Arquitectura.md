@@ -1,3 +1,16 @@
+---
+creado: 22/07/2026
+modificado: 22/07/2026
+tipo: Avance
+tags: # deuda-tecnica, idea-loca, bug-critico, bug, refactor
+titulo: Arquitectura del Sistema
+proyecto: "[[LeyendaFacyt]]"
+area: Base
+estado: En progreso
+prioridad: 2
+dificultad: Media
+version: 1.0.0
+---
 # Arquitectura del Sistema
 
 Visión general de la arquitectura técnica de [[LeyendaFacyt]]. Para detalles de cada sistema, ver la documentación específica en [[Sistemas/Combate|Sistemas]].
