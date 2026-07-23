@@ -12,10 +12,16 @@ dificultad: Media
 version: 1.0.0
 ---
 ## Log
-### Log 23/07/2026 - Eliminación de Magic numbers
+### Log 23/07/2026 - Corrección de Deudas técnicas
 #### Cambios realizados
+##### Eliminación de Magic numbers
 Se sustituyo las variables con números mágicos, ahora todo se centraliza en constantes de ![[Balance#Constantes de Balanceo]]
+##### Configuración de Terrenos
+Ya se encuentra la configuración de terrenos diferentes por el GameManager. 
+Falta implementar el cambio multinivel.
+>Cuando se implemente transición entre niveles, hay que llamar `encounterMgr.resetear()` y `encounterMgr.setTerreno(nuevoTerreno)` al cargar un nuevo mapa.
 
+##### Eliminación DataManager Legacy
 ### Log 18/06/2026 — Soporte multiplataforma (Linux + Windows)
 #### Cambios realizados
 

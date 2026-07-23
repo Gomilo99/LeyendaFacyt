@@ -105,6 +105,10 @@ void GameManager::inicializarNuevaPartida() {
         return;
     }
 
+    // === Configuracion de terreno segun el nivel ===
+    encounterMgr.setTerreno(EncounterManager::Terreno::LLANURA);
+
+    // Carga de personaje y spawn
     jugador = Jugador("Heroe");
     jugador.setPos(spawnX, spawnY);
 
@@ -138,7 +142,15 @@ bool GameManager::cargarPartidaExistente() {
         return false;
     }
 
+    // === Configuracion del terreno en función del nivel cargado ===
+    // Por ahora se carga el nivel 1 siempre. Cuando haya multi-nivel 
+    // se guardara el nivel en CacheManager y se usará aquí
+    encounterMgr.setTerreno(EncounterManager::Terreno::LLANURA);
+
+    //  === Carga de jugador ===
     jugador = CacheManager::cargarHeroe(objetos);
+
+    // === Carga del mundo ===
     state = GameState::OVERWORLD;
     return true;
 }
