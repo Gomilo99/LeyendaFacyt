@@ -283,8 +283,15 @@ void GameManager::handleTile(char tile) {
         }
     }
     if (tile == 'K'){
-        std::cout << "Has encontrado la llave magica!\n";
-        jugador.setHaGanado(true);
+        int siguienteNivel = jugador.getNivelActual() + 1;
+        if(siguienteNivel > 3){ // 3 niveles totales
+            std::cout << "Has completado todos los niveles!\n";
+            jugador.setHaGanado(true);
+        }else{
+            std::cout << "Has encontrado la llave del nivel " << siguienteNivel << "!\n";
+            jugador.setNivelActual(siguienteNivel);
+            cargarNivel(siguienteNivel);
+        }
     }
     if (tile == 'H'){
         jugador.usarPocion();
@@ -328,6 +335,38 @@ void GameManager::iniciarCombateJefe() {
         std::cin.get();
         iniciarCombate();
     }
+}
+
+void GameManager::cargarNivel(int nivel){
+    std::string path = Config::mapaPath(nivel);
+    if(!mapa.cargar(path)){
+        std::cerr << "No se pudo cargar el nivel " << nivel << "\n";
+        return;
+    }
+
+    // Configurar terreno segun el nivel
+    switch(nivel){
+        case 1: encounterMgr.setTerreno(EncounterManager::Terreno::LLANURA); break;
+        case 2: encounterMgr.setTerreno(EncounterManager::Terreno::MAZMORRA); break;
+        case 3: encounterMgr.setTerreno(EncounterManager::Terreno::BOSQUE); break;
+        case 4: encounterMgr.setTerreno(EncounterManager::Terreno::CAMINO); break;
+    }
+    encounterMgr.resetear();
+
+    // Buscar spawn point del nuevo mapa
+    // Cuando encuentra el 'P' reeemplaza ese valor por '.' y pasa esa posición al jugador.
+    for (int y = 0; y < mapa.getAlto(); y++){
+        for (int x = 0; x < mapa.getAncho(); x++){
+            if(mapa.getTile(x, y) == 'P'){
+                jugador.setPos(x, y);
+                mapa.setTile(x, y, '.');
+                break;
+            }
+        }
+    }
+
+    CacheManager::guardarMapa(mapa);
+    CacheManager::guardarHeroe(jugador);
 }
 
 /**
@@ -378,9 +417,12 @@ void GameManager::run() {
                     moverJugador(dx, dy);
                 }
 
-                if (jugador.getHaGanado()) {
+                if (jugador.getHaGanado()) { // Falta pantalla de salida
                     std::cout << "\nMuchas gracias por Jugar :)" << std::endl;
-                    return;
+                    std::cout << "\n==== PULSA CUALQUIER TECLA PARA SALIR ====\n";
+                    char salida;
+                    std::cin >> salida; 
+                    return; 
                 }
                 state = GameState::GAME_OVER;
                 break;

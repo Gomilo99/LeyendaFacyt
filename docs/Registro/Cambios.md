@@ -23,6 +23,8 @@ Falta implementar el cambio multinivel.
 
 ##### Eliminación ``DataManager`` Legacy
 Se eliminaron las funciones de ``guardarHeroe()`` y ``cargarHeroe()`` que escribían directamente en el ``heroe.json`` porque ya se utiliza el ``CacheManager`` en ``batalla()``.
+##### Multi-nivel soportado
+se añadió una función `cargarNivel` que se activa cuando el jugador toca la 'K' que indica la salida (cosa a mejorar o cambiar) 
 ### Log 18/06/2026 — Soporte multiplataforma (Linux + Windows)
 #### Cambios realizados
 

@@ -45,6 +45,7 @@ void CacheManager::guardarHeroe(const Jugador &jugador){
     j["exp"]        = jugador.getExperiencia();
     j["expMax"]     = jugador.getExperienciaNecesaria();
     j["arma"]       = jugador.getArmaNombre();
+    j["nivelActual"] = jugador.getNivelActual();
 
     json inventarioArr = json::array();
     for (const auto& [nombre, cant] : jugador.getInventario())
@@ -72,12 +73,14 @@ Jugador CacheManager::cargarHeroe(const std::map<std::string, std::shared_ptr<Ob
     int expMax            = j.value("expMax", 100);
     int posX              = j.value("posX", 1);
     int posY              = j.value("posY", 1);
+    int nivelActual       = j.value("nivelActual", 1);
 
     Jugador jugador(nombre, salud, ataque, defensa, nivel, pociones);
     jugador.setPos(posX, posY);
     jugador.setExperiencia(exp);
     jugador.setExperienciaNecesaria(expMax);
     jugador.setMana(mana);
+    jugador.setNivelActual(nivelActual);
 
     // Cargar inventario desde el array
     if (j.contains("inventario")) {

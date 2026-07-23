@@ -6,7 +6,7 @@ tags:
   - unity
   - estudio
 creado: 20/06/2026
-modificado: 22/07/2026
+modificado: 23/07/2026
 estado: En progreso
 tipo: Proyecto
 base:
@@ -18,7 +18,7 @@ progreso: 50%
 titulo: Leyenda Facyt
 version: 1.1a
 ---
-# `=this.titulo`
+# Leyenda Facyt
 ## Descripción
 Es un videojuego basado en terminal hecho en C++ que nació como prueba personal para entender la programación orientada a objetos y mejorar mis habilidades de programación. Es un juego de rol donde controlas a un personaje que debe enfrentar a diversos enemigos en un mapa con vista de pájaro (top-down) mientras subes de nivel y obtienes objetos.
 

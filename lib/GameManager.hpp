@@ -55,6 +55,7 @@ private:
     void mostrarInventario();
     void iniciarCombate();
     void iniciarCombateJefe();
+    void cargarNivel(int nivel);
 };
 
 #endif

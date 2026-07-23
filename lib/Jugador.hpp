@@ -20,6 +20,8 @@ private:
     int expNecesaria = EXP_UMBRAL_BASE;
     bool haGanado = false;
     int posX, posY;
+
+    int nivelActual = 1;
 public:
     Jugador(std::string nombre);
     Jugador(std::string nom, int hp, int atk, int def, int lvl, int poc);
@@ -71,6 +73,9 @@ public:
     std::vector<std::pair<std::string, std::shared_ptr<Objeto> > > getItemsList() const;
 
     void obtenerExperiencia(int cantidad);
+
+    int getNivelActual() const {return nivelActual; }
+    void setNivelActual(int n){ nivelActual = n; }
 };
 
 #endif
