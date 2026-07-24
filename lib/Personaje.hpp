@@ -4,6 +4,7 @@
 #include <string>
 #include <iostream>
 #include <algorithm>
+#include "Output.hpp"
 
 class Personaje {
 protected:
@@ -14,12 +15,17 @@ protected:
     int defensa;
     int nivel;
 
+    Output *output;
+    static inline NullOutput defaultOut;
+
 public:
-    Personaje(std::string nom, int hp, int atk, int def, int lvl)
-        : nombre(nom), salud(hp), saludMaxima(hp), ataque(atk), defensa(def), nivel(lvl) {}
+    Personaje(std::string nom, int hp, int atk, int def, int lvl, Output *out = nullptr)
+        : nombre(nom), salud(hp), saludMaxima(hp), ataque(atk), defensa(def), nivel(lvl),
+          output(out ? out : &defaultOut) {}
     Personaje(const Personaje& copia)
         : nombre(copia.nombre), salud(copia.salud), saludMaxima(copia.saludMaxima),
-          ataque(copia.ataque), defensa(copia.defensa), nivel(copia.nivel) {}
+          ataque(copia.ataque), defensa(copia.defensa), nivel(copia.nivel),
+          output(copia.output) {}
     Personaje& operator=(const Personaje&) = default;
     virtual ~Personaje() {}
     virtual void atacar(Personaje* objetivo) = 0;
@@ -27,12 +33,13 @@ public:
     void recibirDano(int atk_atacante) {
         int danoReal = atk_atacante - (this->defensa / 2);
         salud -= danoReal;
-        std::cout << nombre << " recibe " << danoReal << " de dano!\n";
+        output->printLine(nombre + " recibe " + std::to_string(danoReal) + " de daño!");
+        //std::cout << nombre << " recibe " << danoReal << " de dano!\n";
     }
 
     virtual void mostrarEstado() const {
-        std::cout << "\n" << nombre << " - Salud: " << salud << "/" << saludMaxima
-                  << " | Ataque: " << ataque << " | Defensa: " << defensa << std::endl;
+        output->printLine("\n" + nombre + " - Salud: " + std::to_string(salud) + "/" + std::to_string(saludMaxima)
+            + " | Ataque: " + std::to_string(ataque) + " | Defensa: " + std::to_string(defensa));
     }
 
     bool estaVivo() const { return salud > 0; }

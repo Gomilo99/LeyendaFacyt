@@ -1,6 +1,6 @@
 ---
 creado: 22/07/2026
-modificado: 23/07/2026
+modificado: 24/07/2026
 tipo: Avance
 tags: # deuda-tecnica, idea-loca, bug-critico, bug, refactor
 titulo: Cambios
@@ -25,6 +25,9 @@ Falta implementar el cambio multinivel.
 Se eliminaron las funciones de ``guardarHeroe()`` y ``cargarHeroe()`` que escribían directamente en el ``heroe.json`` porque ya se utiliza el ``CacheManager`` en ``batalla()``.
 ##### Multi-nivel soportado
 se añadió una función `cargarNivel` que se activa cuando el jugador toca la 'K' que indica la salida (cosa a mejorar o cambiar) 
+
+##### Separación de responsabilidades para el Output 
+Se creo una nueva clase llamada Output con dos funciones `print` y `printLine` que sirven para traspasar la responsabilidad de clases como Jugador en funciones como recibir daño para que la salida se envíe al output y no se realicen directamente.
 ### Log 18/06/2026 — Soporte multiplataforma (Linux + Windows)
 #### Cambios realizados
 
