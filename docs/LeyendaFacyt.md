@@ -5,8 +5,9 @@ tags:
   - JRPG
   - unity
   - estudio
+  - proyecto
 creado: 20/06/2026
-modificado: 23/07/2026
+modificado: 08/09/2026
 estado: En progreso
 tipo: Proyecto
 base:
@@ -56,6 +57,7 @@ El problema más grande de este proyecto, al igual que el de Unity es convivir c
 | **Plataformas**           | Windows + Linux                    |
 | **Lenguaje**              | C++17                              |
 | **Build system**          | GNU Make                           |
+| [[[[]]]()]()              |                                    |
 
 ### Sistemas implementados
 
