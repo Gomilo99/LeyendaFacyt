@@ -19,7 +19,8 @@
  * Nueva Partida / Continuar se hace en mostrarMenuPrincipal().
  */
 GameManager::GameManager()
-    : jugador("Heroe"), state(GameState::MAIN_MENU), spawnX(1), spawnY(1)
+    : jugador("Heroe"), state(GameState::MAIN_MENU), spawnX(1), spawnY(1),
+      nivelActual(1), jefeDerrotado(false), haGanadoFinal(false)
 {
     objetos = DataManager::cargarObjetos();
     if (objetos.empty()) {
@@ -105,7 +106,9 @@ void GameManager::inicializarNuevaPartida() {
         return;
     }
 
-    // === Configuracion de terreno segun el nivel ===
+    nivelActual = 1;
+    jefeDerrotado = false;
+    haGanadoFinal = false;
     encounterMgr.setTerreno(EncounterManager::Terreno::LLANURA);
 
     // Carga de personaje y spawn
@@ -126,6 +129,7 @@ void GameManager::inicializarNuevaPartida() {
         jugador.setNombre(nombreInput);
 
     CacheManager::crearPartida(mapa, jugador);
+    CacheManager::guardarEstado({nivelActual, jefeDerrotado, haGanadoFinal});
     state = GameState::OVERWORLD;
 }
 
@@ -142,15 +146,39 @@ bool GameManager::cargarPartidaExistente() {
         return false;
     }
 
-    // === Configuracion del terreno en función del nivel cargado ===
-    // Por ahora se carga el nivel 1 siempre. Cuando haya multi-nivel 
-    // se guardara el nivel en CacheManager y se usará aquí
-    encounterMgr.setTerreno(EncounterManager::Terreno::LLANURA);
-
     //  === Carga de jugador ===
     jugador = CacheManager::cargarHeroe(objetos);
 
-    // === Carga del mundo ===
+    CacheManager::EstadoPartida estado;
+    if (CacheManager::cargarEstado(estado)) {
+        nivelActual = estado.nivelActual;
+        jefeDerrotado = estado.jefeDerrotado;
+        haGanadoFinal = estado.haGanadoFinal;
+    } else {
+        nivelActual = jugador.getNivelActual();
+        jefeDerrotado = false;
+        haGanadoFinal = jugador.getHaGanado();
+        bool hayJefeEnMapa = false;
+        for (int y = 0; y < mapa.getAlto(); y++) {
+            for (int x = 0; x < mapa.getAncho(); x++) {
+                if (mapa.getTile(x, y) == 'B') {
+                    hayJefeEnMapa = true;
+                    break;
+                }
+            }
+        }
+        jefeDerrotado = !hayJefeEnMapa;
+    }
+    jugador.setNivelActual(nivelActual);
+    switch (nivelActual) {
+        case 1: encounterMgr.setTerreno(EncounterManager::Terreno::LLANURA); break;
+        case 2: encounterMgr.setTerreno(EncounterManager::Terreno::MAZMORRA); break;
+        case 3: encounterMgr.setTerreno(EncounterManager::Terreno::BOSQUE); break;
+        default: encounterMgr.setTerreno(EncounterManager::Terreno::CAMINO); break;
+    }
+    encounterMgr.resetear();
+    if (haGanadoFinal) jugador.setHaGanado(true);
+
     state = GameState::OVERWORLD;
     return true;
 }
@@ -161,6 +189,7 @@ bool GameManager::cargarPartidaExistente() {
 void GameManager::guardarPartida() {
     CacheManager::guardarHeroe(jugador);
     CacheManager::guardarMapa(mapa);
+    CacheManager::guardarEstado({nivelActual, jefeDerrotado, haGanadoFinal});
 }
 
 /**
@@ -270,27 +299,34 @@ void GameManager::moverJugador(int dx, int dy) {
 /**
  * Procesa tiles especiales del mapa y persiste los cambios en cache.
  *
- * B: Inicia combate contra el jefe del nivel
- * K: Marca victoria (jugador encontró la llave)
+ * B: Inicia combate contra el jefe del nivel y habilita K al ganar
+ * K: Carga el siguiente nivel si el jefe fue derrotado
  * H: Usa una poción y elimina el tile del mapa
  */
 void GameManager::handleTile(char tile) {
     if (tile == 'B'){
         iniciarCombateJefe();
-        if (jugador.estaVivo()){
+        if (jugador.estaVivo() && enemyFactory.hayJefe(nivelActual)){
+            jefeDerrotado = true;
             mapa.setTile(jugador.getPosX(), jugador.getPosY(), '.');
-            CacheManager::guardarMapa(mapa);
+            guardarPartida();
         }
     }
     if (tile == 'K'){
-        int siguienteNivel = jugador.getNivelActual() + 1;
-        if(siguienteNivel > 3){ // 3 niveles totales
+        if (!jefeDerrotado) {
+            std::cout << "El portal esta sellado. Derrota al jefe primero.\n";
+            return;
+        }
+
+        int siguienteNivel = nivelActual + 1;
+        if (!std::ifstream(Config::mapaPath(siguienteNivel)).good()) {
             std::cout << "Has completado todos los niveles!\n";
+            haGanadoFinal = true;
             jugador.setHaGanado(true);
-        }else{
-            std::cout << "Has encontrado la llave del nivel " << siguienteNivel << "!\n";
-            jugador.setNivelActual(siguienteNivel);
-            cargarNivel(siguienteNivel);
+            guardarPartida();
+        } else if (cargarNivel(siguienteNivel)) {
+            std::cout << "Has avanzado al nivel " << siguienteNivel << "!\n";
+            guardarPartida();
         }
     }
     if (tile == 'H'){
@@ -325,8 +361,8 @@ void GameManager::iniciarCombate() {
  * muestra un mensaje y cae en un combate aleatorio normal.
  */
 void GameManager::iniciarCombateJefe() {
-    if (enemyFactory.hayJefe(jugador.getNivel())) {
-        Enemigo jefe = enemyFactory.crearJefe(jugador.getNivel());
+    if (enemyFactory.hayJefe(nivelActual)) {
+        Enemigo jefe = enemyFactory.crearJefe(nivelActual);
         batalla(jugador, jefe);
     } else {
         std::cout << "Aun no hay un jefe para tu nivel...\n";
@@ -337,11 +373,11 @@ void GameManager::iniciarCombateJefe() {
     }
 }
 
-void GameManager::cargarNivel(int nivel){
+bool GameManager::cargarNivel(int nivel){
     std::string path = Config::mapaPath(nivel);
     if(!mapa.cargar(path)){
         std::cerr << "No se pudo cargar el nivel " << nivel << "\n";
-        return;
+        return false;
     }
 
     // Configurar terreno segun el nivel
@@ -353,13 +389,17 @@ void GameManager::cargarNivel(int nivel){
     }
     encounterMgr.resetear();
 
-    // Buscar spawn point del nuevo mapa
-    // Cuando encuentra el 'P' reeemplaza ese valor por '.' y pasa esa posición al jugador.
+    nivelActual = nivel;
+    jugador.setNivelActual(nivelActual);
+    jefeDerrotado = false;
+
+    // El spawn del mapa nuevo se convierte en la posición inicial del jugador.
     for (int y = 0; y < mapa.getAlto(); y++){
         for (int x = 0; x < mapa.getAncho(); x++){
             if(mapa.getTile(x, y) == 'P'){
                 jugador.setPos(x, y);
                 mapa.setTile(x, y, '.');
+                y = mapa.getAlto();
                 break;
             }
         }
@@ -367,6 +407,8 @@ void GameManager::cargarNivel(int nivel){
 
     CacheManager::guardarMapa(mapa);
     CacheManager::guardarHeroe(jugador);
+    CacheManager::guardarEstado({nivelActual, jefeDerrotado, haGanadoFinal});
+    return true;
 }
 
 /**

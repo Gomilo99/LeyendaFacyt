@@ -82,9 +82,9 @@ main.cpp → GameManager::run()
   │
   └── OVERWORLD:
         ├── WASD → moverJugador() → handleTile() → EncounterManager
-        ├── tile 'B' → EnemyFactory::crearJefe() → [[Sistemas/Combate|batalla()]]
+        ├── tile 'B' → EnemyFactory::crearJefe() → derrota → habilita K
         ├── tile 'H' → usar poción → setTile('.')
-        ├── tile 'K' → victoria
+        ├── tile 'K' → carga el siguiente mapa (o victoria final)
         ├── 'I' → [[Sistemas/Inventario|InventoryUI]]
         └── 'Q' → CacheManager::guardar() → salir
 ```
@@ -98,6 +98,7 @@ mapas/nivel1.txt   ──lee──▶  Mapa
 
 cache/heroe.json   ◀──escribe── CacheManager ◀──recibe── Jugador
 cache/mapa_cache.txt ◀──escribe── CacheManager ◀──recibe── Mapa
+cache/partida.json ◀──escribe── CacheManager ◀──recibe── estado de campaña
 ```
 
 ## Controles

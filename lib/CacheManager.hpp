@@ -9,6 +9,12 @@
 #include "Objeto.hpp"
 
 namespace CacheManager{
+    struct EstadoPartida {
+        int nivelActual = 1;
+        bool jefeDerrotado = false;
+        bool haGanadoFinal = false;
+    };
+
     bool existePartida();
     void crearPartida(const Mapa &mapa, const Jugador &jugador);
 
@@ -19,6 +25,9 @@ namespace CacheManager{
     // Heroe
     void guardarHeroe(const Jugador &jugador);
     Jugador cargarHeroe(const std::map<std::string, std::shared_ptr<Objeto>>& objetos);
+
+    bool guardarEstado(const EstadoPartida& estado);
+    bool cargarEstado(EstadoPartida& estado);
 
     // Limpiar cache (para nueva partida)
     void limpiar();

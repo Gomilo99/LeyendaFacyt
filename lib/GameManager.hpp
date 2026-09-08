@@ -44,6 +44,9 @@ private:
     EncounterManager encounterMgr;
     GameState state;
     int spawnX, spawnY;                     ///< Posición inicial en el mapa original
+    int nivelActual;
+    bool jefeDerrotado;
+    bool haGanadoFinal;
 
     void mostrarMenuPrincipal();
     void inicializarNuevaPartida();
@@ -55,7 +58,7 @@ private:
     void mostrarInventario();
     void iniciarCombate();
     void iniciarCombateJefe();
-    void cargarNivel(int nivel);
+    bool cargarNivel(int nivel);
 };
 
 #endif

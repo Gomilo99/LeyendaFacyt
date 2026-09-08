@@ -107,7 +107,7 @@
         { "nombre": "Expreso", "prob": 65 },
         { "nombre": "La Taza de Cafe Rancia", "prob": 35 }
       ],
-      "boss": false,
+      "boss": true,
       "exp": 50
     }
   ],
@@ -373,7 +373,7 @@
         { "nombre": "Pocion de Lagrimas Cachondas", "prob": 35 },
         { "nombre": "Espada del Descongelamiento", "prob": 65 }
       ],
-      "boss": false,
+      "boss": true,
       "exp": 70
     }
   ],
@@ -397,7 +397,7 @@
         { "nombre": "Suavitel", "prob": 35 },
         { "nombre": "El Aspirador del Vacio", "prob": 65 }
       ],
-      "boss": false,
+      "boss": true,
       "exp": 80
     },
     {

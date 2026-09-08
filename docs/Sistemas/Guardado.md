@@ -156,6 +156,11 @@ Namespace que centraliza toda la carga/guarda de datos JSON:
 
 > `DataManager::cargarHeroe()`/`guardarHeroe()` existen pero son legacy — fueron reemplazados por `CacheManager`. Ver [[Registro/Decisiones#DataManager legacy]].
 
+El estado de campaña se guarda en `cache/partida.json`, separado de los datos
+del héroe y del mapa. Incluye el nivel actual, si el jefe del mapa fue
+derrotado y si se alcanzó la victoria final. Esto permite reanudar un nivel
+con el portal correctamente bloqueado o habilitado.
+
 ---
 
 ## Config — Paths centralizados
