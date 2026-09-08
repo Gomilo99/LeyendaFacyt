@@ -124,10 +124,10 @@ sort by priority
 ---
 ## Tareas
 
-- [ ] Continuidad entre niveles - nivel2.txt existe pero **el juego siempre carga nivel 1**. No hay transición.
+- [x] Continuidad entre niveles - transición implementada mediante `K`, jefe `B` y `cache/partida.json`.
 - [ ] Acción Defender - Declarada en el roadmap pero nunca implementada.
 - [ ] Armadura equipable - Solo hay slot de arma.
-- [ ] Terreno configurable - EncounterManager tiene 4 terrenos pero GameManager nunca llama setTerreno().
+- [x] Terreno configurable - GameManager carga terreno, zonas, estilos y tablas desde archivos `.meta`.
 ---
 ## Objetivos
 
@@ -136,11 +136,11 @@ sort by priority
 - [x] Objetivo 40% - Renovación y creación de sistemas responsive y sistemas más funcionales.  [completion:: 2026-06-19]
 
 ### Fase B 50% - Completar con lo Básico
-- [ ] Transición entre niveles (nivel 1→ 2 → 3 → jefe final).
-- [ ] 3+ mapas con diseños distintos y temáticas.
-- [ ] Configuración terreno por mapa en `EncounterManager`, encuentros aleatorios ajustados por terreno.
+- [x] Transición entre niveles (nivel 1→ 2 → 3 → jefe final).
+- [x] 3+ mapas con diseños distintos y temáticas.
+- [x] Configuración terreno por mapa en `EncounterManager`, encuentros aleatorios ajustados por terreno.
 - [ ] Reemplazar magic numbers por ``constexpr`` (revisar que significa e implica este cambio).
-- [ ] Balancear curva de dificultad entre niveles, escalable.
+- [x] Balancear curva de dificultad entre niveles mediante zonas, tiers, modificadores y límites de nivel.
 
 ### Fase C - Refactor (deuda técnica)
 - [ ] Extraer UI de `Jugador` (eliminar cout/cin de las clases de modelo).

@@ -34,6 +34,34 @@ version: 1.0.0
   desactivar temporalmente el límite para depuración.
 - Se agregaron colores y símbolos de terreno configurables desde `.meta`.
 
+#### Motivo y efecto sobre el diseño
+
+La separación entre sección, zona, terreno y nivel propio del enemigo evita
+que la dificultad dependa accidentalmente del nivel del jugador. Un jugador
+que llegue demasiado pronto a una zona sigue encontrando la misma tabla de
+enemigos; la diferencia está en sus decisiones, equipo y preparación.
+
+El límite de nivel funciona como una compuerta de campaña: al alcanzarlo, el
+héroe conserva exactamente `expMax/expMax`, pero no sube hasta entrar en una
+sección con un límite mayor o desactivar el límite mediante debug. Así no se
+descarta experiencia ni se permite farmear indefinidamente en una zona
+temprana.
+
+`GameManager` carga la metadata al iniciar o cambiar de nivel. En cada
+movimiento consulta la zona actual y configura `EncounterManager` con la
+probabilidad base, los multiplicadores y los pasos de gracia. `EnemyFactory`
+recibe la tabla ponderada de esa zona, crea el enemigo por ID y aplica sus
+modificadores antes del combate.
+
+El tile `B` ya no significa “buscar cualquier jefe disponible”: resuelve la
+zona actual y su `boss_id`. Si falta configuración, se informa un error en vez
+de lanzar un jefe incorrecto. `K` sigue siendo la transición de campaña y solo
+se habilita cuando el jefe de la sección fue derrotado.
+
+La renderización consulta la misma metadata que usa el balance. Por eso el
+color, el símbolo, la zona y el límite mostrados en pantalla corresponden a
+las reglas que gobiernan los encuentros.
+
 ### Log 23/07/2026 - Corrección de Deudas técnicas
 #### Cambios realizados
 ##### Eliminación de Magic numbers

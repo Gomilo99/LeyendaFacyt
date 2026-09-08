@@ -25,7 +25,7 @@ Para el trabajo actual del sprint, ver [[Sprint]]. Para ideas futuras, ver [[Bac
 |----------|--------|------------|
 | 25% — Funcionamiento general | ✅ | 2026-06-19 |
 | 40% — Sistemas responsive | ✅ | 2026-06-19 |
-| 50% — Multi-nivel y balanceo | 🔄 En progreso | — |
+| 50% — Multi-nivel y balanceo | ✅ | 2026-09-08 |
 | 75% — Historia, animaciones, subjefes | ⏳ Pendiente | — |
 | 85% — NPC tienda, puzzles | ⏳ Pendiente | — |
 | 95% — Polish y playtesting | ⏳ Pendiente | — |
@@ -91,6 +91,29 @@ Para el trabajo actual del sprint, ver [[Sprint]]. Para ideas futuras, ver [[Bac
 - [x] 3+ mapas con diseños distintos y temáticas 📅 2026-08-30 🔺 #plan/sprint #sistema/mapa [completion:: 2026-09-08]
 - [x] Eliminar DataManager::guardarHeroe/cargarHeroe legacy 📅 2026-08-01 🔽 #deuda-tecnica  [completion:: 2026-09-07]
   Ver [[Registro/Decisiones#DataManager legacy]].
+
+### Resultado técnico del objetivo
+
+La progresión dejó de depender únicamente del nivel del héroe. Cada mapa se
+divide lógicamente en una sección y un conjunto pequeño de zonas rectangulares
+configuradas en un archivo `.meta`. Esto permite que el diseño visual siga en
+el `.txt`, mientras el balance puede cambiarse sin redibujar la geometría.
+
+La sección controla el límite de nivel del jugador y los parámetros globales de
+encuentros. La zona controla el terreno, la tabla ponderada de enemigos, la
+seguridad del área y los multiplicadores de estadísticas y XP. Las zonas pueden
+superponerse y la más pequeña tiene prioridad, de modo que un refugio o una
+sala especial no exige crear decenas de regiones.
+
+El ritmo de progresión queda controlado por tres mecanismos independientes:
+
+1. límite de nivel por sección;
+2. enemigos definidos por zona y no por nivel del jugador;
+3. XP calculada a partir del nivel y tier propios del enemigo.
+
+La tarea restante de este objetivo es de validación de balance: medir tiempos
+de recorrido, frecuencia real de encuentros, duración de combates y consumo de
+curación mediante partidas de prueba.
 
 ---
 

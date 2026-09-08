@@ -17,6 +17,10 @@ version: 1.0.0
 
 El juego separa datos originales (solo lectura) del estado de la partida (escritura en caché). Los archivos en `json/` y `mapas/` nunca se modifican durante el juego.
 
+La metadata también es de solo lectura. Si se cambia un color, una tabla de
+enemigos o un multiplicador, el cambio se aplicará a nuevas cargas del mapa,
+pero no sobrescribirá el progreso existente.
+
 Ver también: [[Mapa]] (usa CacheManager para persistir tiles), [[Enemigos]] (usa DataManager para cargar plantillas), [[Combate]] (guarda héroe tras victoria).
 
 ---
@@ -27,9 +31,11 @@ Ver también: [[Mapa]] (usa CacheManager para persistir tiles), [[Enemigos]] (us
 json/objetos.json  ──lee──▶  DataManager  ──carga──▶  Jugador, Objetos
 json/enemigos.json ──lee──▶  EnemyFactory
 mapas/nivel1.txt   ──lee──▶  Mapa
+mapas/nivel1.meta  ──lee──▶ MapMetadata
 
 cache/heroe.json   ◀──escribe── CacheManager ◀──recibe── Jugador
 cache/mapa_cache.txt ◀──escribe── CacheManager ◀──recibe── Mapa
+cache/partida.json ◀──escribe── CacheManager ◀──recibe── EstadoPartida
 cache/partida.flag ◀──crea── CacheManager
 ```
 
@@ -45,10 +51,12 @@ proyecto/
 │   └── heroe.json     ← template default, solo lectura
 ├── mapas/             ← originales (lectura)
 │   ├── nivel1.txt
+│   ├── nivel1.meta       ← reglas de diseño, solo lectura
 │   └── nivel2.txt
 └── cache/             ← generado en tiempo de juego (escritura)
     ├── heroe.json     ← estado completo del héroe (14 campos + inventario)
-    ├── mapa_cache.txt ← mapa con tiles modificados (B/H → '.')
+    ├── mapa_cache.txt ← mapa con tiles modificados (B/h/H/G → '.')
+    ├── partida.json   ← sección, nivel, jefe derrotado y victoria
     └── partida.flag   ← flag de existencia (archivo vacío)
 ```
 
@@ -143,9 +151,24 @@ namespace CacheManager {
 | Salir del juego con 'Q' | `guardarHeroe()` + `guardarMapa()` |
 | Cambiar de nivel o derrotar jefe | `guardarEstado()` |
 
+### Razón de la separación
+
+`heroe.json` representa al personaje, `mapa_cache.txt` representa los tiles
+consumidos y `partida.json` representa la campaña. Esta división evita que
+cargar una configuración de balance confunda la posición del héroe o el estado
+del portal. Al entrar en una nueva sección se guarda el nuevo nivel, se
+reinicia el jefe de esa sección y se conserva el resto del héroe: estadísticas,
+inventario, arma, mana y experiencia.
+
 ### Formato del mapa en caché
 
-`cache/mapa_cache.txt` es idéntico al original (`vector<string>`), solo con los tiles modificados (B/H → `.`). Usa `Mapa::guardar(archivo)` que serializa línea por línea.
+`cache/mapa_cache.txt` es idéntico al original (`vector<string>`), solo con los
+tiles modificados (B/h/H/G → `.`). Usa `Mapa::guardar(archivo)` que serializa
+línea por línea.
+
+El archivo `.meta` no se copia al caché. Al continuar, el juego vuelve a cargar
+`mapas/nivelN.meta` y combina esas reglas de diseño con el estado mutable de
+`cache/`.
 
 ---
 

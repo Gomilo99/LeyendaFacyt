@@ -26,12 +26,14 @@ Visión general de la arquitectura técnica de [[LeyendaFacyt]]. Para detalles d
 | **CacheManager** | Capa de persistencia en `cache/`. Guarda/carga héroe (14 campos + inventario), mapa y flag de partida | [[Sistemas/Guardado]] |
 | **EnemyFactory** | Carga `json/enemigos.json`, crea enemigos con selección ponderada por `peso` | [[Sistemas/Enemigos]] |
 | **EncounterManager** | Decide encuentros aleatorios al moverse usando probabilidad por terreno | [[Sistemas/Enemigos]] |
+| **MapMetadata** | Carga configuración `.meta`: sección, zonas, terrenos, estilos, enemigos y modificadores | [[Sistemas/Mapa]] |
 
 ## Diagrama de dependencias
 
 ```
 GameManager   → DataManager, CacheManager, batalla.hpp, mapa.hpp,
-                jugador.hpp, enemyFactory.hpp, encounterManager.hpp
+                jugador.hpp, enemyFactory.hpp, encounterManager.hpp,
+                MapMetadata.hpp
 DataManager   → Config, json.hpp, objeto.hpp, enemigo.hpp, jugador.hpp
 CacheManager  → Config, json.hpp, jugador.hpp, mapa.hpp
 EnemyFactory  → Config, json.hpp, enemigo.hpp, objeto.hpp
@@ -73,6 +75,7 @@ main.cpp → GameManager::run()
   ├── Constructor:
   │     ├── DataManager::cargarObjetos()
   │     ├── EnemyFactory::cargarDesdeJSON()
+  ├── MapMetadata::load(nivelN.meta)
   │     └── Buscar spawn 'P' en mapa
   │
   ├── MAIN_MENU:
@@ -95,11 +98,24 @@ main.cpp → GameManager::run()
 json/objetos.json  ──lee──▶  DataManager  ──carga──▶  Jugador, Objetos
 json/enemigos.json ──lee──▶  EnemyFactory ──crea──▶   Enemigo
 mapas/nivel1.txt   ──lee──▶  Mapa
+mapas/nivelN.meta  ──lee──▶ MapMetadata
 
 cache/heroe.json   ◀──escribe── CacheManager ◀──recibe── Jugador
 cache/mapa_cache.txt ◀──escribe── CacheManager ◀──recibe── Mapa
 cache/partida.json ◀──escribe── CacheManager ◀──recibe── estado de campaña
 ```
+
+### Separación entre mapa, metadata y caché
+
+`nivelN.txt` contiene únicamente la topología: paredes, suelo, spawn y tiles
+especiales. `nivelN.meta` contiene reglas de diseño: zonas, terrenos,
+probabilidades, enemigos, jefes, colores y curación. `cache/` contiene solo el
+estado mutable de una partida: posición, tiles consumidos, estadísticas y
+progreso de campaña.
+
+Esta separación evita que probar un ajuste de balance destruya el mapa
+original y permite crear variantes de dificultad reutilizando la misma
+geometría.
 
 ## Controles
 

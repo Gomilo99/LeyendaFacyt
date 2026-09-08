@@ -104,7 +104,7 @@ Enemigo(id, nombre, salud, ataque, defensa, nivel, asciiArt[6], botin)
 ### Carga (`cargarDesdeJSON`)
 
 ```
-JSON (por nivel)
+JSON (por nivel de diseño del enemigo)
   │
   ├─ "1" → [ Goblin, Orco, Slime, Murcielago, Zombie ]
   ├─ "2" → [ Fantasma, Esqueleto, Carlos, Cajero, ... ]
@@ -126,6 +126,11 @@ JSON (por nivel)
 ```
 
 Cada `Drop` en `botin` resuelve el nombre del objeto contra el `map` de objetos cargados por `DataManager::cargarObjetos()`. Si un objeto no existe, lanza `std::runtime_error`.
+
+El nivel del JSON es el nivel propio del enemigo, no el nivel del jugador ni
+necesariamente el número del mapa. La metadata decide qué IDs pueden aparecer
+en cada zona, por lo que dos zonas de una misma sección pueden tener tablas
+completamente distintas.
 
 ### Selección ponderada (ruleta)
 
@@ -151,9 +156,9 @@ Rango [0, totalPeso) con pesos: Goblin=10, Orco=8, Slime=7, Murciélago=9, Zombi
 
 | Método | Comportamiento |
 |--------|---------------|
-| `crearEnemigo(nivel)` | Selección ponderada, devuelve `Enemigo` instanciado |
+| `crearEnemigo(nivel)` | Fallback compatible: selección ponderada por nivel de diseño |
+| `crearEnemigo(entries, statMultiplier, xpMultiplier)` | Selección desde la tabla de una zona y aplicación de modificadores |
 | `crearPorId(id)` | Crea el enemigo exacto asignado al `boss_id` de la zona |
-| `hayJefe(nivel)` | `true` si existe algún `boss: true` entre nivel 1 y `nivel` |
 
 ---
 
@@ -161,34 +166,45 @@ Rango [0, totalPeso) con pesos: Goblin=10, Orco=8, Slime=7, Murciélago=9, Zombi
 
 ### Terrenos y probabilidades
 
-| Terreno | Probabilidad base | Uso típico |
+| Terreno | Probabilidad base orientativa | Uso típico |
 |---------|-------------------|------------|
 | `CAMINO` | 5% | Rutas seguras, pasillos |
 | `LLANURA` | 10% | Salas abiertas, terreno neutral |
 | `BOSQUE` | 18% | Zonas densas, alta peligrosidad |
 | `MAZMORRA` | 14% | Calabozos, subterráneos |
+| `SEGURO` | 0% | Spawn, descanso y preparación |
 
-> **Nota**: El terreno actual nunca se configura desde `GameManager`. Siempre queda en el valor por defecto. Ver [[Registro/Decisiones#Terreno no configurado]].
+La metadata puede sustituir el nombre lógico del terreno, su color y su
+símbolo visual. `SEGURO` fuerza la probabilidad de encuentro a cero y reinicia
+la presión de encuentros al entrar en una zona de descanso.
 
 ### Fórmula de encuentro
 
 ```
-probabilidad = probBase + max(0, pasosDesdeUltimo - GRACE_PERIOD) * INCREMENTO_POR_PASO
-probabilidad = min(probabilidad, CAP)
+base = probBase × multiplicadorMapa × multiplicadorZona
+crecimientoMaximo = base × growth_cap
+probabilidad = base + crecimiento gradual hasta crecimientoMaximo
 
 si random(0, 99) < resultado → ENCUENTRO!
 ```
 
 | Parámetro | Valor |
 |-----------|-------|
-| GRACE_PERIOD | 3 pasos sin encuentros |
-| INCREMENTO_POR_PASO | +3% por paso extra |
-| CAP | 40% máximo |
+| `grace_steps` | 4 pasos sin encuentros por defecto |
+| `growth_cap` | 20% adicional sobre la base por defecto |
+| `multiplier` | Ajuste global del mapa |
 
-- Pasos 1-3: probabilidad = baseTerreno (sin encuentros forzados)
-- Paso 4: +3%, Paso 5: +6%, ... hasta cap 40%
-- El contador se resetea al ocurrir un encuentro
-- Tiles especiales (B, K, H) skipean el chequeo de encuentro aleatorio
+- Pasos 1-4: no hay encuentro aleatorio.
+- Desde el paso 5: la probabilidad crece gradualmente.
+- El crecimiento nunca supera `growth_cap`.
+- El contador se resetea al ocurrir un encuentro o al entrar en terreno seguro.
+
+### Curación porcentual
+
+Los tiles `h`, `H` y `G` son recursos de mapa de un solo uso. Su porcentaje se
+define en la metadata para que cada sección tenga una economía de curación
+distinta. La curación se calcula sobre la vida máxima actual, nunca sobre un
+valor fijo.
 
 ### Integración en [[Mapa|GameManager]]
 
@@ -277,14 +293,15 @@ Jugador presiona W
   │   ├─ handleTile('.') → nada especial
   │   └─ encounterMgr.registrarPaso()
   │       └─ encounterMgr.verificarEncuentro()
-  │           ├─ pasosDesdeUltimo < 3? → No
-  │           ├─ prob = 10 + (4-3)*3 = 13
-  │           ├─ random(0,99) = 7
-  │           └─ 7 < 13 → VERDADERO
+  │           ├─ pasosDesdeUltimo < 4? → No
+  │           ├─ calcula base × multiplicadores y crecimiento
+  │           ├─ respeta growth_cap de la metadata
+  │           └─ 7 < probabilidad → VERDADERO
   │
   └─ iniciarCombate()
-      ├─ enemyFactory.crearEnemigo(jugador.getNivel())
-      │   └─ seleccionarPlantilla(1) → "Slime de Cafe Vencido"
+      ├─ zonaActual().encounters
+      │   └─ enemyFactory.crearEnemigo(tablaPonderada, modificadores)
+      │       └─ selecciona un ID de la zona
       └─ [[Combate|batalla(jugador, enemigo)]]
           ├─ Victoria → exp + loot → [[Guardado|guardar héroe]]
           └─ Vuelve al OVERWORLD
@@ -296,14 +313,10 @@ Jugador presiona W
 Jugador pisa tile 'B'
   │
   ├─ handleTile('B')
-  │   ├─ iniciarCombateJefe()
-  │   │   ├─ enemyFactory.hayJefe(1)? → No (boss está en nivel 4)
-  │   │   └─ iniciarCombate() normal (aleatorio)
-  │   │
-  │   └─ Si el jugador está en nivel 4:
-  │       ├─ enemyFactory.crearJefe(4) → "El Gran Administrador..."
-  │       └─ [[Combate|batalla(jugador, jefe)]]
-  │           └─ Si victoria → haGanado = true
+  │   ├─ zonaActual().boss_id
+  │   ├─ enemyFactory.crearPorId(boss_id)
+  │   └─ [[Combate|batalla(jugador, jefe)]]
+  │       └─ Si victoria → jefeDerrotado = true y se habilita K
   │
   └─ Boss derrotado → tile se marca como '.' (no reaparece)
 ```
