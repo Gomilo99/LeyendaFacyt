@@ -1,6 +1,6 @@
 ---
 creado: 22/07/2026
-modificado: 22/07/2026
+modificado: 08/09/2026
 tipo: Avance
 tags: # deuda-tecnica, idea-loca, bug-critico, bug, refactor
 titulo: Guardado y Formatos de Datos
@@ -127,6 +127,9 @@ namespace CacheManager {
     
     void guardarHeroe(const Jugador&);       // escribe cache/heroe.json
     Jugador cargarHeroe(const map<string, shared_ptr<Objeto>>&);  // lee cache/heroe.json
+
+    bool guardarEstado(const EstadoPartida&); // escribe cache/partida.json
+    bool cargarEstado(EstadoPartida&);       // lee cache/partida.json
 }
 ```
 
@@ -135,9 +138,10 @@ namespace CacheManager {
 | Evento | Se guarda en caché |
 |--------|-------------------|
 | Derrotar jefe (tile 'B' → '.') | `guardarMapa()` |
-| Recoger poción (tile 'H' → '.') | `guardarMapa()` |
+| Recoger poción (tile 'h/H/G' → '.') | `guardarMapa()` |
 | Terminar combate (victoria) | `guardarHeroe()` (desde `batalla()`) |
 | Salir del juego con 'Q' | `guardarHeroe()` + `guardarMapa()` |
+| Cambiar de nivel o derrotar jefe | `guardarEstado()` |
 
 ### Formato del mapa en caché
 

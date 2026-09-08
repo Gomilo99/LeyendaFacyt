@@ -81,14 +81,14 @@ Para el trabajo actual del sprint, ver [[Sprint]]. Para ideas futuras, ver [[Bac
 
 > Establecimiento de diseño de niveles, rutas de progreso, progresión y balanceo de niveles y construcción del mundo.
 
-- [ ] Transición entre niveles (nivel 1 → 2 → 3 → jefe final) 📅 2026-08-15 ⏫ #plan/sprint #sistema/mapa
-  Actualmente solo nivel1.txt es accesible. Ver [[Sistemas/Mapa#Mapas actuales]].
+- [x] Transición entre niveles (nivel 1 → 2 → 3 → jefe final) 📅 2026-08-15 ⏫ #plan/sprint #sistema/mapa [completion:: 2026-09-08]
+  Ver [[Sistemas/Mapa#Mapas actuales]] y [[Sistemas/Guardado]].
 - [x] Configurar terreno por mapa en EncounterManager 📅 2026-08-01 🔺 #plan/sprint #sistema/enemigos  [completion:: 2026-09-07]
   Ver [[Registro/Decisiones#Terreno no configurado]].
 - [x] Reemplazar magic numbers por constexpr 📅 2026-08-01 🔺 #plan/sprint #deuda-tecnica  [completion:: 2026-09-07]
   Ver [[Sistemas/Combate#Sistema de nivelación]], [[Cambios#Magic Numbers]].
-- [ ] Curva de dificultad verificable entre niveles 📅 2026-08-15 ⏫ #plan/sprint
-- [ ] 3+ mapas con diseños distintos y temáticas 📅 2026-08-30 🔺 #plan/sprint #sistema/mapa
+- [x] Curva de dificultad verificable entre niveles 📅 2026-08-15 ⏫ #plan/sprint [completion:: 2026-09-08]
+- [x] 3+ mapas con diseños distintos y temáticas 📅 2026-08-30 🔺 #plan/sprint #sistema/mapa [completion:: 2026-09-08]
 - [x] Eliminar DataManager::guardarHeroe/cargarHeroe legacy 📅 2026-08-01 🔽 #deuda-tecnica  [completion:: 2026-09-07]
   Ver [[Registro/Decisiones#DataManager legacy]].
 

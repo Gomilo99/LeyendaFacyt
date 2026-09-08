@@ -562,7 +562,7 @@ void batalla(Jugador& jugador, Enemigo& enemigo) {
     }
 
     // Otorgar experiencia
-    int exp = enemigo.getExpBase() * (enemigo.getNivel() * (XP_POR_BATALLA / 5));
+    int exp = enemigo.experienciaCalculada();
     jugador.obtenerExperiencia(exp);
 
     // Calcular loot segun probabilidades del enemigo (recorre el vector botin)

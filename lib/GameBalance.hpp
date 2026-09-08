@@ -25,6 +25,13 @@ constexpr int MULT_DANO_MAGICO  = 2;    // ataque * MULT_DANO_MAGICO
 constexpr int BONUS_DANO_NIVEL  = 5;    // nivel * BONUS_DANO_NIVEL
 
 // === XP por batalla ===
-constexpr int XP_POR_BATALLA    = 50;   // nivel * XP_POR_BATALLA
+constexpr int XP_BASE    = 50;   // experiencia base
+constexpr float XP_MULT_JEFE = 4.0f;
+constexpr float XP_MULT_CAMPEON = 2.1f;
+
+constexpr float XP_MULT_ELITE = 1.8f;
+constexpr float XP_MULT_AVANZADO = 1.35f;
+
+
 
 #endif

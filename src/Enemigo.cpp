@@ -1,6 +1,7 @@
 #include "../lib/Enemigo.hpp"
 #include <iostream>
 #include <cstring>
+#include <algorithm>
 
 /**
  * Constructor principal. Inicializa stats base desde Personaje,
@@ -27,8 +28,19 @@ Enemigo::Enemigo(std::string id, std::string nom, int hp, int atk, int def, int 
  * una plantilla almacenada en EnemyFactory.
  */
 Enemigo::Enemigo(const Enemigo& copia)
-    : Personaje(copia), id(copia.id), botin(copia.botin) {
+    : Personaje(copia), id(copia.id), botin(copia.botin),
+      exp_base(copia.exp_base), tier(copia.tier), xpMultiplier(copia.xpMultiplier) {
     for (int i = 0; i < 6; i++) asciiArt[i] = copia.asciiArt[i];
+}
+void Enemigo::aplicarMultiplicadorStats(float value) {
+    saludMaxima = std::max(1, static_cast<int>(saludMaxima * value));
+    salud = saludMaxima;
+    ataque = std::max(1, static_cast<int>(ataque * value));
+    defensa = std::max(0, static_cast<int>(defensa * value));
+}
+int Enemigo::experienciaCalculada() const {
+    const int tierBonus = std::max(1, tier);
+    return std::max(1, static_cast<int>(50.0f * nivel * tierBonus * xpMultiplier));
 }
 
 /**

@@ -35,7 +35,8 @@ void Mapa::setTile(int x, int y, char c){
 }
 bool Mapa::esTransitable(int x, int y) const {
     char tile = getTile(x, y);
-    return tile == '.' || tile == 'P' || tile == 'B' || tile == 'K' || tile == 'H';
+    return tile == '.' || tile == 'P' || tile == 'B' || tile == 'K' ||
+           tile == 'H' || tile == 'h' || tile == 'G';
 }
 
 bool Mapa::guardar(const std::string &archivo) const{

@@ -14,6 +14,7 @@ struct Config{
     static std::string heroeCachePath() { return SAVE_DIR + "heroe.json"; }
     static std::string partidaCachePath() { return SAVE_DIR + "partida.json"; }
     static std::string mapaPath(int nivel = 1) { return MAPS_DIR + "nivel" + std::to_string(nivel) + ".txt"; }
+    static std::string mapaMetaPath(int nivel = 1) { return MAPS_DIR + "nivel" + std::to_string(nivel) + ".meta"; }
     static std::string mapaCache(){ return SAVE_DIR + "mapa_cache.txt"; }
 };
 #endif

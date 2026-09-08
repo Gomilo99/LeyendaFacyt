@@ -1,6 +1,6 @@
 ---
 creado: 22/07/2026
-modificado: 24/07/2026
+modificado: 08/09/2026
 tipo: Avance
 tags: # deuda-tecnica, idea-loca, bug-critico, bug, refactor
 titulo: Cambios
@@ -12,6 +12,28 @@ dificultad: Media
 version: 1.0.0
 ---
 ## Log
+### Log 08/09/2026 - Progresión por secciones, metadatos y encuentros configurables
+#### Cambios realizados
+- Se añadieron archivos `mapas/nivelN.meta` para configurar cada sección sin
+  mezclar balance con la cuadrícula visual.
+- Cada metadata define límite de nivel del héroe, probabilidad base,
+  multiplicador del mapa, pasos de gracia, crecimiento máximo de encuentros,
+  estilos de terreno, curación porcentual y zonas rectangulares.
+- Las zonas seleccionan enemigos por peso y pueden aplicar multiplicadores de
+  estadísticas y experiencia. El nivel del jugador ya no determina la tabla de
+  enemigos de una zona.
+- Los tiles `B` usan el `boss_id` de la zona actual y no buscan un jefe por
+  nivel del jugador. Un `B` sin jefe configurado se reporta como error de
+  configuración.
+- Se añadió el terreno seguro, que desactiva encuentros aleatorios.
+- La experiencia se calcula usando nivel y tier del enemigo, además de los
+  modificadores de zona. La XP del héroe se limita al umbral actual (`200/200`,
+  por ejemplo) y no se acumula por encima de él.
+- Se añadieron pociones porcentuales: `h` (25%), `H` (50%) y `G` (100%).
+- El HUD muestra sección, zona, terreno y límite de nivel. `8`/`F8` permite
+  desactivar temporalmente el límite para depuración.
+- Se agregaron colores y símbolos de terreno configurables desde `.meta`.
+
 ### Log 23/07/2026 - Corrección de Deudas técnicas
 #### Cambios realizados
 ##### Eliminación de Magic numbers

@@ -21,14 +21,14 @@ Trabajo planificado para el sprint actual. Al terminar una tarea, marcar como `[
 ---
 
 ## Tareas activas
-- [ ] Transición entre niveles 📅 2026-08-15 ⏫ #sistema/mapa
+- [x] Transición entre niveles 📅 2026-08-15 ⏫ #sistema/mapa
   Requiere:
   - Modificar `handleTile('K')` para cargar siguiente nivel en vez de terminar el juego
   - Mantener estado del jugador entre niveles (nivel actual, stats, inventario)
   - CacheManager debe soportar múltiples mapas
   - Crear `mapas/nivel3.txt` si no existe
 
-- [ ] Curva de dificultad verificable 📅 2026-08-15 ⏫
+- [x] Curva de dificultad verificable 📅 2026-08-15 ⏫
   Verificar que:
   - Nivel 1: enemigos con HP 25-50, ATK 7-12 → jugador nivel 1-2 puede ganar
   - Nivel 2: enemigos con HP 50-150, ATK 7-25 → jugador nivel 3-5 necesita buen equipo
@@ -41,6 +41,16 @@ Trabajo planificado para el sprint actual. Al terminar una tarea, marcar como `[
 ## Completado este sprint
 
 _(al terminar una tarea, moverla aquí)_
+
+- [x] Progresión por secciones y configuración `.meta` 📅 2026-09-08 ⏫ #sistema/mapa #sistema/enemigos
+  - Límites de nivel por sección con interruptor de depuración `8`/`F8`.
+  - Zonas rectangulares con terreno, colores, símbolos y tablas de enemigos.
+  - Terreno seguro sin encuentros y modificadores de estadísticas/XP.
+  - Jefes asignados exclusivamente al `B` mediante `boss_id`.
+  - Encuentros con cuatro pasos de gracia, multiplicador por mapa y crecimiento
+    configurable hasta el 20%.
+  - XP calculada por nivel/tier del enemigo y limitada al umbral actual.
+  - Curación porcentual mediante `h`, `H` y `G`.
 
 - [x] Reemplazar magic numbers por constexpr 📅 2026-08-01 🔺 #deuda-tecnica #sistema/combate  [completion:: 2026-07-23]
   Ver [[Sistemas/Combate#Sistema de nivelación]], [[Cambios#Magic Numbers]]

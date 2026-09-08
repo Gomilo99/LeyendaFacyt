@@ -1,6 +1,6 @@
 ---
 creado: 22/07/2026
-modificado: 22/07/2026
+modificado: 08/09/2026
 proyecto: "[[LeyendaFacyt]]"
 area: Sistemas
 estado: En Progreso
@@ -64,7 +64,9 @@ El mapa se carga desde archivos `.txt` en `mapas/`. Cada carácter representa un
 | `E` | Spawn de enemigo (obsoleto, reemplazado por encuentros aleatorios) |
 | `B` | Jefe final del nivel |
 | `K` | Llave mágica (victoria) |
-| `H` | Poción en el suelo |
+| `h` | Poción pequeña (25% de vida máxima) |
+| `H` | Poción mediana (50% de vida máxima) |
+| `G` | Poción grande (100% de vida máxima) |
 
 ### API
 
@@ -84,10 +86,13 @@ class Mapa {
 
 | Archivo | Dimensiones | Descripción |
 |---------|-------------|-------------|
-| `mapas/nivel1.txt` | 16x11 | Habitación abierta con P, K, B, H |
+| `mapas/nivel1.txt` | 39x20 | Habitación abierta con P, K, B y zonas configuradas |
 | `mapas/nivel2.txt` | 20x14 | Laberinto complejo con múltiples habitaciones |
+| `mapas/nivel3.txt` | 41x11 | Sección final con bosque y jefe |
 
-> **Nota**: Solo nivel1.txt es accesible actualmente. No hay transición entre niveles. Ver [[Planificacion/Roadmap#Objetivo 50%]].
+Cada mapa tiene un archivo lateral `nivelN.meta`. Las zonas se definen como
+rectángulos grandes y pueden superponerse: la zona más pequeña tiene prioridad,
+lo que permite añadir un refugio sin fragmentar todo el mapa.
 
 ---
 
@@ -98,14 +103,14 @@ OVERWORLD
   │
   ├─ WASD ──────────→ mover jugador
   │                     │
-  │                     ├─ tile 'B' ──→ [[Enemigos|crearJefe(nivel)]] → [[Combate|batalla()]]
+  │                     ├─ tile 'B' ──→ jefe de la zona (`boss_id`) → [[Combate|batalla()]]
   │                     │               ├─ victoria → mapa.setTile('.') → [[Guardado|guardarMapa()]]
   │                     │               └─ derrota  → GAME_OVER
-  │                     ├─ tile 'K' ──→ haGanado = true
-  │                     ├─ tile 'H' ──→ usar poción → tile → '.' → 
+  │                     ├─ tile 'K' ──→ siguiente sección o victoria final
+  │                     ├─ tile 'h/H/G' ──→ curación porcentual → tile → '.'
   │                     └─ tile '.' ──→ [[Enemigos|EncounterManager::checkEncounter()]]
   │                                       │
-  │                                       ├─ true  → crearEnemigo(nivel) → [[Combate|batalla()]]
+  │                                       ├─ true  → enemigo de la zona → [[Combate|batalla()]]
   │                                       │           └─ victoria → OVERWORLD
   │                                       │           └─ muerte  → GAME_OVER
   │                                       │
@@ -142,8 +147,8 @@ main.cpp → GameManager::run()
   └── OVERWORLD:
         ├── tile '.' + encounter → EnemyFactory → [[Combate|batalla()]]
         ├── tile 'B' → EnemyFactory → [[Combate|batalla()]]
-        ├── tile 'H' → usar poción → setTile('.')
-        ├── tile 'K' → victoria
+        ├── tile 'h/H/G' → curación porcentual → setTile('.')
+        ├── tile 'K' → siguiente sección o victoria final
         └── 'Q' → [[Guardado|guardar]] → salir
 ```
 
@@ -153,7 +158,8 @@ main.cpp → GameManager::run()
 
 ```
 GameManager   → DataManager, CacheManager, batalla.hpp, mapa.hpp,
-                jugador.hpp, enemyFactory.hpp, encounterManager.hpp
+                jugador.hpp, enemyFactory.hpp, encounterManager.hpp,
+                MapMetadata.hpp
 DataManager   → Config, json.hpp, objeto.hpp, enemigo.hpp, jugador.hpp
 CacheManager  → Config, json.hpp, jugador.hpp, mapa.hpp
 EnemyFactory  → Config, json.hpp, enemigo.hpp, objeto.hpp
@@ -173,3 +179,26 @@ main.cpp      → GameManager.hpp
 | **I** | Abrir [[Inventario]] |
 | **Q** | [[Guardado|Guardar]] partida y salir del juego |
 | **Enter** | Ir al menú desde pantalla de título |
+
+## Metadatos de mapas
+
+Cada `mapas/nivelN.meta` acompaña al mapa y permite cambiar el balance sin
+rediseñar la cuadrícula. Define sección, límite de nivel, probabilidad base,
+multiplicador del mapa, pasos de gracia, crecimiento máximo, estilos de terreno,
+curación y zonas rectangulares.
+
+Una zona puede ser segura, modificar estadísticas/XP, listar enemigos por peso
+y asignar el jefe exacto del tile `B` mediante `boss_id`. Las zonas pequeñas
+superpuestas tienen prioridad para evitar fragmentar el mapa en muchas regiones.
+
+El HUD muestra sección, zona, terreno y límite. `8` o `F8` alterna el límite
+para depuración. La XP nunca supera el umbral actual.
+# Metadatos de mapas
+
+Cada `mapas/nivelN.meta` acompaña al mapa y permite cambiar balance sin
+rediseñar la cuadrícula. Define el límite de nivel de la sección, multiplicador
+de encuentros y crecimiento máximo (hasta 20%), colores/estilos de terreno,
+curación de `h`/`H`/`G` y zonas rectangulares. Una zona puede ser segura,
+modificar estadísticas/XP y listar sus enemigos por peso; `boss_id` selecciona
+exactamente el jefe del tile `B`. El HUD muestra sección, terreno, zona y
+límite. `8` (o F8 en Windows) alterna el límite para depuración.

@@ -23,6 +23,7 @@
 #include "objeto.hpp"
 #include "enemyFactory.hpp"
 #include "encounterManager.hpp"
+#include "MapMetadata.hpp"
 
 class GameManager {
 public:
@@ -36,6 +37,10 @@ public:
     GameManager();
     void run();
 
+    bool limiteNivelActivo = true; // Se puede desactivar durante pruebas con F8/8
+    int nivelMaximoSeccion;
+    bool metaCargada;
+    MapMetadata metadata;
 private:
     Mapa mapa;
     Jugador jugador;
@@ -59,6 +64,8 @@ private:
     void iniciarCombate();
     void iniciarCombateJefe();
     bool cargarNivel(int nivel);
+    void cargarMetadata(int nivel);
+    const ZoneMetadata* zonaActual() const;
 };
 
 #endif

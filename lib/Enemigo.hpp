@@ -26,6 +26,8 @@ private:
     std::string asciiArt[6];   ///< 6 líneas de arte ASCII del JSON
     std::vector<Drop> botin;   ///< Array extensible de objetos+probabilidad
     int exp_base;
+    int tier = 1;
+    float xpMultiplier = 1.0f;
 
 public:
     /**
@@ -52,6 +54,11 @@ public:
     const std::string* getAsciiArt() const { return asciiArt; }
     const std::vector<Drop>& getBotin() const { return botin; }
     int getExpBase() const {return exp_base; }
+    int getTier() const { return tier; }
+    void setTier(int value) { tier = value; }
+    void setXpMultiplier(float value) { xpMultiplier = value; }
+    void aplicarMultiplicadorStats(float value);
+    int experienciaCalculada() const;
 
     void setExpBase(int new_exp_base){ exp_base = new_exp_base; }
 };

@@ -134,7 +134,13 @@ inline int getTerminalHeight() {
  */
 inline char getKey() {
 #ifdef _WIN32
-    return char(_getch());
+    int c = _getch();
+    if (c == 0 || c == 224) {
+        int extended = _getch();
+        if (extended == 66) return static_cast<char>(-8); // F8
+        return static_cast<char>(extended);
+    }
+    return char(c);
 #else
     char c;
     if (read(STDIN_FILENO, &c, 1) > 0)

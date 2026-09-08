@@ -28,6 +28,7 @@ GameManager::GameManager()
     }
 
     enemyFactory.cargarDesdeJSON(Config::enemigosPath(), objetos);
+    cargarMetadata(1);
 
     // Buscar spawn point 'P' del mapa original
     Mapa mapaTemp;
@@ -40,9 +41,27 @@ GameManager::GameManager()
                 }
             }
         }
+
     } else {
         std::cerr << "No se pudo cargar el mapa original.\n";
     }
+
+}
+
+void GameManager::cargarMetadata(int nivel) {
+    metaCargada = metadata.load(Config::mapaMetaPath(nivel));
+    if (!metaCargada) {
+        metadata = MapMetadata();
+        metadata.levelCap = 2;
+    }
+    nivelMaximoSeccion = metadata.levelCap;
+    jugador.setNivelMaximoPermitido(nivelMaximoSeccion);
+    encounterMgr.configurar(metadata.encounterBase, metadata.encounterMultiplier,
+                            metadata.encounterGrowthCap, metadata.encounterGraceSteps);
+}
+
+const ZoneMetadata* GameManager::zonaActual() const {
+    return metaCargada ? metadata.zoneAt(jugador.getPosX(), jugador.getPosY()) : nullptr;
 }
 
 /**
@@ -109,7 +128,7 @@ void GameManager::inicializarNuevaPartida() {
     nivelActual = 1;
     jefeDerrotado = false;
     haGanadoFinal = false;
-    encounterMgr.setTerreno(EncounterManager::Terreno::LLANURA);
+    cargarMetadata(1);
 
     // Carga de personaje y spawn
     jugador = Jugador("Heroe");
@@ -170,12 +189,7 @@ bool GameManager::cargarPartidaExistente() {
         jefeDerrotado = !hayJefeEnMapa;
     }
     jugador.setNivelActual(nivelActual);
-    switch (nivelActual) {
-        case 1: encounterMgr.setTerreno(EncounterManager::Terreno::LLANURA); break;
-        case 2: encounterMgr.setTerreno(EncounterManager::Terreno::MAZMORRA); break;
-        case 3: encounterMgr.setTerreno(EncounterManager::Terreno::BOSQUE); break;
-        default: encounterMgr.setTerreno(EncounterManager::Terreno::CAMINO); break;
-    }
+    cargarMetadata(nivelActual);
     encounterMgr.resetear();
     if (haGanadoFinal) jugador.setHaGanado(true);
 
@@ -228,6 +242,12 @@ void GameManager::renderMapa() {
         + std::to_string(jugador.getManaMaxima()) + " " + mpBar + "\033[0m");
     hud.push_back("\033[97m|  Arma: " + jugador.getArmaNombre() + "\033[0m");
     hud.push_back("\033[97m|  Pociones: " + std::to_string(jugador.getPociones()) + "\033[0m");
+    const ZoneMetadata* zone = zonaActual();
+    hud.push_back("\033[97m|  Sec: " + std::to_string(metadata.section) +
+                  "  Terreno: " + (zone ? zone->terrain : "default") +
+                  "  Zona: " + (zone ? zone->id : "none") + "\033[0m");
+    hud.push_back("\033[97m|  Cap: " + std::to_string(nivelMaximoSeccion) +
+                  (limiteNivelActivo ? " (ON)" : " (OFF)") + "  F8/8 toggle\033[0m");
     hud.push_back("\033[36m+-----------------------+\033[0m");
 
     int altoHud = (int)hud.size();
@@ -240,9 +260,12 @@ void GameManager::renderMapa() {
                     std::cout << "\033[93m@\033[0m";
                 } else {
                     char t = mapa.getTile(x, y);
+                    const ZoneMetadata* z = metadata.zoneAt(x, y);
+                    int color = z ? z->terrainColor : 32;
                     switch (t) {
                         case '#': std::cout << "\033[90m#\033[0m"; break;
-                        case '.': std::cout << "\033[32m.\033[0m"; break;
+                        case '.': std::cout << "\033[" << color << "m"
+                                             << (z ? z->terrainStyle : ".") << "\033[0m"; break;
                         case 'K': std::cout << "\033[93mK\033[0m"; break;
                         case 'B': std::cout << "\033[91mB\033[0m"; break;
                         case 'H': std::cout << "\033[92mH\033[0m"; break;
@@ -287,7 +310,13 @@ void GameManager::moverJugador(int dx, int dy) {
         handleTile(tile);
 
         if (jugador.estaVivo() && !jugador.getHaGanado()
-            && tile != 'B' && tile != 'K' && tile != 'H') {
+            && tile != 'B' && tile != 'K' && tile != 'H' &&
+               tile != 'h' && tile != 'G') {
+            const ZoneMetadata* zone = zonaActual();
+            encounterMgr.configurar(metadata.encounterBase, metadata.encounterMultiplier *
+                                    (zone ? zone->encounterMultiplier : 1.0f),
+                                    metadata.encounterGrowthCap, metadata.encounterGraceSteps,
+                                    zone ? zone->safe : false);
             encounterMgr.registrarPaso();
             if (encounterMgr.verificarEncuentro()) {
                 iniciarCombate();
@@ -305,8 +334,13 @@ void GameManager::moverJugador(int dx, int dy) {
  */
 void GameManager::handleTile(char tile) {
     if (tile == 'B'){
+        const ZoneMetadata* zone = zonaActual();
+        if (!zone || zone->bossId.empty()) {
+            std::cerr << "Error de configuracion: el tile B no tiene jefe asignado.\n";
+            return;
+        }
         iniciarCombateJefe();
-        if (jugador.estaVivo() && enemyFactory.hayJefe(nivelActual)){
+        if (jugador.estaVivo()){
             jefeDerrotado = true;
             mapa.setTile(jugador.getPosX(), jugador.getPosY(), '.');
             guardarPartida();
@@ -329,8 +363,12 @@ void GameManager::handleTile(char tile) {
             guardarPartida();
         }
     }
-    if (tile == 'H'){
-        jugador.usarPocion();
+    if (tile == 'H' || tile == 'h' || tile == 'G'){
+        int pct = 100;
+        auto healing = metadata.healing.find(tile);
+        if (healing != metadata.healing.end()) pct = healing->second;
+        int amount = jugador.getSaludMaxima() * pct / 100;
+        jugador.setSalud(std::min(jugador.getSaludMaxima(), jugador.getSalud() + amount));
         mapa.setTile(jugador.getPosX(), jugador.getPosY(), '.');
         CacheManager::guardarMapa(mapa);
     }
@@ -351,7 +389,10 @@ void GameManager::mostrarInventario() {
  * y crea una instancia de Enemigo lista para batalla().
  */
 void GameManager::iniciarCombate() {
-    Enemigo enemigo = enemyFactory.crearEnemigo(jugador.getNivel());
+    const ZoneMetadata* zone = zonaActual();
+    Enemigo enemigo = zone && !zone->enemies.empty()
+        ? enemyFactory.crearEnemigo(zone->enemies, zone->statMultiplier, zone->xpMultiplier)
+        : enemyFactory.crearEnemigo(jugador.getNivel());
     batalla(jugador, enemigo);
 }
 
@@ -361,15 +402,14 @@ void GameManager::iniciarCombate() {
  * muestra un mensaje y cae en un combate aleatorio normal.
  */
 void GameManager::iniciarCombateJefe() {
-    if (enemyFactory.hayJefe(nivelActual)) {
-        Enemigo jefe = enemyFactory.crearJefe(nivelActual);
+    const ZoneMetadata* zone = zonaActual();
+    if (zone && !zone->bossId.empty()) {
+        Enemigo jefe = enemyFactory.crearPorId(zone->bossId);
+        jefe.setXpMultiplier(zone->xpMultiplier);
+        jefe.aplicarMultiplicadorStats(zone->statMultiplier);
         batalla(jugador, jefe);
     } else {
-        std::cout << "Aun no hay un jefe para tu nivel...\n";
-        std::cout << "Un enemigo aparece de todas formas!\n";
-        std::cout << "Presiona Enter para continuar...";
-        std::cin.get();
-        iniciarCombate();
+        std::cerr << "Error de configuracion: no hay jefe para esta zona.\n";
     }
 }
 
@@ -380,7 +420,8 @@ bool GameManager::cargarNivel(int nivel){
         return false;
     }
 
-    // Configurar terreno segun el nivel
+    cargarMetadata(nivel);
+    // Configurar terreno segun el nivel (fallback para mapas sin metadata)
     switch(nivel){
         case 1: encounterMgr.setTerreno(EncounterManager::Terreno::LLANURA); break;
         case 2: encounterMgr.setTerreno(EncounterManager::Terreno::MAZMORRA); break;
@@ -450,7 +491,11 @@ void GameManager::run() {
                     case 'i': case 'I': 
                         mostrarInventario(); 
                         continue;
-                    case 'q': case 'Q':
+                                case '8': case static_cast<char>(-8):
+                                    limiteNivelActivo = !limiteNivelActivo;
+                                    jugador.setIgnorarLimiteNivel(!limiteNivelActivo);
+                                    continue;
+                                case 'q': case 'Q':
                         guardarPartida();
                         return;
                     default: continue;

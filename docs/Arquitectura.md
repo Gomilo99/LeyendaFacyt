@@ -82,8 +82,8 @@ main.cpp → GameManager::run()
   │
   └── OVERWORLD:
         ├── WASD → moverJugador() → handleTile() → EncounterManager
-        ├── tile 'B' → EnemyFactory::crearJefe() → derrota → habilita K
-        ├── tile 'H' → usar poción → setTile('.')
+        ├── tile 'B' → jefe de la zona → derrota → habilita K
+        ├── tile 'h/H/G' → curación porcentual → setTile('.')
         ├── tile 'K' → carga el siguiente mapa (o victoria final)
         ├── 'I' → [[Sistemas/Inventario|InventoryUI]]
         └── 'Q' → CacheManager::guardar() → salir

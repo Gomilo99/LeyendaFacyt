@@ -1,6 +1,6 @@
 ---
 creado: 22/07/2026
-modificado: 22/07/2026
+modificado: 08/09/2026
 tipo: Avance
 tags: # deuda-tecnica, idea-loca, bug-critico, bug, refactor
 titulo: Desiciones
@@ -20,6 +20,36 @@ Para logs de cambios técnicos, ver [[Cambios]].
 ---
 
 ## Decisiones
+
+### Metadatos laterales `.meta` para mapas
+
+**Fecha**: 2026-09-08
+**Decisión**: Mantener la geometría en `nivelN.txt` y el balance/diseño en
+`nivelN.meta`, usando zonas rectangulares grandes y superposición para casos
+puntuales como refugios.
+
+**Motivo**: Evita mezclar configuración con la cuadrícula, permite cambiar
+colores y símbolos de terreno sin rediseñar el mapa y evita una fragmentación
+difícil de depurar.
+
+### Enemigos seleccionados por zona, no por nivel del jugador
+
+**Fecha**: 2026-09-08
+**Decisión**: La tabla ponderada de enemigos pertenece a la zona y el nivel del
+héroe no cambia sus probabilidades. La zona puede modificar estadísticas y XP.
+
+**Motivo**: Conserva la identidad de cada área y hace reproducible el balance
+para cualquier jugador.
+
+### Límite de nivel por sección
+
+**Fecha**: 2026-09-08
+**Decisión**: El límite bloquea la subida del héroe por sección. La XP se limita
+al umbral actual y se muestra como `expMax/expMax`. `8`/`F8` desactiva el límite
+durante depuración.
+
+**Motivo**: La campaña controla el ritmo de progresión sin descartar XP ni
+permitir que una zona temprana escale indefinidamente.
 
 ### [[Sistemas/Plataforma|Platform.hpp]] en vez de `#ifdef` dispersos
 

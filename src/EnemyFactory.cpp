@@ -48,7 +48,8 @@ void EnemyFactory::cargarDesdeJSON(
             t.peso = item.value("peso", 5);
             t.nivel = nivel;
             t.boss = item.value("boss", false);
-            t.exp_base = item["exp"];
+            t.exp_base = item.value("exp", 0);
+            t.tier = item.value("tier", 1);
 
             // Copia las 6 líneas de arte ASCII
             for (int i = 0; i < 6 && i < (int)item["ascii"].size(); i++)
@@ -113,7 +114,38 @@ const EnemyFactory::EnemyTemplate& EnemyFactory::seleccionarPlantilla(int nivel)
  */
 Enemigo EnemyFactory::crearEnemigo(int nivel) {
     const auto& t = seleccionarPlantilla(nivel);
-    return Enemigo(t.id, t.nombre, t.salud, t.ataque, t.defensa, t.nivel, t.asciiArt, t.botin, t.exp_base);
+    Enemigo result(t.id, t.nombre, t.salud, t.ataque, t.defensa, t.nivel, t.asciiArt, t.botin, t.exp_base);
+    result.setTier(t.tier);
+    return result;
+}
+Enemigo EnemyFactory::crearPorId(const std::string& id) const {
+    for (const auto& level : plantillas)
+        for (const auto& t : level.second)
+            if (t.id == id) {
+                Enemigo result(t.id, t.nombre, t.salud, t.ataque, t.defensa, t.nivel,
+                               t.asciiArt, t.botin, t.exp_base);
+                result.setTier(t.tier);
+                return result;
+            }
+    throw std::runtime_error("Enemigo no encontrado: " + id);
+}
+Enemigo EnemyFactory::crearEnemigo(
+    const std::vector<std::pair<std::string, int>>& entries,
+    float statMultiplier, float xpMultiplier) {
+    if (entries.empty()) return crearEnemigo(1);
+    int total = 0; for (const auto& e : entries) total += std::max(0, e.second);
+    std::uniform_int_distribution<int> dist(0, std::max(0, total - 1));
+    int roll = dist(DataManager::rng());
+    for (const auto& e : entries) {
+        roll -= e.second;
+        if (roll < 0) {
+            Enemigo result = crearPorId(e.first);
+            result.aplicarMultiplicadorStats(statMultiplier);
+            result.setXpMultiplier(xpMultiplier);
+            return result;
+        }
+    }
+    return crearPorId(entries.back().first);
 }
 
 /**
@@ -126,8 +158,12 @@ Enemigo EnemyFactory::crearJefe(int nivel) {
         auto it = plantillas.find(n);
         if (it == plantillas.end()) continue;
         for (const auto& t : it->second) {
-            if (t.boss)
-                return Enemigo(t.id, t.nombre, t.salud, t.ataque, t.defensa, t.nivel, t.asciiArt, t.botin, t.exp_base);
+            if (t.boss) {
+                Enemigo result(t.id, t.nombre, t.salud, t.ataque, t.defensa,
+                               t.nivel, t.asciiArt, t.botin, t.exp_base);
+                result.setTier(t.tier);
+                return result;
+            }
         }
     }
     throw std::runtime_error("No hay jefe definido para el nivel " + std::to_string(nivel));

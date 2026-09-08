@@ -1,6 +1,6 @@
 ---
 creado: 22/07/2026
-modificado: 22/07/2026
+modificado: 08/09/2026
 tipo: Avance
 tags: # deuda-tecnica, idea-loca, bug-critico, bug, refactor
 titulo: Enemigos, Factoria y Encuentros
@@ -28,6 +28,46 @@ EncounterManager  ◀──integra──  [[Mapa|GameManager]]
 ```
 
 Ver también: [[Combate#Sistema de loot]], [[Guardado#Formato de archivos JSON]].
+
+## Configuración por sección, zona y terreno
+
+La tabla de enemigos pertenece a la zona del mapa y no depende del nivel del
+jugador. Los archivos `mapas/nivelN.meta` definen listas ponderadas:
+
+```json
+{
+  "id": "field",
+  "terrain": "plain",
+  "enemies": [
+    {"id": "goblin", "weight": 10},
+    {"id": "orco", "weight": 7}
+  ],
+  "stat_multiplier": 1.0,
+  "xp_multiplier": 1.0,
+  "boss_id": "zombie_lunes"
+}
+```
+
+El terreno seguro usa `safe: true` y desactiva los encuentros. Las zonas
+rectangulares pueden superponerse; la zona más pequeña tiene prioridad, por lo
+que un refugio no obliga a dividir toda la cuadrícula.
+
+Los multiplicadores de estadísticas y XP pertenecen a la zona. Así una
+mazmorra o bosque puede ser más peligroso sin escalar artificialmente según el
+nivel del héroe.
+
+## XP calculada
+
+La recompensa usa el nivel propio del enemigo, su tier y el multiplicador de
+zona. El nivel del jugador no participa:
+
+```text
+XP = XP_BASE × nivelEnemigo × tier × multiplicadorZona
+```
+
+El campo `exp` antiguo del JSON se mantiene por compatibilidad, pero el
+combate utiliza la recompensa calculada. La XP del jugador se limita al
+umbral actual y no puede mostrar valores superiores a `expMax`.
 
 ---
 
@@ -112,7 +152,7 @@ Rango [0, totalPeso) con pesos: Goblin=10, Orco=8, Slime=7, Murciélago=9, Zombi
 | Método | Comportamiento |
 |--------|---------------|
 | `crearEnemigo(nivel)` | Selección ponderada, devuelve `Enemigo` instanciado |
-| `crearJefe(nivel)` | Busca desde `nivel` hacia abajo el primer `boss: true`. Si no encuentra, lanza excepción |
+| `crearPorId(id)` | Crea el enemigo exacto asignado al `boss_id` de la zona |
 | `hayJefe(nivel)` | `true` si existe algún `boss: true` entre nivel 1 y `nivel` |
 
 ---
