@@ -55,7 +55,7 @@ proyecto/
 │   └── nivel2.txt
 └── cache/             ← generado en tiempo de juego (escritura)
     ├── heroe.json     ← estado completo del héroe (14 campos + inventario)
-    ├── mapa_cache.txt ← mapa con tiles modificados (B/h/H/G → '.')
+    ├── mapa_cache.txt ← mapa con tiles modificados (B → terreno de la zona; h/H/G → terreno base)
     ├── partida.json   ← sección, nivel, jefe derrotado y victoria
     └── partida.flag   ← flag de existencia (archivo vacío)
 ```
@@ -145,8 +145,8 @@ namespace CacheManager {
 
 | Evento | Se guarda en caché |
 |--------|-------------------|
-| Derrotar jefe (tile 'B' → '.') | `guardarMapa()` |
-| Recoger poción (tile 'h/H/G' → '.') | `guardarMapa()` |
+| Derrotar jefe (tile 'B' → terreno de la zona) | `guardarMapa()` |
+| Recoger poción (tile 'h/H/G' → terreno base) | `guardarMapa()` |
 | Terminar combate (victoria) | `guardarHeroe()` (desde `batalla()`) |
 | Salir del juego con 'Q' | `guardarHeroe()` + `guardarMapa()` |
 | Cambiar de nivel o derrotar jefe | `guardarEstado()` |
@@ -163,7 +163,7 @@ inventario, arma, mana y experiencia.
 ### Formato del mapa en caché
 
 `cache/mapa_cache.txt` es idéntico al original (`vector<string>`), solo con los
-tiles modificados (B/h/H/G → `.`). Usa `Mapa::guardar(archivo)` que serializa
+tiles modificados (B/h/H/G → terreno restaurado). Usa `Mapa::guardar(archivo)` que serializa
 línea por línea.
 
 El archivo `.meta` no se copia al caché. Al continuar, el juego vuelve a cargar

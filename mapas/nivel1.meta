@@ -10,8 +10,8 @@
   },
   "healing": {"h": 25, "H": 50, "G": 100},
   "terrain_styles": {
-    "tutorial": {"color": 37, "style": "."},
-    "safe": {"color": 36, "style": "."}
+    "tutorial": {"color": 37},
+    "safe": {"color": 36}
   },
   "zones": [
     {

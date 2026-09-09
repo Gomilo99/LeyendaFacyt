@@ -12,13 +12,45 @@ dificultad: Media
 version: 1.0.0
 ---
 ## Log
+### Log 09/09/2026 - Correcciones de interfaz, HUD y terrenos de curación
+#### Cambios realizados
+- Se corrigió la superposición de mensajes al equipar armas desde el inventario.
+  `InventoryUI` ahora llama a `Jugador::equiparArma()` en modo silencioso y
+  deja que el mensaje se dibuje dentro del `ScreenBuffer` del inventario.
+- El cuadro de información del héroe en el overworld ahora calcula su ancho a
+  partir de la línea visible más larga. El borde se mantiene alineado cuando
+  cambian el nombre, el arma, la zona o el terreno.
+- Al consumir una poción (`h`, `H` o `G`), el tile se restaura al primer
+  terreno no seguro definido en la metadata del nivel. En el nivel 2 esto
+  devuelve `,` (pradera) en lugar de forzar siempre `.`.
+- Se confirmó que `terrain_styles.*.style` se carga en `MapMetadata`, pero no
+  controla todavía el dibujo del mapa: el carácter y la representación visual
+  siguen dependiendo del tile del archivo `.txt` y del `switch` de
+  `GameManager::renderMapa()`.
+
+#### Validación
+- La compilación incremental y la compilación forzada terminaron sin errores
+  cuando `make` estaba disponible en el entorno.
+- La comprobación posterior de `src/Inventario.cpp` y `src/GameManager.cpp`
+  no reportó errores.
+
+### Log 09/09/2026 - Victoria final después del último nivel
+#### Cambios realizados
+- Se corrigió `batalla()`: ya no considera jefe final a cualquier enemigo con
+  nivel alto.
+- `GameManager` marca como final únicamente al jefe del último mapa disponible.
+  Los jefes de los niveles anteriores se derrotan normalmente y permiten
+  continuar al siguiente nivel mediante su llave `K`.
+- La campaña termina solo después de derrotar al jefe del último nivel y
+  recoger su `K` final.
+
 ### Log 08/09/2026 - Progresión por secciones, metadatos y encuentros configurables
 #### Cambios realizados
 - Se añadieron archivos `mapas/nivelN.meta` para configurar cada sección sin
   mezclar balance con la cuadrícula visual.
 - Cada metadata define límite de nivel del héroe, probabilidad base,
   multiplicador del mapa, pasos de gracia, crecimiento máximo de encuentros,
-  estilos de terreno, curación porcentual y zonas rectangulares.
+  estilos de terreno, curación porcentual y zonas asociadas a tiles.
 - Las zonas seleccionan enemigos por peso y pueden aplicar multiplicadores de
   estadísticas y experiencia. El nivel del jugador ya no determina la tabla de
   enemigos de una zona.

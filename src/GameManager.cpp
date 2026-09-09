@@ -230,27 +230,38 @@ void GameManager::renderMapa() {
     std::string hpBar = std::string(hpFill, '#') + std::string(barW - hpFill, '.');
     std::string mpBar = std::string(mpFill, '#') + std::string(barW - mpFill, '.');
 
-    std::vector<std::string> hud;
-    hud.push_back("\033[36m+--------------------------------------+\033[0m");
-    hud.push_back("\033[93m|  " + jugador.getNombre() + "\033[0m");
-    hud.push_back("\033[97m|  Nv: " + std::to_string(jugador.getNivel())
+    std::vector<std::string> hudText;
+    hudText.push_back(jugador.getNombre());
+    hudText.push_back("Nv: " + std::to_string(jugador.getNivel())
         + "  Exp: " + std::to_string(jugador.getExperiencia())
-        + "/" + std::to_string(jugador.getExperienciaNecesaria()) + "\033[0m");
-    hud.push_back("\033[" + hpColor + "m|  HP: "
-        + std::to_string(jugador.getSalud()) + "/"
-        + std::to_string(jugador.getSaludMaxima()) + " " + hpBar + "\033[0m");
-    hud.push_back("\033[94m|  MP: "
-        + std::to_string(jugador.getMana()) + "/"
-        + std::to_string(jugador.getManaMaxima()) + " " + mpBar + "\033[0m");
-    hud.push_back("\033[97m|  Arma: " + jugador.getArmaNombre() + "\033[0m");
-    hud.push_back("\033[97m|  Pociones: " + std::to_string(jugador.getPociones()) + "\033[0m");
+        + "/" + std::to_string(jugador.getExperienciaNecesaria()));
+    hudText.push_back("HP: " + std::to_string(jugador.getSalud())
+        + "/" + std::to_string(jugador.getSaludMaxima()) + " " + hpBar);
+    hudText.push_back("MP: " + std::to_string(jugador.getMana())
+        + "/" + std::to_string(jugador.getManaMaxima()) + " " + mpBar);
+    hudText.push_back("Arma: " + jugador.getArmaNombre());
+    hudText.push_back("Pociones: " + std::to_string(jugador.getPociones()));
     const ZoneMetadata* zone = zonaActual();
-    hud.push_back("\033[97m|  Sec: " + std::to_string(metadata.section) +
+    hudText.push_back("Sec: " + std::to_string(metadata.section) +
                 "  Terreno: " + (zone ? zone->terrain : "default") +
-                "  Zona: " + (zone ? zone->id : "none") + "\033[0m");
-    hud.push_back("\033[97m|  Cap: " + std::to_string(nivelMaximoSeccion) +
-                (limiteNivelActivo ? " (ON)" : " (OFF)") + "  F8/8 toggle\033[0m");
-    hud.push_back("\033[36m+--------------------------------------+\033[0m");
+                "  Zona: " + (zone ? zone->id : "none"));
+    hudText.push_back("Cap: " + std::to_string(nivelMaximoSeccion) +
+                (limiteNivelActivo ? " (ON)" : " (OFF)") + "  F8/8 toggle");
+
+    int hudWidth = 40;
+    for (const auto& line : hudText)
+        hudWidth = std::max(hudWidth, static_cast<int>(line.size()) + 4);
+    int contentWidth = hudWidth - 4;
+    std::string hudBorder = "\033[36m+" + std::string(hudWidth - 2, '-') + "+\033[0m";
+    std::vector<std::string> hud;
+    hud.push_back(hudBorder);
+    for (size_t i = 0; i < hudText.size(); i++) {
+        std::string line = hudText[i];
+        line.resize(contentWidth, ' ');
+        std::string color = (i == 0) ? "93" : (i == 2 ? hpColor : (i == 3 ? "94" : "97"));
+        hud.push_back("\033[" + color + "m|  " + line + " |\033[0m");
+    }
+    hud.push_back(hudBorder);
 
     int altoHud = (int)hud.size();
     int altoTotal = std::max(altoMapa, altoHud);
@@ -379,9 +390,16 @@ void GameManager::handleTile(char tile) {
         if (healing != metadata.healing.end()) pct = healing->second;
         int amount = jugador.getSaludMaxima() * pct / 100;
         jugador.setSalud(std::min(jugador.getSaludMaxima(), jugador.getSalud() + amount));
-        const ZoneMetadata* zone = zonaActual();
-        mapa.setTile(jugador.getPosX(), jugador.getPosY(),
-                    zone && zone->tile != '\0' ? zone->tile : '.');
+
+        // El tile de curacion no tiene zona propia; restaurar el terreno base del nivel.
+        char terrenoBase = '.';
+        for (const auto& candidate : metadata.zones) {
+            if (candidate.tile != '\0' && candidate.tile != 's') {
+                terrenoBase = candidate.tile;
+                break;
+            }
+        }
+        mapa.setTile(jugador.getPosX(), jugador.getPosY(), terrenoBase);
         CacheManager::guardarMapa(mapa);
     }
 }
@@ -419,7 +437,8 @@ void GameManager::iniciarCombateJefe() {
         Enemigo jefe = enemyFactory.crearPorId(zone->bossId);
         jefe.setXpMultiplier(zone->xpMultiplier);
         jefe.aplicarMultiplicadorStats(zone->statMultiplier);
-        batalla(jugador, jefe);
+        bool esUltimoNivel = !std::ifstream(Config::mapaPath(nivelActual + 1)).good();
+        batalla(jugador, jefe, esUltimoNivel);
     } else {
         std::cerr << "Error de configuracion: no hay jefe para esta zona.\n";
     }

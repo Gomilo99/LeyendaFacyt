@@ -95,15 +95,15 @@ Para el trabajo actual del sprint, ver [[Sprint]]. Para ideas futuras, ver [[Bac
 ### Resultado técnico del objetivo
 
 La progresión dejó de depender únicamente del nivel del héroe. Cada mapa se
-divide lógicamente en una sección y un conjunto pequeño de zonas rectangulares
-configuradas en un archivo `.meta`. Esto permite que el diseño visual siga en
+divide lógicamente en una sección y un conjunto pequeño de zonas identificadas
+por tile en un archivo `.meta`. Esto permite que el diseño visual siga en
 el `.txt`, mientras el balance puede cambiarse sin redibujar la geometría.
 
 La sección controla el límite de nivel del jugador y los parámetros globales de
 encuentros. La zona controla el terreno, la tabla ponderada de enemigos, la
-seguridad del área y los multiplicadores de estadísticas y XP. Las zonas pueden
-superponerse y la más pequeña tiene prioridad, de modo que un refugio o una
-sala especial no exige crear decenas de regiones.
+seguridad del área y los multiplicadores de estadísticas y XP. Cada carácter de
+terreno se asocia a una zona mediante `tile`; un refugio o una sala especial se
+representa dibujando su carácter en el `.txt`.
 
 El ritmo de progresión queda controlado por tres mecanismos independientes:
 

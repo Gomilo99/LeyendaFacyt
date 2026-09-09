@@ -171,6 +171,6 @@ void limpiarBuffer();
 void limpiarPantalla();
 
 // Punto de entrada al combate: muestra intro, instancia BattleSystem, maneja loot/exp post-batalla
-void batalla(Jugador& jugador, Enemigo& enemigo);
+void batalla(Jugador& jugador, Enemigo& enemigo, bool esJefeFinal = false);
 
 #endif

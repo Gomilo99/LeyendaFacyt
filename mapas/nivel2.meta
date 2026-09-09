@@ -10,13 +10,14 @@
   },
   "healing": {"h": 25, "H": 50, "G": 100},
   "terrain_styles": {
-    "prairie": {"color": 32, "style":"."},
-    "safe": {"color": 36, "style":"."}
+    "camino": {"color": 37},
+    "pradera": {"color": 32},
+    "safe": {"color": 36}
   },
   "zones": [
     {
-      "id":"prairie", "tile":",",
-      "terrain":"prairie",
+      "id":"pradera", "tile":",",
+      "terrain":"pradera",
       "encounter_multiplier":1.0, 
       "stat_multiplier":1.0, 
       "xp_multiplier":1.0,
@@ -26,6 +27,17 @@
         {"id":"jabalina_pradera","weight":5}
       ],
       "boss_id":"rey_maleza"},
+    {
+      "id":"camino", "tile":".",
+      "terrain":"camino",
+      "encounter_multiplier":0.8, 
+      "stat_multiplier":1.2, 
+      "xp_multiplier":0.8,
+      "enemies":[
+        {"id":"slime_cafe","weight":12},
+        {"id":"goblin","weight":8}
+      ]
+    },
     {
       "id":"safe_start", "tile":"s",
       "terrain":"safe", 

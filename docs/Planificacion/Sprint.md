@@ -44,7 +44,7 @@ _(al terminar una tarea, moverla aquí)_
 
 - [x] Progresión por secciones y configuración `.meta` 📅 2026-09-08 ⏫ #sistema/mapa #sistema/enemigos
   - Límites de nivel por sección con interruptor de depuración `8`/`F8`.
-  - Zonas rectangulares con terreno, colores, símbolos y tablas de enemigos.
+  - Zonas asociadas a tiles con terreno, colores, símbolos y tablas de enemigos.
   - Terreno seguro sin encuentros y modificadores de estadísticas/XP.
   - Jefes asignados exclusivamente al `B` mediante `boss_id`.
   - Encuentros con cuatro pasos de gracia, multiplicador por mapa y crecimiento

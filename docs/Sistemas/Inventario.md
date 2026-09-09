@@ -102,7 +102,7 @@ L21: [W/S] Navegar [A/D] Categoria [SPACE] OK [Q] Salir
 
 | Tipo de item | Acción | Efecto |
 |--------------|--------|--------|
-| `Arma` | Equipar | Llama `Jugador::equiparArma()`, actualiza ataque |
+| `Arma` | Equipar | Llama `Jugador::equiparArma()` en modo silencioso y actualiza ataque; el resultado se muestra en el log del inventario |
 | `Pocion` | Usar | Llama `Jugador::usarPocion()`, elimina del inventario, reconstruye lista |
 | `ObjClave` | Mostrar info | Muestra la descripción del objeto |
 
@@ -146,6 +146,14 @@ Se requiere `std::cin.ignore(numeric_limits<streamsize>::max(), '\n')` antes de 
 | Qué hay debajo | Frame de combate (ScreenBuffer) | Mapa renderizado con `std::cout` directo |
 | Cómo se restaura | `screenBuffer.forceRedraw()` → BattleSystem redibuja todo | `limpiarPantalla()` + `renderMapa()` desde cero |
 | Input fantasma | No hay `\n` residual | Sí, requiere `cin.ignore()` |
+
+### Salida de acciones
+
+Las acciones del inventario no escriben directamente con `std::cout` cuando
+ya existe una interfaz basada en `ScreenBuffer`. Al equipar un arma se usa el
+modo silencioso de `Jugador::equiparArma()` y `InventoryUI` coloca el mensaje
+en su línea de log. Esto evita que el texto de la acción se mezcle con la
+descripción del objeto o con el siguiente frame.
 
 ## Dependencias
 

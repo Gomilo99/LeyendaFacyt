@@ -25,12 +25,13 @@ Para logs de cambios técnicos, ver [[Cambios]].
 
 **Fecha**: 2026-09-08
 **Decisión**: Mantener la geometría en `nivelN.txt` y el balance/diseño en
-`nivelN.meta`, usando zonas rectangulares grandes y superposición para casos
-puntuales como refugios.
+`nivelN.meta`, usando zonas asociadas a tiles del mapa para casos como terrenos
+y refugios.
 
-**Motivo**: Evita mezclar configuración con la cuadrícula, permite cambiar
-colores y símbolos de terreno sin rediseñar el mapa y evita una fragmentación
-difícil de depurar.
+**Motivo**: Evita mezclar reglas con la cuadrícula y permite cambiar el balance
+sin rediseñar el mapa. El carácter real del terreno continúa definido en el
+`.txt`; los estilos visuales del `.meta` se cargan como metadatos, pero el
+renderizador actual todavía usa su tabla de símbolos y colores.
 
 ### Enemigos seleccionados por zona, no por nivel del jugador
 

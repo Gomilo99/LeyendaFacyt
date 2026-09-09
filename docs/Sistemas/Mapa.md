@@ -62,11 +62,11 @@ El mapa se carga desde archivos `.txt` en `mapas/`. Cada carácter representa un
 | `.` | Suelo — transitable |
 | `P` | Posición inicial del jugador |
 | `E` | Spawn de enemigo (obsoleto, reemplazado por encuentros aleatorios) |
-| `B` | Jefe final del nivel |
+| `B` | Jefe del nivel; el jefe del último nivel es el jefe final de campaña |
 | `K` | Llave mágica (victoria) |
-| `h` | Poción pequeña (25% de vida máxima) |
-| `H` | Poción mediana (50% de vida máxima) |
-| `G` | Poción grande (100% de vida máxima) |
+| `h` | Poción pequeña (25% de vida máxima); restaura el terreno base |
+| `H` | Poción mediana (50% de vida máxima); restaura el terreno base |
+| `G` | Poción grande (100% de vida máxima); restaura el terreno base |
 | `,` | Pradera decorativa, transitable |
 | `;` | Bosque o hierba, transitable |
 | `~` | Agua u océano, transitable con semántica configurable |
@@ -142,7 +142,7 @@ OVERWORLD
   │                     │               ├─ victoria → mapa.setTile('.') → [[Guardado|guardarMapa()]]
   │                     │               └─ derrota  → GAME_OVER
   │                     ├─ tile 'K' ──→ siguiente sección o victoria final
-  │                     ├─ tile 'h/H/G' ──→ curación porcentual → tile → '.'
+  │                     ├─ tile 'h/H/G' ──→ curación porcentual → terreno base
   │                     └─ tile '.' ──→ [[Enemigos|EncounterManager::checkEncounter()]]
   │                                       │
   │                                       ├─ true  → enemigo de la zona → [[Combate|batalla()]]
@@ -182,7 +182,7 @@ main.cpp → GameManager::run()
   └── OVERWORLD:
         ├── tile '.' + encounter → EnemyFactory → [[Combate|batalla()]]
         ├── tile 'B' → EnemyFactory → [[Combate|batalla()]]
-        ├── tile 'h/H/G' → curación porcentual → setTile('.')
+        ├── tile 'h/H/G' → curación porcentual → restaura el terreno base
         ├── tile 'K' → siguiente sección o victoria final
         └── 'Q' → [[Guardado|guardar]] → salir
 ```
@@ -220,11 +220,14 @@ main.cpp      → GameManager.hpp
 Cada `mapas/nivelN.meta` acompaña al mapa y permite cambiar el balance sin
 rediseñar la cuadrícula. Define sección, límite de nivel, probabilidad base,
 multiplicador del mapa, pasos de gracia, crecimiento máximo, estilos de terreno,
-curación y zonas rectangulares.
+curación y zonas asociadas a un tile.
 
 Una zona puede ser segura, modificar estadísticas/XP, listar enemigos por peso
-y asignar el jefe exacto del tile `B` mediante `boss_id`. Las zonas pequeñas
-superpuestas tienen prioridad para evitar fragmentar el mapa en muchas regiones.
+y asignar el jefe exacto del tile `B` mediante `boss_id`. `tile` identifica las
+celdas de la zona; cada carácter de terreno debe tener una sola zona
+correspondiente. Actualmente `boss_id` para `B` se resuelve usando la primera
+zona no segura, así que dos terrenos distintos no pueden distinguirse
+automáticamente bajo el mismo `B`.
 
 El HUD muestra sección, zona, terreno y límite. `8` o `F8` alterna el límite
 para depuración. La XP nunca supera el umbral actual.
@@ -233,7 +236,9 @@ para depuración. La XP nunca supera el umbral actual.
 Cada `mapas/nivelN.meta` acompaña al mapa y permite cambiar balance sin
 rediseñar la cuadrícula. Define el límite de nivel de la sección, multiplicador
 de encuentros y crecimiento máximo (hasta 20%), colores/estilos de terreno,
-curación de `h`/`H`/`G` y zonas rectangulares. Una zona puede ser segura,
-modificar estadísticas/XP y listar sus enemigos por peso; `boss_id` selecciona
-exactamente el jefe del tile `B`. El HUD muestra sección, terreno, zona y
-límite. `8` (o F8 en Windows) alterna el límite para depuración.
+curación de `h`/`H`/`G` y zonas asociadas a un tile. Una zona puede ser segura,
+modificar estadísticas/XP y listar sus enemigos por peso. `boss_id` se resuelve
+para `B` mediante la primera zona no segura, por lo que varios terrenos no
+pueden distinguirse automáticamente si comparten el mismo `B`. El HUD muestra
+sección, terreno, zona y límite. `8` (o F8 en Windows) alterna el límite para
+depuración.

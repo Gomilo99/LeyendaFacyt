@@ -440,7 +440,7 @@ void InventoryUI::doAction() {
     auto obj = entry.objeto;
 
     if (auto arma = std::dynamic_pointer_cast<Arma>(obj)){
-        player->equiparArma(arma);
+        player->equiparArma(arma, true);
         logMessage = "Has equipado: " + arma->getNombre();
     }else if (auto pocion = std::dynamic_pointer_cast<Pocion>(obj)){
         player->usarPocion(pocion.get());
