@@ -20,7 +20,7 @@
  */
 GameManager::GameManager()
     : jugador("Heroe"), state(GameState::MAIN_MENU), spawnX(1), spawnY(1),
-      nivelActual(1), jefeDerrotado(false), haGanadoFinal(false)
+    nivelActual(1), jefeDerrotado(false), haGanadoFinal(false)
 {
     objetos = DataManager::cargarObjetos();
     if (objetos.empty()) {
@@ -61,7 +61,9 @@ void GameManager::cargarMetadata(int nivel) {
 }
 
 const ZoneMetadata* GameManager::zonaActual() const {
-    return metaCargada ? metadata.zoneAt(jugador.getPosX(), jugador.getPosY()) : nullptr;
+    return metaCargada
+        ? metadata.zoneAt(mapa.getTile(jugador.getPosX(), jugador.getPosY()))
+        : nullptr;
 }
 
 /**
@@ -229,7 +231,7 @@ void GameManager::renderMapa() {
     std::string mpBar = std::string(mpFill, '#') + std::string(barW - mpFill, '.');
 
     std::vector<std::string> hud;
-    hud.push_back("\033[36m+-----------------------+\033[0m");
+    hud.push_back("\033[36m+--------------------------------------+\033[0m");
     hud.push_back("\033[93m|  " + jugador.getNombre() + "\033[0m");
     hud.push_back("\033[97m|  Nv: " + std::to_string(jugador.getNivel())
         + "  Exp: " + std::to_string(jugador.getExperiencia())
@@ -248,7 +250,7 @@ void GameManager::renderMapa() {
                 "  Zona: " + (zone ? zone->id : "none") + "\033[0m");
     hud.push_back("\033[97m|  Cap: " + std::to_string(nivelMaximoSeccion) +
                 (limiteNivelActivo ? " (ON)" : " (OFF)") + "  F8/8 toggle\033[0m");
-    hud.push_back("\033[36m+-----------------------+\033[0m");
+    hud.push_back("\033[36m+--------------------------------------+\033[0m");
 
     int altoHud = (int)hud.size();
     int altoTotal = std::max(altoMapa, altoHud);
@@ -257,19 +259,26 @@ void GameManager::renderMapa() {
         if (y < altoMapa) {
             for (int x = 0; x < anchoMapa; x++) {
                 if (x == jugador.getPosX() && y == jugador.getPosY()) {
-                    std::cout << "\033[93m@\033[0m";
+                    std::cout << "\033[1;93m@ \033[0m";
                 } else {
                     char t = mapa.getTile(x, y);
-                    const ZoneMetadata* z = metadata.zoneAt(x, y);
-                    int color = z ? z->terrainColor : 32;
                     switch (t) {
-                        case '#': std::cout << "\033[90m#\033[0m"; break;
-                        case '.': std::cout << "\033[" << color << "m"
-                                            << (z ? z->terrainStyle : ".") << "\033[0m"; break;
-                        case 'K': std::cout << "\033[93mK\033[0m"; break;
-                        case 'B': std::cout << "\033[91mB\033[0m"; break;
-                        case 'H': std::cout << "\033[92mH\033[0m"; break;
-                        default:  std::cout << t;
+                        case '#': std::cout << "\033[36m# \033[0m"; break;
+                        case '-': case '|': case '+': case '=':
+                            std::cout << "\033[36m" << t << " \033[0m"; break;
+                        case '.': std::cout << "\033[90m. \033[0m"; break;
+                        case ',': std::cout << "\033[33m, \033[0m"; break;
+                        case ';': std::cout << "\033[33m; \033[0m"; break;
+                        case '~': std::cout << "\033[34m~ \033[0m"; break;
+                        case 'd': std::cout << "\033[90m▒ \033[0m"; break;
+                        case 's': std::cout << "\033[92m░ \033[0m"; break;
+                        case 'P': std::cout << "\033[1;93mP \033[0m"; break;
+                        case 'K': std::cout << "\033[1;96mK \033[0m"; break;
+                        case 'B': std::cout << "\033[1;91mB \033[0m"; break;
+                        case 'h': std::cout << "\033[32mh \033[0m"; break;
+                        case 'H': std::cout << "\033[92mH \033[0m"; break;
+                        case 'G': std::cout << "\033[1;92mG \033[0m"; break;
+                        default:  std::cout << t << ' ';
                     }
                 }
             }
@@ -303,7 +312,7 @@ void GameManager::moverJugador(int dx, int dy) {
         int viejoY = jugador.getPosY();
         jugador.setPos(nuevoX, nuevoY);
         if (mapa.getTile(viejoX, viejoY) == 'P'){
-            mapa.setTile(viejoX, viejoY, '.');
+            mapa.setTile(viejoX, viejoY, 's');
             CacheManager::guardarMapa(mapa);
         }
         char tile = mapa.getTile(nuevoX, nuevoY);
@@ -342,7 +351,8 @@ void GameManager::handleTile(char tile) {
         iniciarCombateJefe();
         if (jugador.estaVivo()){
             jefeDerrotado = true;
-            mapa.setTile(jugador.getPosX(), jugador.getPosY(), '.');
+            mapa.setTile(jugador.getPosX(), jugador.getPosY(),
+                        zone->tile != '\0' ? zone->tile : '.');
             guardarPartida();
         }
     }
@@ -369,7 +379,9 @@ void GameManager::handleTile(char tile) {
         if (healing != metadata.healing.end()) pct = healing->second;
         int amount = jugador.getSaludMaxima() * pct / 100;
         jugador.setSalud(std::min(jugador.getSaludMaxima(), jugador.getSalud() + amount));
-        mapa.setTile(jugador.getPosX(), jugador.getPosY(), '.');
+        const ZoneMetadata* zone = zonaActual();
+        mapa.setTile(jugador.getPosX(), jugador.getPosY(),
+                    zone && zone->tile != '\0' ? zone->tile : '.');
         CacheManager::guardarMapa(mapa);
     }
 }
@@ -439,7 +451,7 @@ bool GameManager::cargarNivel(int nivel){
         for (int x = 0; x < mapa.getAncho(); x++){
             if(mapa.getTile(x, y) == 'P'){
                 jugador.setPos(x, y);
-                mapa.setTile(x, y, '.');
+                mapa.setTile(x, y, 's');
                 y = mapa.getAlto();
                 break;
             }

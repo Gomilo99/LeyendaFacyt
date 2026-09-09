@@ -35,8 +35,8 @@ bool MapMetadata::load(const std::string& path) {
     for (const auto& value : root.value("zones", json::array())) {
         ZoneMetadata z;
         z.id = value.value("id", "");
-        z.x = value.value("x", 0); z.y = value.value("y", 0);
-        z.width = value.value("width", 0); z.height = value.value("height", 0);
+        const std::string tile = value.value("tile", "");
+        if (!tile.empty()) z.tile = tile.front();
         z.terrain = value.value("terrain", "plain");
         auto style = terrainStyles.find(z.terrain);
         if (style != terrainStyles.end()) {
@@ -55,11 +55,19 @@ bool MapMetadata::load(const std::string& path) {
     return true;
 }
 
-const ZoneMetadata* MapMetadata::zoneAt(int x, int y) const {
-    const ZoneMetadata* result = nullptr;
-    for (const auto& zone : zones)
-        if (zone.contains(x, y) &&
-            (!result || zone.width * zone.height < result->width * result->height))
-            result = &zone;
-    return result;
+const ZoneMetadata* MapMetadata::zoneAt(char tile) const {
+    for (const auto& zone : zones) {
+        if (zone.tile == tile)
+            return &zone;
+    }
+    if (tile == 'P') {
+        for (const auto& zone : zones)
+            if (zone.safe) return &zone;
+    }
+    if (tile == 'B' || tile == 'K' ||
+        tile == 'h' || tile == 'H' || tile == 'G') {
+        for (const auto& zone : zones)
+            if (!zone.safe) return &zone;
+    }
+    return nullptr;
 }

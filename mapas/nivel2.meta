@@ -15,9 +15,7 @@
   },
   "zones": [
     {
-      "id":"prairie", 
-      "x":1, "y":1, 
-      "width":34, "height":11, 
+      "id":"prairie", "tile":",",
       "terrain":"prairie",
       "encounter_multiplier":1.0, 
       "stat_multiplier":1.0, 
@@ -29,9 +27,7 @@
       ],
       "boss_id":"rey_maleza"},
     {
-      "id":"safe_start", 
-      "x":1, "y":1, 
-      "width":4, "height":3, 
+      "id":"safe_start", "tile":"s",
       "terrain":"safe", 
       "safe":true,
       "encounter_multiplier":0, 

@@ -1,23 +1,18 @@
 {
-    "arma": "Sopladora",
-    "ataque": 97,
-    "defensa": 80,
-    "exp": 2950,
-    "expMax": 1100,
-    "inventario": [
-        {
-            "cant": 1,
-            "nombre": "Sopladora"
-        }
-    ],
+    "arma": "Espada Gallo",
+    "ataque": 22,
+    "defensa": 10,
+    "exp": 0,
+    "expMax": 100,
+    "inventario": [],
     "mana": 50,
     "manaMaxima": 50,
-    "nivel": 5,
-    "nivelActual": 2,
+    "nivel": 1,
+    "nivelActual": 1,
     "nombre": "Heroe",
-    "pociones": 2,
-    "posX": 3,
-    "posY": 5,
-    "salud": 800,
-    "saludMaxima": 800
+    "pociones": 3,
+    "posX": 1,
+    "posY": 1,
+    "salud": 100,
+    "saludMaxima": 100
 }

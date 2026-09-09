@@ -14,9 +14,7 @@
   },
   "zones": [
     {
-      "id":"dungeon_1", 
-      "x":1, "y":1, 
-      "width":42, "height":14, 
+      "id":"dungeon_1", "tile":"d",
       "terrain":"dungeon",
       "encounter_multiplier":1.1, 
       "stat_multiplier":1.15, 
@@ -28,9 +26,7 @@
       ],
       "boss_id":"caballero_cebolla"},
     {
-      "id":"safe_start", 
-      "x":1, "y":1, 
-      "width":4, "height":3, 
+      "id":"safe_start", "tile":"s",
       "terrain":"safe", 
       "safe":true,
       "encounter_multiplier":0, 

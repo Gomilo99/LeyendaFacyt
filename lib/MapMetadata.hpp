@@ -7,7 +7,7 @@
 
 struct ZoneMetadata {
     std::string id;
-    int x = 0, y = 0, width = 0, height = 0;
+    char tile = '\0';
     std::string terrain = "plain";
     int terrainColor = 32;
     std::string terrainStyle = ".";
@@ -17,9 +17,6 @@ struct ZoneMetadata {
     float xpMultiplier = 1.0f;
     std::vector<std::pair<std::string, int>> enemies;
     std::string bossId;
-    bool contains(int px, int py) const {
-        return px >= x && py >= y && px < x + width && py < y + height;
-    }
 };
 
 struct MapMetadata {
@@ -34,7 +31,7 @@ struct MapMetadata {
     std::vector<ZoneMetadata> zones;
 
     bool load(const std::string& path);
-    const ZoneMetadata* zoneAt(int x, int y) const;
+    const ZoneMetadata* zoneAt(char tile) const;
 };
 
 #endif

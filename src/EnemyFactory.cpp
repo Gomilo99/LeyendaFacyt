@@ -52,8 +52,13 @@ void EnemyFactory::cargarDesdeJSON(
             t.tier = item.value("tier", 1);
 
             // Copia las 6 líneas de arte ASCII
-            for (int i = 0; i < 6 && i < (int)item["ascii"].size(); i++)
+            std::size_t maxWidth = 0;
+            for (int i = 0; i < 6 && i < (int)item["ascii"].size(); i++) {
                 t.asciiArt[i] = item["ascii"][i];
+                maxWidth = std::max(maxWidth, t.asciiArt[i].size());
+            }
+            for (auto& line : t.asciiArt)
+                line.append(maxWidth - line.size(), ' ');
 
             // Resuelve cada objeto del botín contra el catálogo
             for (const auto& drop : item["botin"]) {

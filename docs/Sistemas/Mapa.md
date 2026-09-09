@@ -67,6 +67,26 @@ El mapa se carga desde archivos `.txt` en `mapas/`. Cada carácter representa un
 | `h` | Poción pequeña (25% de vida máxima) |
 | `H` | Poción mediana (50% de vida máxima) |
 | `G` | Poción grande (100% de vida máxima) |
+| `,` | Pradera decorativa, transitable |
+| `;` | Bosque o hierba, transitable |
+| `~` | Agua u océano, transitable con semántica configurable |
+| `d` | Sala de mazmorra, transitable |
+| `f` | Piso de mazmorra final, transitable |
+| `s` | Zona segura, transitable y sin encuentros |
+
+Los caracteres de terreno son parte de la geometría visual del `.txt`, no
+coordenadas codificadas en la metadata. Esto permite ampliar una zona
+dibujando nuevas celdas con el mismo símbolo. Las reglas de enemigos y
+multiplicadores se asocian a ese único símbolo mediante `tile` en `.meta`.
+Por ejemplo, `"tile": "."` es el piso general, `","` la pradera, `";"` el
+bosque, `"d"` una mazmorra y `"s"` una zona segura.
+
+El renderizador duplica horizontalmente cada celda (`símbolo + espacio`) para
+compensar la relación de aspecto habitual de las terminales. La representación
+del muro es ahora explícita: el mapa puede usar `-`, `|`, `+` y `=` como
+tiles de pared y el renderizador los imprime directamente, sin inferir
+esquinas ni consultar vecinos. `#` se conserva únicamente como compatibilidad
+con mapas antiguos.
 
 ### API
 
@@ -95,18 +115,19 @@ La campaña contiene cinco mapas jugables, cargados en este orden:
 | 5 | Mazmorra final | 5 | Recursos limitados y jefe de campaña |
 
 Cada mapa separa geometría (`nivelN.txt`) y reglas (`nivelN.meta`). Las zonas
-grandes evitan fragmentar el diseño, mientras que la zona segura superpuesta
-al spawn permite descansar sin crear muchos rectángulos pequeños.
+se amplían directamente dibujando más celdas con su símbolo; la zona segura se
+delimita con `s` alrededor del spawn sin coordenadas adicionales.
 
 | Archivo | Dimensiones | Descripción |
 |---------|-------------|-------------|
-| `mapas/nivel1.txt` | 39x20 | Habitación abierta con P, K, B y zonas configuradas |
-| `mapas/nivel2.txt` | 20x14 | Laberinto complejo con múltiples habitaciones |
-| `mapas/nivel3.txt` | 41x11 | Sección final con bosque y jefe |
+| `mapas/nivel1.txt` | 30x12 | Tutorial con piso `.` |
+| `mapas/nivel2.txt` | 36x13 | Pradera con terreno `,` |
+| `mapas/nivel3.txt` | 40x15 | Bosque con terreno `;` |
+| `mapas/nivel4.txt` | 44x16 | Mazmorra con terreno `d` |
+| `mapas/nivel5.txt` | 48x18 | Mazmorra final con terreno `f` |
 
-Cada mapa tiene un archivo lateral `nivelN.meta`. Las zonas se definen como
-rectángulos grandes y pueden superponerse: la zona más pequeña tiene prioridad,
-lo que permite añadir un refugio sin fragmentar todo el mapa.
+Cada mapa tiene un archivo lateral `nivelN.meta`. Cada zona declara un único
+`tile`; no existen rectángulos, rangos ni prioridades geométricas.
 
 ---
 

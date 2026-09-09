@@ -15,9 +15,7 @@
   },
   "zones": [
     {
-      "id":"forest", 
-      "x":1, "y":1, 
-      "width":38, "height":13, 
+      "id":"forest", "tile":";",
       "terrain":"forest",
       "encounter_multiplier":1.05, 
       "stat_multiplier":1.08, 
@@ -30,9 +28,7 @@
       "boss_id":"ent_ancestral"
     },
     {
-      "id":"safe_start", 
-      "x":28, "y":1, 
-      "width":8, "height":3, 
+      "id":"safe_start", "tile":"s",
       "terrain":"safe", 
       "safe":true,
       "encounter_multiplier":0, 

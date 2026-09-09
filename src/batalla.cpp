@@ -181,7 +181,7 @@ int ScreenBuffer::getTerminalHeight() {
 
 Renderer::Renderer(ScreenBuffer& buffer)
     : buf(buffer), selOpt(0), enemyHP(0), enemyMaxHP(1),
-      playerHP(0), playerMaxHP(1), playerMP(0), playerMaxMP(1) {}
+    playerHP(0), playerMaxHP(1), playerMP(0), playerMaxMP(1) {}
 
 // Almacena la informacion del enemigo para el proximo frame
 void Renderer::setEnemyInfo(const std::string& name, int hp, int maxHp, const std::string art[6]) {
@@ -210,7 +210,10 @@ void Renderer::drawBackground() {
 void Renderer::drawEnemy() {
     int cx = SCREEN_WIDTH / 2;
     int nameLen = (int)enemyName.size();
-    int boxW = std::max(nameLen + 4, 23);
+    int artWidth = 0;
+    for (const auto& line : enemyArt)
+        artWidth = std::max(artWidth, static_cast<int>(line.size()));
+    int boxW = std::max({nameLen + 4, artWidth + 4, 36});
     int boxX = cx - boxW / 2;
 
     buf.drawBox(boxX, 2, boxW, 2, COL_CYAN);
@@ -240,7 +243,7 @@ void Renderer::drawEnemyHealthBar() {
 void Renderer::drawCombatMenu() {
     int menuX = 3;
     int menuY = 12;
-    int menuW = 22; // Probando, antes estaba en 22, se cambio a 26
+    int menuW = 26; // Probando, antes estaba en 22, se cambio a 26
     int menuH = 7;
 
     buf.drawBox(menuX, menuY, menuW, menuH, COL_CYAN);
@@ -250,7 +253,7 @@ void Renderer::drawCombatMenu() {
         int optY = menuY + 1 + i;
         int selColor = (i == selOpt) ? COL_BYELLOW : COL_DEFAULT;
         std::string line = (i == selOpt) ? " > " + std::string(options[i])
-                                         : "   " + std::string(options[i]);
+                                        : "   " + std::string(options[i]);
         buf.drawString(menuX + 2, optY, line, selColor);
     }
 

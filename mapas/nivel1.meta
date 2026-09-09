@@ -15,9 +15,7 @@
   },
   "zones": [
     {
-      "id":"tutorial", 
-      "x":1, "y":1, 
-      "width":28, "height":10, 
+      "id":"tutorial", "tile":".",
       "terrain":"tutorial",
       "encounter_multiplier":0.8, 
       "stat_multiplier":0.9, 
@@ -28,9 +26,7 @@
       ],
       "boss_id":"guardian_tutorial"},
     {
-      "id":"safe_start", 
-      "x":1, "y":1, 
-      "width":4, "height":3, 
+      "id":"safe_start", "tile":"s",
       "terrain":"safe", 
       "safe":true,
       "encounter_multiplier":0, 
