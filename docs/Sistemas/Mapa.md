@@ -84,6 +84,20 @@ class Mapa {
 
 ### Mapas actuales
 
+La campaña contiene cinco mapas jugables, cargados en este orden:
+
+| Nivel | Rol | Límite | Identidad |
+|---|---|---:|---|
+| 1 | Tutorial | 1 | Recorrido corto y jefe de aprendizaje |
+| 2 | Pradera | 2 | Primer mapa abierto y primera mejora |
+| 3 | Bosque | 3 | Mayor presión y enemigos de dos tiers |
+| 4 | Mazmorra 1 | 4 | Pasillos, defensas altas y arma pesada |
+| 5 | Mazmorra final | 5 | Recursos limitados y jefe de campaña |
+
+Cada mapa separa geometría (`nivelN.txt`) y reglas (`nivelN.meta`). Las zonas
+grandes evitan fragmentar el diseño, mientras que la zona segura superpuesta
+al spawn permite descansar sin crear muchos rectángulos pequeños.
+
 | Archivo | Dimensiones | Descripción |
 |---------|-------------|-------------|
 | `mapas/nivel1.txt` | 39x20 | Habitación abierta con P, K, B y zonas configuradas |

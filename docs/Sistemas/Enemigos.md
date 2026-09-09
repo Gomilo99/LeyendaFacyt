@@ -206,6 +206,21 @@ define en la metadata para que cada sección tenga una economía de curación
 distinta. La curación se calcula sobre la vida máxima actual, nunca sobre un
 valor fijo.
 
+## 8. Ruta de dificultad de cinco niveles
+
+| Nivel | Enemigos normales | Jefe | Modificadores de zona |
+|---|---|---|---|
+| 1 | Slime, Goblin | Guardián del Tutorial | 0.9 stats / 0.8 XP |
+| 2 | Murciélago, Orco, Jabalina | Rey de la Maleza | 1.0 / 1.0 |
+| 3 | Duende, Espectro, Cíclope | Ent Ancestral | 1.08 / 1.15 |
+| 4 | Esqueleto, Golem, Bruja | Caballero Cebolla | 1.15 / 1.3 |
+| 5 | Gárgola, Ogro | Administrador Final | 1.25 / 1.5 |
+
+La progresión de armas sigue la misma cadencia:
+`Espada Gallo → Sopladora → Lanza de Zarzas → Mazo de Mineral → Espada del
+Codigo Fuente`. Las pociones se reducen a tres tiers (`25`, `50` y `100` HP)
+para que la economía de curación sea legible.
+
 ### Integración en [[Mapa|GameManager]]
 
 ```cpp

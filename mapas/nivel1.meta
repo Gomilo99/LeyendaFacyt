@@ -1,18 +1,40 @@
 {
-  "section": 1, "level_cap": 2,
-  "encounter": {"base": 10, "multiplier": 1.0, "growth_cap": 0.20, "grace_steps": 4},
+  "section": 1,
+  "level_cap": 1,
+  "encounter": 
+  {
+    "base": 6, 
+    "multiplier": 0.9, 
+    "growth_cap": 0.2, 
+    "grace_steps": 4
+  },
   "healing": {"h": 25, "H": 50, "G": 100},
   "terrain_styles": {
-    "plain": {"color": 32, "style": "."},
-    "road": {"color": 33, "style": "."},
+    "tutorial": {"color": 37, "style": "."},
     "safe": {"color": 36, "style": "."}
   },
   "zones": [
-    {"id":"field", "x":1, "y":1, "width":39, "height":18, "terrain":"plain",
-     "encounter_multiplier":1.0, "stat_multiplier":1.0, "xp_multiplier":1.0,
-     "enemies":[{"id":"goblin","weight":10},{"id":"orco","weight":7},{"id":"slime_cafe","weight":8}],
-     "boss_id":"zombie_lunes"},
-    {"id":"safe_start", "x":1, "y":6, "width":6, "height":3, "terrain":"safe", "safe":true,
-     "encounter_multiplier":0, "enemies":[]}
+    {
+      "id":"tutorial", 
+      "x":1, "y":1, 
+      "width":28, "height":10, 
+      "terrain":"tutorial",
+      "encounter_multiplier":0.8, 
+      "stat_multiplier":0.9, 
+      "xp_multiplier":0.8,
+      "enemies":[
+        {"id":"slime_cafe","weight":12},
+        {"id":"goblin","weight":8}
+      ],
+      "boss_id":"guardian_tutorial"},
+    {
+      "id":"safe_start", 
+      "x":1, "y":1, 
+      "width":4, "height":3, 
+      "terrain":"safe", 
+      "safe":true,
+      "encounter_multiplier":0, 
+      "enemies":[]
+    }
   ]
 }

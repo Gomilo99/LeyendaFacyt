@@ -62,6 +62,19 @@ La renderización consulta la misma metadata que usa el balance. Por eso el
 color, el símbolo, la zona y el límite mostrados en pantalla corresponden a
 las reglas que gobiernan los encuentros.
 
+### Rebalanceo de la campaña de cinco niveles
+
+Se reemplazaron los catálogos extensos y mezclados por una ruta compacta:
+cinco armas, tres tiers de pociones y enemigos con una función concreta en
+cada sección. Los drops anticipan la siguiente mejora sin entregar el arma
+final demasiado pronto.
+
+También se reemplazaron los mapas anteriores por tutorial, pradera, bosque,
+mazmorra 1 y mazmorra final. La dificultad sube mediante probabilidad de
+encuentro, multiplicador de estadísticas, multiplicador de XP y disponibilidad
+de curación, todos definidos en `.meta`. El nivel del jugador no altera la
+selección de enemigos.
+
 ### Log 23/07/2026 - Corrección de Deudas técnicas
 #### Cambios realizados
 ##### Eliminación de Magic numbers

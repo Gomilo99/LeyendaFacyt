@@ -210,7 +210,7 @@ void Renderer::drawBackground() {
 void Renderer::drawEnemy() {
     int cx = SCREEN_WIDTH / 2;
     int nameLen = (int)enemyName.size();
-    int boxW = std::max(nameLen + 4, 18);
+    int boxW = std::max(nameLen + 4, 23);
     int boxX = cx - boxW / 2;
 
     buf.drawBox(boxX, 2, boxW, 2, COL_CYAN);
@@ -261,7 +261,7 @@ void Renderer::drawCombatMenu() {
 void Renderer::drawPlayerInfo() {
     int infoX = SCREEN_WIDTH - 28;
     int infoY = 12;
-    int infoW = 26;
+    int infoW = 30;
     int infoH = 7;
 
     buf.drawBox(infoX, infoY, infoW, infoH, COL_CYAN);
@@ -319,8 +319,8 @@ void InputHandler::moveDown() {
 
 BattleSystem::BattleSystem(Jugador& p, Enemigo& e)
     : currentState(BattleState::PLAYER_TURN), currentEnemy(&e), player(&p),
-      screenBuffer(), renderer(screenBuffer), inputHandler(),
-      battleOver(false), victory(false), fled(false) {
+    screenBuffer(), renderer(screenBuffer), inputHandler(),
+    battleOver(false), victory(false), fled(false) {
     const std::string* art = e.getAsciiArt();
     for (int i = 0; i < 6; i++) enemyArt[i] = art[i];
 }

@@ -123,7 +123,7 @@ Enemigo EnemyFactory::crearPorId(const std::string& id) const {
         for (const auto& t : level.second)
             if (t.id == id) {
                 Enemigo result(t.id, t.nombre, t.salud, t.ataque, t.defensa, t.nivel,
-                               t.asciiArt, t.botin, t.exp_base);
+                            t.asciiArt, t.botin, t.exp_base);
                 result.setTier(t.tier);
                 return result;
             }
@@ -160,7 +160,7 @@ Enemigo EnemyFactory::crearJefe(int nivel) {
         for (const auto& t : it->second) {
             if (t.boss) {
                 Enemigo result(t.id, t.nombre, t.salud, t.ataque, t.defensa,
-                               t.nivel, t.asciiArt, t.botin, t.exp_base);
+                            t.nivel, t.asciiArt, t.botin, t.exp_base);
                 result.setTier(t.tier);
                 return result;
             }

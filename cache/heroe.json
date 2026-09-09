@@ -1,35 +1,23 @@
 {
-    "arma": "Espada del Descongelamiento",
-    "ataque": 108,
+    "arma": "Sopladora",
+    "ataque": 97,
     "defensa": 80,
-    "exp": 10150,
+    "exp": 2950,
     "expMax": 1100,
     "inventario": [
         {
             "cant": 1,
-            "nombre": "Alka-Seltzer"
-        },
-        {
-            "cant": 1,
-            "nombre": "Espada del Descongelamiento"
-        },
-        {
-            "cant": 1,
-            "nombre": "Expreso"
-        },
-        {
-            "cant": 1,
-            "nombre": "Pocion Cubana"
+            "nombre": "Sopladora"
         }
     ],
-    "mana": 40,
+    "mana": 50,
     "manaMaxima": 50,
     "nivel": 5,
-    "nivelActual": 3,
+    "nivelActual": 2,
     "nombre": "Heroe",
-    "pociones": 1,
-    "posX": 20,
-    "posY": 10,
+    "pociones": 2,
+    "posX": 3,
+    "posY": 5,
     "salud": 800,
     "saludMaxima": 800
 }

@@ -29,7 +29,7 @@ Enemigo::Enemigo(std::string id, std::string nom, int hp, int atk, int def, int 
  */
 Enemigo::Enemigo(const Enemigo& copia)
     : Personaje(copia), id(copia.id), botin(copia.botin),
-      exp_base(copia.exp_base), tier(copia.tier), xpMultiplier(copia.xpMultiplier) {
+    exp_base(copia.exp_base), tier(copia.tier), xpMultiplier(copia.xpMultiplier) {
     for (int i = 0; i < 6; i++) asciiArt[i] = copia.asciiArt[i];
 }
 void Enemigo::aplicarMultiplicadorStats(float value) {

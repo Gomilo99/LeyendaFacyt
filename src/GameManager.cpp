@@ -244,10 +244,10 @@ void GameManager::renderMapa() {
     hud.push_back("\033[97m|  Pociones: " + std::to_string(jugador.getPociones()) + "\033[0m");
     const ZoneMetadata* zone = zonaActual();
     hud.push_back("\033[97m|  Sec: " + std::to_string(metadata.section) +
-                  "  Terreno: " + (zone ? zone->terrain : "default") +
-                  "  Zona: " + (zone ? zone->id : "none") + "\033[0m");
+                "  Terreno: " + (zone ? zone->terrain : "default") +
+                "  Zona: " + (zone ? zone->id : "none") + "\033[0m");
     hud.push_back("\033[97m|  Cap: " + std::to_string(nivelMaximoSeccion) +
-                  (limiteNivelActivo ? " (ON)" : " (OFF)") + "  F8/8 toggle\033[0m");
+                (limiteNivelActivo ? " (ON)" : " (OFF)") + "  F8/8 toggle\033[0m");
     hud.push_back("\033[36m+-----------------------+\033[0m");
 
     int altoHud = (int)hud.size();
@@ -265,7 +265,7 @@ void GameManager::renderMapa() {
                     switch (t) {
                         case '#': std::cout << "\033[90m#\033[0m"; break;
                         case '.': std::cout << "\033[" << color << "m"
-                                             << (z ? z->terrainStyle : ".") << "\033[0m"; break;
+                                            << (z ? z->terrainStyle : ".") << "\033[0m"; break;
                         case 'K': std::cout << "\033[93mK\033[0m"; break;
                         case 'B': std::cout << "\033[91mB\033[0m"; break;
                         case 'H': std::cout << "\033[92mH\033[0m"; break;
@@ -311,7 +311,7 @@ void GameManager::moverJugador(int dx, int dy) {
 
         if (jugador.estaVivo() && !jugador.getHaGanado()
             && tile != 'B' && tile != 'K' && tile != 'H' &&
-               tile != 'h' && tile != 'G') {
+            tile != 'h' && tile != 'G') {
             const ZoneMetadata* zone = zonaActual();
             encounterMgr.configurar(metadata.encounterBase, metadata.encounterMultiplier *
                                     (zone ? zone->encounterMultiplier : 1.0f),
