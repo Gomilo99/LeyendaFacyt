@@ -41,6 +41,8 @@ version: 1.0.0
 - `GameManager` marca como final únicamente al jefe del último mapa disponible.
   Los jefes de los niveles anteriores se derrotan normalmente y permiten
   continuar al siguiente nivel mediante su llave `K`.
+- Derrotar al jefe final ya no marca inmediatamente la partida como ganada:
+  deja disponible la `K` final para completar el objetivo.
 - La campaña termina solo después de derrotar al jefe del último nivel y
   recoger su `K` final.
 

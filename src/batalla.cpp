@@ -591,10 +591,7 @@ void batalla(Jugador& jugador, Enemigo& enemigo, bool esJefeFinal) {
     limpiarPantalla();
     std::cout << "\n\nHAS DERROTADO A '" << enemigo.getNombre() << "' !\n";
     if (esJefeFinal) {
-        std::cout << "Felicidades, has derrotado al jefe final!\n";
-        std::cout << "...\n";
-        std::cout << "Has ganado el juego!\n";
-        jugador.setHaGanado(true);
+        std::cout << "Has derrotado al jefe final. Busca la llave final.\n";
     }
 
     // Otorgar experiencia
