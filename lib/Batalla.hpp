@@ -93,16 +93,19 @@ class Renderer {
     ScreenBuffer& buf;      // buffer sobre el que se dibuja
     int selOpt;             // opcion del menu seleccionada (0-3)
     std::string enemyName;
+    int enemyColor;
     int enemyHP, enemyMaxHP;
     std::string enemyArt[6]; // 6 lineas de arte ASCII del enemigo
     int playerHP, playerMaxHP;
     int playerMP, playerMaxMP;
     std::string playerName;
     std::string logMsg;     // mensaje de estado en la linea inferior
+    bool canFlee;
 public:
     Renderer(ScreenBuffer& buffer);
     void setSelectedOption(int opt) { selOpt = opt; }
-    void setEnemyInfo(const std::string& name, int hp, int maxHp, const std::string art[6]);
+    void setEnemyInfo(const std::string& name, int hp, int maxHp, int color, const std::string art[6]);
+    void setCanFlee(bool value) { canFlee = value; }
     void setPlayerInfo(const std::string& name, int hp, int maxHp, int mp, int maxMp);
     void setLogMessage(const std::string& msg) { logMsg = msg; }
     void drawBackground();
@@ -136,6 +139,7 @@ class BattleSystem {
     bool battleOver;
     bool victory;
     bool fled;
+    bool canFlee;
     std::string enemyArt[6];
     std::string logMessage;
 
@@ -156,7 +160,7 @@ class BattleSystem {
     // Actualiza el mensaje de log que se muestra en pantalla
     void setLog(const std::string& msg);
 public:
-    BattleSystem(Jugador& p, Enemigo& e);
+    BattleSystem(Jugador& p, Enemigo& e, bool allowFlee = true);
     BattleState getState() const { return currentState; }
     bool isOver() const { return battleOver; }
     bool isVictory() const { return victory; }
@@ -171,6 +175,6 @@ void limpiarBuffer();
 void limpiarPantalla();
 
 // Punto de entrada al combate: muestra intro, instancia BattleSystem, maneja loot/exp post-batalla
-void batalla(Jugador& jugador, Enemigo& enemigo, bool esJefeFinal = false);
+void batalla(Jugador& jugador, Enemigo& enemigo, bool esJefe = false, bool esJefeFinal = false);
 
 #endif

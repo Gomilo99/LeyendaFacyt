@@ -1,3 +1,7 @@
+Los combates contra jefes no permiten huir. La opción permanece visible como
+`No huir` para mantener estable el layout del menú, pero no ejecuta ninguna
+acción de escape. Los enemigos se muestran con el color de su tier configurado
+en la metadata del nivel.
 ---
 creado: 22/07/2026
 modificado: 23/07/2026

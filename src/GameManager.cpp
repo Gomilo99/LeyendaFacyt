@@ -66,6 +66,19 @@ const ZoneMetadata* GameManager::zonaActual() const {
         : nullptr;
 }
 
+const ZoneMetadata* GameManager::zonaJefeActual() const {
+    for (int dy = -1; dy <= 1; dy++) {
+        for (int dx = -1; dx <= 1; dx++) {
+            if (dx == 0 && dy == 0) continue;
+            char terrainTile = mapa.getTile(jugador.getPosX() + dx, jugador.getPosY() + dy);
+            for (const auto& zone : metadata.zones) {
+                if (zone.tile == terrainTile && !zone.bossId.empty()) return &zone;
+            }
+        }
+    }
+    return nullptr;
+}
+
 /**
  * Pantalla de titulo con menu de 3 opciones:
  * 1. Nueva Partida — borra cache, crea partida fresca
@@ -273,6 +286,15 @@ void GameManager::renderMapa() {
                     std::cout << "\033[1;93m@ \033[0m";
                 } else {
                     char t = mapa.getTile(x, y);
+                    const ZoneMetadata* terrainZone = metadata.zoneAt(t);
+                    bool isTerrainTile = t == '.' || t == ',' || t == ';' ||
+                                         t == '~' || t == 'd' || t == 'f' ||
+                                         t == '^' || t == 's';
+                    if (terrainZone && isTerrainTile) {
+                        std::cout << "\033[" << terrainZone->terrainColor << "m"
+                                  << t << " \033[0m";
+                        continue;
+                    }
                     switch (t) {
                         case '#': std::cout << "\033[36m# \033[0m"; break;
                         case '-': case '|': case '+': case '=':
@@ -354,7 +376,7 @@ void GameManager::moverJugador(int dx, int dy) {
  */
 void GameManager::handleTile(char tile) {
     if (tile == 'B'){
-        const ZoneMetadata* zone = zonaActual();
+        const ZoneMetadata* zone = zonaJefeActual();
         if (!zone || zone->bossId.empty()) {
             std::cerr << "Error de configuracion: el tile B no tiene jefe asignado.\n";
             return;
@@ -363,7 +385,8 @@ void GameManager::handleTile(char tile) {
         if (jugador.estaVivo()){
             jefeDerrotado = true;
             mapa.setTile(jugador.getPosX(), jugador.getPosY(),
-                        zone->tile != '\0' ? zone->tile : '.');
+                        zone->restoreTile != '\0' ? zone->restoreTile :
+                        (zone->tile != '\0' ? zone->tile : '.'));
             guardarPartida();
         }
     }
@@ -423,6 +446,8 @@ void GameManager::iniciarCombate() {
     Enemigo enemigo = zone && !zone->enemies.empty()
         ? enemyFactory.crearEnemigo(zone->enemies, zone->statMultiplier, zone->xpMultiplier)
         : enemyFactory.crearEnemigo(jugador.getNivel());
+    auto color = metadata.tierColors.find(enemigo.getTier());
+    enemigo.setDisplayColor(color != metadata.tierColors.end() ? color->second : COL_WHITE);
     batalla(jugador, enemigo);
 }
 
@@ -432,13 +457,15 @@ void GameManager::iniciarCombate() {
  * muestra un mensaje y cae en un combate aleatorio normal.
  */
 void GameManager::iniciarCombateJefe() {
-    const ZoneMetadata* zone = zonaActual();
+    const ZoneMetadata* zone = zonaJefeActual();
     if (zone && !zone->bossId.empty()) {
         Enemigo jefe = enemyFactory.crearPorId(zone->bossId);
         jefe.setXpMultiplier(zone->xpMultiplier);
         jefe.aplicarMultiplicadorStats(zone->statMultiplier);
+        auto color = metadata.tierColors.find(jefe.getTier());
+        jefe.setDisplayColor(color != metadata.tierColors.end() ? color->second : COL_BRED);
         bool esUltimoNivel = !std::ifstream(Config::mapaPath(nivelActual + 1)).good();
-        batalla(jugador, jefe, esUltimoNivel);
+        batalla(jugador, jefe, true, esUltimoNivel);
     } else {
         std::cerr << "Error de configuracion: no hay jefe para esta zona.\n";
     }

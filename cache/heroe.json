@@ -1,12 +1,12 @@
 {
-    "arma": "Mazo de Mineral",
-    "ataque": 90,
-    "defensa": 55,
+    "arma": "Lanza de Zarzas",
+    "ataque": 57,
+    "defensa": 35,
     "exp": 700,
-    "expMax": 900,
+    "expMax": 700,
     "inventario": [
         {
-            "cant": 1,
+            "cant": 2,
             "nombre": "Lanza de Zarzas"
         },
         {
@@ -14,18 +14,22 @@
             "nombre": "Mazo de Mineral"
         },
         {
-            "cant": 2,
-            "nombre": "Pocion Mediana"
+            "cant": 1,
+            "nombre": "Pocion Pequena"
+        },
+        {
+            "cant": 1,
+            "nombre": "Sopladora"
         }
     ],
-    "mana": 10,
-    "manaMaxima": 60,
-    "nivel": 4,
-    "nivelActual": 4,
+    "mana": 30,
+    "manaMaxima": 50,
+    "nivel": 3,
+    "nivelActual": 3,
     "nombre": "Heroe",
     "pociones": 3,
-    "posX": 17,
-    "posY": 7,
-    "salud": 550,
-    "saludMaxima": 550
+    "posX": 20,
+    "posY": 4,
+    "salud": 296,
+    "saludMaxima": 350
 }

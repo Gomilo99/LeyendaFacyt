@@ -25,13 +25,13 @@ bool Mapa::cargar(const std::string &archivo){
 }
 
 char Mapa::getTile(int x, int y) const{
-    if(y < 0 || y >= alto || x < 0 || x >= ancho)
+    if(y < 0 || y >= alto || x < 0 || x >= (int)grid[y].size())
         return '#'; // fuera del mapa es pared
     
     return grid[y][x];
 }
 void Mapa::setTile(int x, int y, char c){
-    if (y >= 0 && y < alto && x >=0 && x < ancho) grid[y][x] = c;
+    if (y >= 0 && y < alto && x >= 0 && x < (int)grid[y].size()) grid[y][x] = c;
 }
 bool Mapa::esTransitable(int x, int y) const {
     char tile = getTile(x, y);

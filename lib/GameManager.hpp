@@ -66,6 +66,7 @@ private:
     bool cargarNivel(int nivel);
     void cargarMetadata(int nivel);
     const ZoneMetadata* zonaActual() const;
+    const ZoneMetadata* zonaJefeActual() const;
 };
 
 #endif

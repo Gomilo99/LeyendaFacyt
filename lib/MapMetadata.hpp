@@ -10,13 +10,13 @@ struct ZoneMetadata {
     char tile = '\0';
     std::string terrain = "plain";
     int terrainColor = 32;
-    std::string terrainStyle = ".";
     bool safe = false;
     float encounterMultiplier = 1.0f;
     float statMultiplier = 1.0f;
     float xpMultiplier = 1.0f;
     std::vector<std::pair<std::string, int>> enemies;
     std::string bossId;
+    char restoreTile = '\0';
 };
 
 struct MapMetadata {
@@ -26,7 +26,7 @@ struct MapMetadata {
     float encounterMultiplier = 1.0f;
     float encounterGrowthCap = 0.20f;
     int encounterGraceSteps = 4;
-    std::map<std::string, std::pair<int, std::string>> terrainStyles;
+    std::map<int, int> tierColors;
     std::map<char, int> healing;
     std::vector<ZoneMetadata> zones;
 

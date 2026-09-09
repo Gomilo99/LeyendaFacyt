@@ -46,6 +46,22 @@ version: 1.0.0
 - La campaña termina solo después de derrotar al jefe del último nivel y
   recoger su `K` final.
 
+### Log 09/09/2026 - Terrenos, color de enemigos y reglas de jefes
+#### Cambios realizados
+- Se eliminó `terrain_styles` de los metadatos. Cada zona define ahora su
+  propio `color` junto a `tile` y `terrain`.
+- Se añadió `tier_colors` por nivel. El arte y el nombre del enemigo se dibujan
+  con el color configurado para su tier, incluidos los jefes.
+- Se añadió `restore_tile` a las zonas con jefe. Al derrotarlo, el tile `B`
+  recupera explícitamente el terreno indicado por la zona.
+- La zona de un jefe se resuelve inspeccionando los tiles que rodean al `B`.
+  Así un mismo símbolo `B` puede representar jefes distintos según el terreno
+  que lo rodea.
+- Los combates contra jefes no permiten huir; la opción queda deshabilitada y
+  una confirmación no puede escapar del combate.
+- Los mapas ya no requieren filas de igual longitud. Las filas cortas se tratan
+  como pared fuera de sus límites, evitando accesos fuera del almacenamiento.
+
 ### Log 08/09/2026 - Progresión por secciones, metadatos y encuentros configurables
 #### Cambios realizados
 - Se añadieron archivos `mapas/nivelN.meta` para configurar cada sección sin

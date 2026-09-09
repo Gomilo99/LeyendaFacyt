@@ -180,14 +180,15 @@ int ScreenBuffer::getTerminalHeight() {
 // ==================== RENDERER ====================
 
 Renderer::Renderer(ScreenBuffer& buffer)
-    : buf(buffer), selOpt(0), enemyHP(0), enemyMaxHP(1),
-    playerHP(0), playerMaxHP(1), playerMP(0), playerMaxMP(1) {}
+    : buf(buffer), selOpt(0), enemyColor(COL_WHITE), enemyHP(0), enemyMaxHP(1),
+    playerHP(0), playerMaxHP(1), playerMP(0), playerMaxMP(1), canFlee(true) {}
 
 // Almacena la informacion del enemigo para el proximo frame
-void Renderer::setEnemyInfo(const std::string& name, int hp, int maxHp, const std::string art[6]) {
+void Renderer::setEnemyInfo(const std::string& name, int hp, int maxHp, int color, const std::string art[6]) {
     enemyName = name;
     enemyHP = hp;
     enemyMaxHP = std::max(maxHp, 1);
+    enemyColor = color;
     for (int i = 0; i < 6; i++) enemyArt[i] = art[i];
 }
 
@@ -217,11 +218,11 @@ void Renderer::drawEnemy() {
     int boxX = cx - boxW / 2;
 
     buf.drawBox(boxX, 2, boxW, 2, COL_CYAN);
-    buf.drawString(cx - nameLen / 2, 3, enemyName, COL_BRED);
+    buf.drawString(cx - nameLen / 2, 3, enemyName, enemyColor);
 
     for (int i = 0; i < 6; i++) {
         int artX = cx - (int)enemyArt[i].size() / 2;
-        buf.drawString(artX, 6 + i, enemyArt[i], COL_WHITE);
+        buf.drawString(artX, 6 + i, enemyArt[i], enemyColor);
     }
 }
 
@@ -244,7 +245,7 @@ void Renderer::drawCombatMenu() {
     int menuX = 3;
     int menuY = 12;
 
-    const char* options[] = { "Atacar", "Magia", "Inventario", "Huir" };
+    const char* options[] = { "Atacar", "Magia", "Inventario", canFlee ? "Huir" : "No huir" };
     int maxLength = 0;
     for (int i = 0; i < 4; i++) {
         std::string line = (i == selOpt) ? " > " + std::string(options[i])
@@ -355,10 +356,11 @@ void InputHandler::moveDown() {
 
 // ==================== BATTLE SYSTEM ====================
 
-BattleSystem::BattleSystem(Jugador& p, Enemigo& e)
+BattleSystem::BattleSystem(Jugador& p, Enemigo& e, bool allowFlee)
     : currentState(BattleState::PLAYER_TURN), currentEnemy(&e), player(&p),
     screenBuffer(), renderer(screenBuffer), inputHandler(),
-    battleOver(false), victory(false), fled(false) {
+    battleOver(false), victory(false), fled(false), canFlee(allowFlee) {
+    renderer.setCanFlee(canFlee);
     const std::string* art = e.getAsciiArt();
     for (int i = 0; i < 6; i++) enemyArt[i] = art[i];
 }
@@ -458,6 +460,13 @@ void BattleSystem::doPlayerAction() {
 
         case 3: // Huir: 50% de probabilidad de exito
         {
+            if (!canFlee) {
+                setLog("No puedes huir de un combate contra un jefe!");
+                render();
+                std::this_thread::sleep_for(std::chrono::milliseconds(800));
+                currentState = BattleState::PLAYER_TURN;
+                return;
+            }
             std::uniform_int_distribution<int> dist(0, 99);
             int chance = dist(DataManager::rng());
             if (chance < 50) {
@@ -505,6 +514,7 @@ void BattleSystem::render() {
         currentEnemy->getNombre(),
         currentEnemy->getSalud(),
         currentEnemy->getSaludMaxima(),
+        currentEnemy->getDisplayColor(),
         enemyArt
     );
     renderer.setPlayerInfo(
@@ -558,7 +568,7 @@ void BattleSystem::run() {
 // 1. Muestra intro (jefe final o enemigo normal)
 // 2. Instancia y ejecuta BattleSystem
 // 3. Post-batalla: maneja huida, derrota, victoria, experiencia y loot
-void batalla(Jugador& jugador, Enemigo& enemigo, bool esJefeFinal) {
+void batalla(Jugador& jugador, Enemigo& enemigo, bool esJefe, bool esJefeFinal) {
     limpiarPantalla();
 
     if (esJefeFinal) {
@@ -570,7 +580,7 @@ void batalla(Jugador& jugador, Enemigo& enemigo, bool esJefeFinal) {
     std::cout << "Presiona Enter para comenzar la batalla...";
     std::cin.get();
 
-    BattleSystem system(jugador, enemigo);
+    BattleSystem system(jugador, enemigo, !esJefe);
     system.run();
 
     if (system.hasFled()) {

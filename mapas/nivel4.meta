@@ -8,14 +8,11 @@
     "grace_steps": 4
   },
   "healing": {"h": 20, "H": 45, "G": 100},
-  "terrain_styles": {
-    "dungeon": {"color": 35},
-    "safe": {"color": 36}
-  },
+  "tier_colors": {"1": 37, "2": 33, "3": 91, "4": 95},
   "zones": [
     {
       "id":"dungeon_1", "tile":"d",
-      "terrain":"dungeon",
+      "terrain":"dungeon", "color":35,
       "encounter_multiplier":1.0, 
       "stat_multiplier":1.4, 
       "xp_multiplier":1.3,
@@ -24,10 +21,10 @@
         {"id":"golem_facturas","weight":6},
         {"id":"bruja","weight":5}
       ],
-      "boss_id":"caballero_cebolla"},
+      "boss_id":"caballero_cebolla", "restore_tile":"d"},
     {
       "id":"safe_start", "tile":"s",
-      "terrain":"safe", 
+      "terrain":"safe", "color":36,
       "safe":true,
       "encounter_multiplier":0, 
       "enemies":[]

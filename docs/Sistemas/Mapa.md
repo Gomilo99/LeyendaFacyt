@@ -219,26 +219,20 @@ main.cpp      → GameManager.hpp
 
 Cada `mapas/nivelN.meta` acompaña al mapa y permite cambiar el balance sin
 rediseñar la cuadrícula. Define sección, límite de nivel, probabilidad base,
-multiplicador del mapa, pasos de gracia, crecimiento máximo, estilos de terreno,
-curación y zonas asociadas a un tile.
+multiplicador del mapa, pasos de gracia, crecimiento máximo, colores por tier,
+curación y zonas asociadas a un tile. Cada zona define su `color` junto a su
+`tile`; ya no se usa una sección global `terrain_styles`.
+
+El bloque `tier_colors` asigna colores ANSI a los tiers de enemigos. Por
+ejemplo, `"tier_colors": {"1": 37, "2": 33, "3": 91, "4": 95}`. Las zonas
+con jefe pueden declarar `boss_id` y `restore_tile`; este último indica el
+terreno que queda después de derrotar al jefe.
 
 Una zona puede ser segura, modificar estadísticas/XP, listar enemigos por peso
-y asignar el jefe exacto del tile `B` mediante `boss_id`. `tile` identifica las
-celdas de la zona; cada carácter de terreno debe tener una sola zona
-correspondiente. Actualmente `boss_id` para `B` se resuelve usando la primera
-zona no segura, así que dos terrenos distintos no pueden distinguirse
-automáticamente bajo el mismo `B`.
+y asignar el jefe mediante `boss_id`. `tile` identifica las celdas de la zona y
+`restore_tile` indica qué terreno recupera un `B` derrotado. El jefe se resuelve
+por los tiles que rodean su posición, por lo que `B` puede reutilizarse en
+terrenos distintos si queda rodeado por el tile de cada zona.
 
 El HUD muestra sección, zona, terreno y límite. `8` o `F8` alterna el límite
 para depuración. La XP nunca supera el umbral actual.
-# Metadatos de mapas
-
-Cada `mapas/nivelN.meta` acompaña al mapa y permite cambiar balance sin
-rediseñar la cuadrícula. Define el límite de nivel de la sección, multiplicador
-de encuentros y crecimiento máximo (hasta 20%), colores/estilos de terreno,
-curación de `h`/`H`/`G` y zonas asociadas a un tile. Una zona puede ser segura,
-modificar estadísticas/XP y listar sus enemigos por peso. `boss_id` se resuelve
-para `B` mediante la primera zona no segura, por lo que varios terrenos no
-pueden distinguirse automáticamente si comparten el mismo `B`. El HUD muestra
-sección, terreno, zona y límite. `8` (o F8 en Windows) alterna el límite para
-depuración.

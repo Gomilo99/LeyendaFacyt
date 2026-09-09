@@ -201,7 +201,9 @@ si random(0, 99) < resultado → ENCUENTRO!
 
 ### Curación porcentual
 
-Los tiles `h`, `H` y `G` son recursos de mapa de un solo uso. Su porcentaje se
+El arte y el nombre de cada enemigo se dibujan con el color configurado para
+su `tier` en `tier_colors` del metadata del mapa. Los tiles `h`, `H` y `G` son
+recursos de mapa de un solo uso. Su porcentaje se
 define en la metadata para que cada sección tenga una economía de curación
 distinta. La curación se calcula sobre la vida máxima actual, nunca sobre un
 valor fijo.

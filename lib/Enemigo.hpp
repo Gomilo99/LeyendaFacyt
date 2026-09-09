@@ -27,6 +27,7 @@ private:
     std::vector<Drop> botin;   ///< Array extensible de objetos+probabilidad
     int exp_base;
     int tier = 1;
+    int displayColor = 37;
     float xpMultiplier = 1.0f;
 
 public:
@@ -56,6 +57,8 @@ public:
     int getExpBase() const {return exp_base; }
     int getTier() const { return tier; }
     void setTier(int value) { tier = value; }
+    int getDisplayColor() const { return displayColor; }
+    void setDisplayColor(int value) { displayColor = value; }
     void setXpMultiplier(float value) { xpMultiplier = value; }
     void aplicarMultiplicadorStats(float value);
     int experienciaCalculada() const;
