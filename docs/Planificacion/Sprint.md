@@ -1,6 +1,6 @@
 ---
 creado: 22/07/2026
-modificado: 08/09/2026
+modificado: 10/09/2026
 tipo: Avance
 tags: # deuda-tecnica, idea-loca, bug-critico, bug, refactor
 titulo: Sprint
@@ -34,7 +34,12 @@ Trabajo planificado para el sprint actual. Al terminar una tarea, marcar como `[
   - Nivel 2: enemigos con HP 50-150, ATK 7-25 → jugador nivel 3-5 necesita buen equipo
   - Nivel 3: enemigos con HP 60-180, ATK 8-28 → jugador nivel 5-7 con armadura
 
-
+- [ ] Rediseñar la ventana del enemigo vencido y la subida de nivel, donde se pueda visualizar el aumento de daño, la experiencia ganada, etc.
+- [ ] Rediseño de pantallas de finalización de partida: game over, victoria
+- [ ] Ajustar los sprites para que coincida la versión json con el resultado final
+- [x] Refactorizar para que el enemigo final no aparezca antes (no aparezca por el nivel sino por el flujo nuevo `BOSS` -> `KEY` -> `MAP CHANGE`)  [completion:: 2026-09-09]
+- [ ] Eliminar la pantalla intermedia de enemigos normales
+- [ ] Limitar la tasa de encuentros y balancear las estadísticas con la experiencia.
 ## Tareas pendientes (próximo sprint)
 
 
