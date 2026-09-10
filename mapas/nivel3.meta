@@ -22,7 +22,7 @@
         {"id":"espectro_rojo","weight":7},
         {"id":"ciclope","weight":4}
       ],
-      "boss_id":"ent_ancestral", "restore_tile":"^"
+      "boss_id":"ent_ancestral", "restore_tile":"."
     },
     {
       "id":"safe_start", "tile":"s",
