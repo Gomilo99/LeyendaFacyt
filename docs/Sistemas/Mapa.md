@@ -1,6 +1,6 @@
 ---
 creado: 22/07/2026
-modificado: 22/07/2026
+modificado: 08/09/2026
 proyecto: "[[LeyendaFacyt]]"
 area: Sistemas
 estado: En Progreso
@@ -62,9 +62,31 @@ El mapa se carga desde archivos `.txt` en `mapas/`. Cada carácter representa un
 | `.` | Suelo — transitable |
 | `P` | Posición inicial del jugador |
 | `E` | Spawn de enemigo (obsoleto, reemplazado por encuentros aleatorios) |
-| `B` | Jefe final del nivel |
+| `B` | Jefe del nivel; el jefe del último nivel es el jefe final de campaña |
 | `K` | Llave mágica (victoria) |
-| `H` | Poción en el suelo |
+| `h` | Poción pequeña (25% de vida máxima); restaura el terreno base |
+| `H` | Poción mediana (50% de vida máxima); restaura el terreno base |
+| `G` | Poción grande (100% de vida máxima); restaura el terreno base |
+| `,` | Pradera decorativa, transitable |
+| `;` | Bosque o hierba, transitable |
+| `~` | Agua u océano, transitable con semántica configurable |
+| `d` | Sala de mazmorra, transitable |
+| `f` | Piso de mazmorra final, transitable |
+| `s` | Zona segura, transitable y sin encuentros |
+
+Los caracteres de terreno son parte de la geometría visual del `.txt`, no
+coordenadas codificadas en la metadata. Esto permite ampliar una zona
+dibujando nuevas celdas con el mismo símbolo. Las reglas de enemigos y
+multiplicadores se asocian a ese único símbolo mediante `tile` en `.meta`.
+Por ejemplo, `"tile": "."` es el piso general, `","` la pradera, `";"` el
+bosque, `"d"` una mazmorra y `"s"` una zona segura.
+
+El renderizador duplica horizontalmente cada celda (`símbolo + espacio`) para
+compensar la relación de aspecto habitual de las terminales. La representación
+del muro es ahora explícita: el mapa puede usar `-`, `|`, `+` y `=` como
+tiles de pared y el renderizador los imprime directamente, sin inferir
+esquinas ni consultar vecinos. `#` se conserva únicamente como compatibilidad
+con mapas antiguos.
 
 ### API
 
@@ -82,12 +104,30 @@ class Mapa {
 
 ### Mapas actuales
 
+La campaña contiene cinco mapas jugables, cargados en este orden:
+
+| Nivel | Rol | Límite | Identidad |
+|---|---|---:|---|
+| 1 | Tutorial | 1 | Recorrido corto y jefe de aprendizaje |
+| 2 | Pradera | 2 | Primer mapa abierto y primera mejora |
+| 3 | Bosque | 3 | Mayor presión y enemigos de dos tiers |
+| 4 | Mazmorra 1 | 4 | Pasillos, defensas altas y arma pesada |
+| 5 | Mazmorra final | 5 | Recursos limitados y jefe de campaña |
+
+Cada mapa separa geometría (`nivelN.txt`) y reglas (`nivelN.meta`). Las zonas
+se amplían directamente dibujando más celdas con su símbolo; la zona segura se
+delimita con `s` alrededor del spawn sin coordenadas adicionales.
+
 | Archivo | Dimensiones | Descripción |
 |---------|-------------|-------------|
-| `mapas/nivel1.txt` | 16x11 | Habitación abierta con P, K, B, H |
-| `mapas/nivel2.txt` | 20x14 | Laberinto complejo con múltiples habitaciones |
+| `mapas/nivel1.txt` | 30x12 | Tutorial con piso `.` |
+| `mapas/nivel2.txt` | 36x13 | Pradera con terreno `,` |
+| `mapas/nivel3.txt` | 40x15 | Bosque con terreno `;` |
+| `mapas/nivel4.txt` | 44x16 | Mazmorra con terreno `d` |
+| `mapas/nivel5.txt` | 48x18 | Mazmorra final con terreno `f` |
 
-> **Nota**: Solo nivel1.txt es accesible actualmente. No hay transición entre niveles. Ver [[Planificacion/Roadmap#Objetivo 50%]].
+Cada mapa tiene un archivo lateral `nivelN.meta`. Cada zona declara un único
+`tile`; no existen rectángulos, rangos ni prioridades geométricas.
 
 ---
 
@@ -98,14 +138,14 @@ OVERWORLD
   │
   ├─ WASD ──────────→ mover jugador
   │                     │
-  │                     ├─ tile 'B' ──→ [[Enemigos|crearJefe(nivel)]] → [[Combate|batalla()]]
+  │                     ├─ tile 'B' ──→ jefe de la zona (`boss_id`) → [[Combate|batalla()]]
   │                     │               ├─ victoria → mapa.setTile('.') → [[Guardado|guardarMapa()]]
   │                     │               └─ derrota  → GAME_OVER
-  │                     ├─ tile 'K' ──→ haGanado = true
-  │                     ├─ tile 'H' ──→ usar poción → tile → '.' → 
+  │                     ├─ tile 'K' ──→ siguiente sección o victoria final
+  │                     ├─ tile 'h/H/G' ──→ curación porcentual → terreno base
   │                     └─ tile '.' ──→ [[Enemigos|EncounterManager::checkEncounter()]]
   │                                       │
-  │                                       ├─ true  → crearEnemigo(nivel) → [[Combate|batalla()]]
+  │                                       ├─ true  → enemigo de la zona → [[Combate|batalla()]]
   │                                       │           └─ victoria → OVERWORLD
   │                                       │           └─ muerte  → GAME_OVER
   │                                       │
@@ -142,8 +182,8 @@ main.cpp → GameManager::run()
   └── OVERWORLD:
         ├── tile '.' + encounter → EnemyFactory → [[Combate|batalla()]]
         ├── tile 'B' → EnemyFactory → [[Combate|batalla()]]
-        ├── tile 'H' → usar poción → setTile('.')
-        ├── tile 'K' → victoria
+        ├── tile 'h/H/G' → curación porcentual → restaura el terreno base
+        ├── tile 'K' → siguiente sección o victoria final
         └── 'Q' → [[Guardado|guardar]] → salir
 ```
 
@@ -153,7 +193,8 @@ main.cpp → GameManager::run()
 
 ```
 GameManager   → DataManager, CacheManager, batalla.hpp, mapa.hpp,
-                jugador.hpp, enemyFactory.hpp, encounterManager.hpp
+                jugador.hpp, enemyFactory.hpp, encounterManager.hpp,
+                MapMetadata.hpp
 DataManager   → Config, json.hpp, objeto.hpp, enemigo.hpp, jugador.hpp
 CacheManager  → Config, json.hpp, jugador.hpp, mapa.hpp
 EnemyFactory  → Config, json.hpp, enemigo.hpp, objeto.hpp
@@ -173,3 +214,25 @@ main.cpp      → GameManager.hpp
 | **I** | Abrir [[Inventario]] |
 | **Q** | [[Guardado|Guardar]] partida y salir del juego |
 | **Enter** | Ir al menú desde pantalla de título |
+
+## Metadatos de mapas
+
+Cada `mapas/nivelN.meta` acompaña al mapa y permite cambiar el balance sin
+rediseñar la cuadrícula. Define sección, límite de nivel, probabilidad base,
+multiplicador del mapa, pasos de gracia, crecimiento máximo, colores por tier,
+curación y zonas asociadas a un tile. Cada zona define su `color` junto a su
+`tile`; ya no se usa una sección global `terrain_styles`.
+
+El bloque `tier_colors` asigna colores ANSI a los tiers de enemigos. Por
+ejemplo, `"tier_colors": {"1": 37, "2": 33, "3": 91, "4": 95}`. Las zonas
+con jefe pueden declarar `boss_id` y `restore_tile`; este último indica el
+terreno que queda después de derrotar al jefe.
+
+Una zona puede ser segura, modificar estadísticas/XP, listar enemigos por peso
+y asignar el jefe mediante `boss_id`. `tile` identifica las celdas de la zona y
+`restore_tile` indica qué terreno recupera un `B` derrotado. El jefe se resuelve
+por los tiles que rodean su posición, por lo que `B` puede reutilizarse en
+terrenos distintos si queda rodeado por el tile de cada zona.
+
+El HUD muestra sección, zona, terreno y límite. `8` o `F8` alterna el límite
+para depuración. La XP nunca supera el umbral actual.

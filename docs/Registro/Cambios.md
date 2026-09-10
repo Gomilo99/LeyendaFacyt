@@ -1,6 +1,6 @@
 ---
 creado: 22/07/2026
-modificado: 24/07/2026
+modificado: 08/09/2026
 tipo: Avance
 tags: # deuda-tecnica, idea-loca, bug-critico, bug, refactor
 titulo: Cambios
@@ -12,6 +12,119 @@ dificultad: Media
 version: 1.0.0
 ---
 ## Log
+### Log 09/09/2026 - Correcciones de interfaz, HUD y terrenos de curación
+#### Cambios realizados
+- Se corrigió la superposición de mensajes al equipar armas desde el inventario.
+  `InventoryUI` ahora llama a `Jugador::equiparArma()` en modo silencioso y
+  deja que el mensaje se dibuje dentro del `ScreenBuffer` del inventario.
+- El cuadro de información del héroe en el overworld ahora calcula su ancho a
+  partir de la línea visible más larga. El borde se mantiene alineado cuando
+  cambian el nombre, el arma, la zona o el terreno.
+- Al consumir una poción (`h`, `H` o `G`), el tile se restaura al primer
+  terreno no seguro definido en la metadata del nivel. En el nivel 2 esto
+  devuelve `,` (pradera) en lugar de forzar siempre `.`.
+- Se confirmó que `terrain_styles.*.style` se carga en `MapMetadata`, pero no
+  controla todavía el dibujo del mapa: el carácter y la representación visual
+  siguen dependiendo del tile del archivo `.txt` y del `switch` de
+  `GameManager::renderMapa()`.
+
+#### Validación
+- La compilación incremental y la compilación forzada terminaron sin errores
+  cuando `make` estaba disponible en el entorno.
+- La comprobación posterior de `src/Inventario.cpp` y `src/GameManager.cpp`
+  no reportó errores.
+
+### Log 09/09/2026 - Victoria final después del último nivel
+#### Cambios realizados
+- Se corrigió `batalla()`: ya no considera jefe final a cualquier enemigo con
+  nivel alto.
+- `GameManager` marca como final únicamente al jefe del último mapa disponible.
+  Los jefes de los niveles anteriores se derrotan normalmente y permiten
+  continuar al siguiente nivel mediante su llave `K`.
+- Derrotar al jefe final ya no marca inmediatamente la partida como ganada:
+  deja disponible la `K` final para completar el objetivo.
+- La campaña termina solo después de derrotar al jefe del último nivel y
+  recoger su `K` final.
+
+### Log 09/09/2026 - Terrenos, color de enemigos y reglas de jefes
+#### Cambios realizados
+- Se eliminó `terrain_styles` de los metadatos. Cada zona define ahora su
+  propio `color` junto a `tile` y `terrain`.
+- Se añadió `tier_colors` por nivel. El arte y el nombre del enemigo se dibujan
+  con el color configurado para su tier, incluidos los jefes.
+- Se añadió `restore_tile` a las zonas con jefe. Al derrotarlo, el tile `B`
+  recupera explícitamente el terreno indicado por la zona.
+- La zona de un jefe se resuelve inspeccionando los tiles que rodean al `B`.
+  Así un mismo símbolo `B` puede representar jefes distintos según el terreno
+  que lo rodea.
+- Los combates contra jefes no permiten huir; la opción queda deshabilitada y
+  una confirmación no puede escapar del combate.
+- Los mapas ya no requieren filas de igual longitud. Las filas cortas se tratan
+  como pared fuera de sus límites, evitando accesos fuera del almacenamiento.
+
+### Log 08/09/2026 - Progresión por secciones, metadatos y encuentros configurables
+#### Cambios realizados
+- Se añadieron archivos `mapas/nivelN.meta` para configurar cada sección sin
+  mezclar balance con la cuadrícula visual.
+- Cada metadata define límite de nivel del héroe, probabilidad base,
+  multiplicador del mapa, pasos de gracia, crecimiento máximo de encuentros,
+  estilos de terreno, curación porcentual y zonas asociadas a tiles.
+- Las zonas seleccionan enemigos por peso y pueden aplicar multiplicadores de
+  estadísticas y experiencia. El nivel del jugador ya no determina la tabla de
+  enemigos de una zona.
+- Los tiles `B` usan el `boss_id` de la zona actual y no buscan un jefe por
+  nivel del jugador. Un `B` sin jefe configurado se reporta como error de
+  configuración.
+- Se añadió el terreno seguro, que desactiva encuentros aleatorios.
+- La experiencia se calcula usando nivel y tier del enemigo, además de los
+  modificadores de zona. La XP del héroe se limita al umbral actual (`200/200`,
+  por ejemplo) y no se acumula por encima de él.
+- Se añadieron pociones porcentuales: `h` (25%), `H` (50%) y `G` (100%).
+- El HUD muestra sección, zona, terreno y límite de nivel. `8`/`F8` permite
+  desactivar temporalmente el límite para depuración.
+- Se agregaron colores y símbolos de terreno configurables desde `.meta`.
+
+#### Motivo y efecto sobre el diseño
+
+La separación entre sección, zona, terreno y nivel propio del enemigo evita
+que la dificultad dependa accidentalmente del nivel del jugador. Un jugador
+que llegue demasiado pronto a una zona sigue encontrando la misma tabla de
+enemigos; la diferencia está en sus decisiones, equipo y preparación.
+
+El límite de nivel funciona como una compuerta de campaña: al alcanzarlo, el
+héroe conserva exactamente `expMax/expMax`, pero no sube hasta entrar en una
+sección con un límite mayor o desactivar el límite mediante debug. Así no se
+descarta experiencia ni se permite farmear indefinidamente en una zona
+temprana.
+
+`GameManager` carga la metadata al iniciar o cambiar de nivel. En cada
+movimiento consulta la zona actual y configura `EncounterManager` con la
+probabilidad base, los multiplicadores y los pasos de gracia. `EnemyFactory`
+recibe la tabla ponderada de esa zona, crea el enemigo por ID y aplica sus
+modificadores antes del combate.
+
+El tile `B` ya no significa “buscar cualquier jefe disponible”: resuelve la
+zona actual y su `boss_id`. Si falta configuración, se informa un error en vez
+de lanzar un jefe incorrecto. `K` sigue siendo la transición de campaña y solo
+se habilita cuando el jefe de la sección fue derrotado.
+
+La renderización consulta la misma metadata que usa el balance. Por eso el
+color, el símbolo, la zona y el límite mostrados en pantalla corresponden a
+las reglas que gobiernan los encuentros.
+
+### Rebalanceo de la campaña de cinco niveles
+
+Se reemplazaron los catálogos extensos y mezclados por una ruta compacta:
+cinco armas, tres tiers de pociones y enemigos con una función concreta en
+cada sección. Los drops anticipan la siguiente mejora sin entregar el arma
+final demasiado pronto.
+
+También se reemplazaron los mapas anteriores por tutorial, pradera, bosque,
+mazmorra 1 y mazmorra final. La dificultad sube mediante probabilidad de
+encuentro, multiplicador de estadísticas, multiplicador de XP y disponibilidad
+de curación, todos definidos en `.meta`. El nivel del jugador no altera la
+selección de enemigos.
+
 ### Log 23/07/2026 - Corrección de Deudas técnicas
 #### Cambios realizados
 ##### Eliminación de Magic numbers

@@ -29,6 +29,30 @@ bool CacheManager::cargarMapa(Mapa &mapa){
     return mapa.cargar(Config::mapaCache());
 }
 
+bool CacheManager::guardarEstado(const EstadoPartida& estado){
+    std::ofstream file(Config::partidaCachePath());
+    if (!file.is_open()) return false;
+
+    json j;
+    j["nivelActual"] = estado.nivelActual;
+    j["jefeDerrotado"] = estado.jefeDerrotado;
+    j["haGanadoFinal"] = estado.haGanadoFinal;
+    file << j.dump(4);
+    return file.good();
+}
+
+bool CacheManager::cargarEstado(EstadoPartida& estado){
+    std::ifstream file(Config::partidaCachePath());
+    if (!file.is_open()) return false;
+
+    json j;
+    file >> j;
+    estado.nivelActual = j.value("nivelActual", 1);
+    estado.jefeDerrotado = j.value("jefeDerrotado", false);
+    estado.haGanadoFinal = j.value("haGanadoFinal", false);
+    return true;
+}
+
 void CacheManager::guardarHeroe(const Jugador &jugador){
     json j;
     j["nombre"]     = jugador.getNombre();

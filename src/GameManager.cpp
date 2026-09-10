@@ -19,7 +19,8 @@
  * Nueva Partida / Continuar se hace en mostrarMenuPrincipal().
  */
 GameManager::GameManager()
-    : jugador("Heroe"), state(GameState::MAIN_MENU), spawnX(1), spawnY(1)
+    : jugador("Heroe"), state(GameState::MAIN_MENU), spawnX(1), spawnY(1),
+    nivelActual(1), jefeDerrotado(false), haGanadoFinal(false)
 {
     objetos = DataManager::cargarObjetos();
     if (objetos.empty()) {
@@ -27,6 +28,7 @@ GameManager::GameManager()
     }
 
     enemyFactory.cargarDesdeJSON(Config::enemigosPath(), objetos);
+    cargarMetadata(1);
 
     // Buscar spawn point 'P' del mapa original
     Mapa mapaTemp;
@@ -39,9 +41,42 @@ GameManager::GameManager()
                 }
             }
         }
+
     } else {
         std::cerr << "No se pudo cargar el mapa original.\n";
     }
+
+}
+
+void GameManager::cargarMetadata(int nivel) {
+    metaCargada = metadata.load(Config::mapaMetaPath(nivel));
+    if (!metaCargada) {
+        metadata = MapMetadata();
+        metadata.levelCap = 2;
+    }
+    nivelMaximoSeccion = metadata.levelCap;
+    jugador.setNivelMaximoPermitido(nivelMaximoSeccion);
+    encounterMgr.configurar(metadata.encounterBase, metadata.encounterMultiplier,
+                            metadata.encounterGrowthCap, metadata.encounterGraceSteps);
+}
+
+const ZoneMetadata* GameManager::zonaActual() const {
+    return metaCargada
+        ? metadata.zoneAt(mapa.getTile(jugador.getPosX(), jugador.getPosY()))
+        : nullptr;
+}
+
+const ZoneMetadata* GameManager::zonaJefeActual() const {
+    for (int dy = -1; dy <= 1; dy++) {
+        for (int dx = -1; dx <= 1; dx++) {
+            if (dx == 0 && dy == 0) continue;
+            char terrainTile = mapa.getTile(jugador.getPosX() + dx, jugador.getPosY() + dy);
+            for (const auto& zone : metadata.zones) {
+                if (zone.tile == terrainTile && !zone.bossId.empty()) return &zone;
+            }
+        }
+    }
+    return nullptr;
 }
 
 /**
@@ -105,8 +140,10 @@ void GameManager::inicializarNuevaPartida() {
         return;
     }
 
-    // === Configuracion de terreno segun el nivel ===
-    encounterMgr.setTerreno(EncounterManager::Terreno::LLANURA);
+    nivelActual = 1;
+    jefeDerrotado = false;
+    haGanadoFinal = false;
+    cargarMetadata(1);
 
     // Carga de personaje y spawn
     jugador = Jugador("Heroe");
@@ -126,6 +163,7 @@ void GameManager::inicializarNuevaPartida() {
         jugador.setNombre(nombreInput);
 
     CacheManager::crearPartida(mapa, jugador);
+    CacheManager::guardarEstado({nivelActual, jefeDerrotado, haGanadoFinal});
     state = GameState::OVERWORLD;
 }
 
@@ -142,15 +180,34 @@ bool GameManager::cargarPartidaExistente() {
         return false;
     }
 
-    // === Configuracion del terreno en función del nivel cargado ===
-    // Por ahora se carga el nivel 1 siempre. Cuando haya multi-nivel 
-    // se guardara el nivel en CacheManager y se usará aquí
-    encounterMgr.setTerreno(EncounterManager::Terreno::LLANURA);
-
     //  === Carga de jugador ===
     jugador = CacheManager::cargarHeroe(objetos);
 
-    // === Carga del mundo ===
+    CacheManager::EstadoPartida estado;
+    if (CacheManager::cargarEstado(estado)) {
+        nivelActual = estado.nivelActual;
+        jefeDerrotado = estado.jefeDerrotado;
+        haGanadoFinal = estado.haGanadoFinal;
+    } else {
+        nivelActual = jugador.getNivelActual();
+        jefeDerrotado = false;
+        haGanadoFinal = jugador.getHaGanado();
+        bool hayJefeEnMapa = false;
+        for (int y = 0; y < mapa.getAlto(); y++) {
+            for (int x = 0; x < mapa.getAncho(); x++) {
+                if (mapa.getTile(x, y) == 'B') {
+                    hayJefeEnMapa = true;
+                    break;
+                }
+            }
+        }
+        jefeDerrotado = !hayJefeEnMapa;
+    }
+    jugador.setNivelActual(nivelActual);
+    cargarMetadata(nivelActual);
+    encounterMgr.resetear();
+    if (haGanadoFinal) jugador.setHaGanado(true);
+
     state = GameState::OVERWORLD;
     return true;
 }
@@ -161,6 +218,7 @@ bool GameManager::cargarPartidaExistente() {
 void GameManager::guardarPartida() {
     CacheManager::guardarHeroe(jugador);
     CacheManager::guardarMapa(mapa);
+    CacheManager::guardarEstado({nivelActual, jefeDerrotado, haGanadoFinal});
 }
 
 /**
@@ -185,21 +243,38 @@ void GameManager::renderMapa() {
     std::string hpBar = std::string(hpFill, '#') + std::string(barW - hpFill, '.');
     std::string mpBar = std::string(mpFill, '#') + std::string(barW - mpFill, '.');
 
-    std::vector<std::string> hud;
-    hud.push_back("\033[36m+-----------------------+\033[0m");
-    hud.push_back("\033[93m|  " + jugador.getNombre() + "\033[0m");
-    hud.push_back("\033[97m|  Nv: " + std::to_string(jugador.getNivel())
+    std::vector<std::string> hudText;
+    hudText.push_back(jugador.getNombre());
+    hudText.push_back("Nv: " + std::to_string(jugador.getNivel())
         + "  Exp: " + std::to_string(jugador.getExperiencia())
-        + "/" + std::to_string(jugador.getExperienciaNecesaria()) + "\033[0m");
-    hud.push_back("\033[" + hpColor + "m|  HP: "
-        + std::to_string(jugador.getSalud()) + "/"
-        + std::to_string(jugador.getSaludMaxima()) + " " + hpBar + "\033[0m");
-    hud.push_back("\033[94m|  MP: "
-        + std::to_string(jugador.getMana()) + "/"
-        + std::to_string(jugador.getManaMaxima()) + " " + mpBar + "\033[0m");
-    hud.push_back("\033[97m|  Arma: " + jugador.getArmaNombre() + "\033[0m");
-    hud.push_back("\033[97m|  Pociones: " + std::to_string(jugador.getPociones()) + "\033[0m");
-    hud.push_back("\033[36m+-----------------------+\033[0m");
+        + "/" + std::to_string(jugador.getExperienciaNecesaria()));
+    hudText.push_back("HP: " + std::to_string(jugador.getSalud())
+        + "/" + std::to_string(jugador.getSaludMaxima()) + " " + hpBar);
+    hudText.push_back("MP: " + std::to_string(jugador.getMana())
+        + "/" + std::to_string(jugador.getManaMaxima()) + " " + mpBar);
+    hudText.push_back("Arma: " + jugador.getArmaNombre());
+    hudText.push_back("Pociones: " + std::to_string(jugador.getPociones()));
+    const ZoneMetadata* zone = zonaActual();
+    hudText.push_back("Sec: " + std::to_string(metadata.section) +
+                "  Terreno: " + (zone ? zone->terrain : "default") +
+                "  Zona: " + (zone ? zone->id : "none"));
+    hudText.push_back("Cap: " + std::to_string(nivelMaximoSeccion) +
+                (limiteNivelActivo ? " (ON)" : " (OFF)") + "  F8/8 toggle");
+
+    int hudWidth = 40;
+    for (const auto& line : hudText)
+        hudWidth = std::max(hudWidth, static_cast<int>(line.size()) + 4);
+    int contentWidth = hudWidth - 4;
+    std::string hudBorder = "\033[36m+" + std::string(hudWidth - 2, '-') + "+\033[0m";
+    std::vector<std::string> hud;
+    hud.push_back(hudBorder);
+    for (size_t i = 0; i < hudText.size(); i++) {
+        std::string line = hudText[i];
+        line.resize(contentWidth, ' ');
+        std::string color = (i == 0) ? "93" : (i == 2 ? hpColor : (i == 3 ? "94" : "97"));
+        hud.push_back("\033[" + color + "m|  " + line + " |\033[0m");
+    }
+    hud.push_back(hudBorder);
 
     int altoHud = (int)hud.size();
     int altoTotal = std::max(altoMapa, altoHud);
@@ -208,16 +283,35 @@ void GameManager::renderMapa() {
         if (y < altoMapa) {
             for (int x = 0; x < anchoMapa; x++) {
                 if (x == jugador.getPosX() && y == jugador.getPosY()) {
-                    std::cout << "\033[93m@\033[0m";
+                    std::cout << "\033[1;93m@ \033[0m";
                 } else {
                     char t = mapa.getTile(x, y);
+                    const ZoneMetadata* terrainZone = metadata.zoneAt(t);
+                    bool isTerrainTile = t == '.' || t == ',' || t == ';' ||
+                                         t == '~' || t == 'd' || t == 'f' ||
+                                         t == '^' || t == 's';
+                    if (terrainZone && isTerrainTile) {
+                        std::cout << "\033[" << terrainZone->terrainColor << "m"
+                                  << t << " \033[0m";
+                        continue;
+                    }
                     switch (t) {
-                        case '#': std::cout << "\033[90m#\033[0m"; break;
-                        case '.': std::cout << "\033[32m.\033[0m"; break;
-                        case 'K': std::cout << "\033[93mK\033[0m"; break;
-                        case 'B': std::cout << "\033[91mB\033[0m"; break;
-                        case 'H': std::cout << "\033[92mH\033[0m"; break;
-                        default:  std::cout << t;
+                        case '#': std::cout << "\033[36m# \033[0m"; break;
+                        case '-': case '|': case '+': case '=':
+                            std::cout << "\033[36m" << t << " \033[0m"; break;
+                        case '.': std::cout << "\033[90m. \033[0m"; break;
+                        case ',': std::cout << "\033[33m, \033[0m"; break;
+                        case ';': std::cout << "\033[33m; \033[0m"; break;
+                        case '~': std::cout << "\033[34m~ \033[0m"; break;
+                        case 'd': std::cout << "\033[90m▒ \033[0m"; break;
+                        case 's': std::cout << "\033[92m░ \033[0m"; break;
+                        case 'P': std::cout << "\033[1;93mP \033[0m"; break;
+                        case 'K': std::cout << "\033[1;96mK \033[0m"; break;
+                        case 'B': std::cout << "\033[1;91mB \033[0m"; break;
+                        case 'h': std::cout << "\033[32mh \033[0m"; break;
+                        case 'H': std::cout << "\033[92mH \033[0m"; break;
+                        case 'G': std::cout << "\033[1;92mG \033[0m"; break;
+                        default:  std::cout << t << ' ';
                     }
                 }
             }
@@ -251,14 +345,20 @@ void GameManager::moverJugador(int dx, int dy) {
         int viejoY = jugador.getPosY();
         jugador.setPos(nuevoX, nuevoY);
         if (mapa.getTile(viejoX, viejoY) == 'P'){
-            mapa.setTile(viejoX, viejoY, '.');
+            mapa.setTile(viejoX, viejoY, 's');
             CacheManager::guardarMapa(mapa);
         }
         char tile = mapa.getTile(nuevoX, nuevoY);
         handleTile(tile);
 
         if (jugador.estaVivo() && !jugador.getHaGanado()
-            && tile != 'B' && tile != 'K' && tile != 'H') {
+            && tile != 'B' && tile != 'K' && tile != 'H' &&
+            tile != 'h' && tile != 'G') {
+            const ZoneMetadata* zone = zonaActual();
+            encounterMgr.configurar(metadata.encounterBase, metadata.encounterMultiplier *
+                                    (zone ? zone->encounterMultiplier : 1.0f),
+                                    metadata.encounterGrowthCap, metadata.encounterGraceSteps,
+                                    zone ? zone->safe : false);
             encounterMgr.registrarPaso();
             if (encounterMgr.verificarEncuentro()) {
                 iniciarCombate();
@@ -270,32 +370,59 @@ void GameManager::moverJugador(int dx, int dy) {
 /**
  * Procesa tiles especiales del mapa y persiste los cambios en cache.
  *
- * B: Inicia combate contra el jefe del nivel
- * K: Marca victoria (jugador encontró la llave)
+ * B: Inicia combate contra el jefe del nivel y habilita K al ganar
+ * K: Carga el siguiente nivel si el jefe fue derrotado
  * H: Usa una poción y elimina el tile del mapa
  */
 void GameManager::handleTile(char tile) {
     if (tile == 'B'){
+        const ZoneMetadata* zone = zonaJefeActual();
+        if (!zone || zone->bossId.empty()) {
+            std::cerr << "Error de configuracion: el tile B no tiene jefe asignado.\n";
+            return;
+        }
         iniciarCombateJefe();
         if (jugador.estaVivo()){
-            mapa.setTile(jugador.getPosX(), jugador.getPosY(), '.');
-            CacheManager::guardarMapa(mapa);
+            jefeDerrotado = true;
+            mapa.setTile(jugador.getPosX(), jugador.getPosY(),
+                        zone->restoreTile != '\0' ? zone->restoreTile :
+                        (zone->tile != '\0' ? zone->tile : '.'));
+            guardarPartida();
         }
     }
     if (tile == 'K'){
-        int siguienteNivel = jugador.getNivelActual() + 1;
-        if(siguienteNivel > 3){ // 3 niveles totales
+        if (!jefeDerrotado) {
+            std::cout << "El portal esta sellado. Derrota al jefe primero.\n";
+            return;
+        }
+
+        int siguienteNivel = nivelActual + 1;
+        if (!std::ifstream(Config::mapaPath(siguienteNivel)).good()) {
             std::cout << "Has completado todos los niveles!\n";
+            haGanadoFinal = true;
             jugador.setHaGanado(true);
-        }else{
-            std::cout << "Has encontrado la llave del nivel " << siguienteNivel << "!\n";
-            jugador.setNivelActual(siguienteNivel);
-            cargarNivel(siguienteNivel);
+            guardarPartida();
+        } else if (cargarNivel(siguienteNivel)) {
+            std::cout << "Has avanzado al nivel " << siguienteNivel << "!\n";
+            guardarPartida();
         }
     }
-    if (tile == 'H'){
-        jugador.usarPocion();
-        mapa.setTile(jugador.getPosX(), jugador.getPosY(), '.');
+    if (tile == 'H' || tile == 'h' || tile == 'G'){
+        int pct = 100;
+        auto healing = metadata.healing.find(tile);
+        if (healing != metadata.healing.end()) pct = healing->second;
+        int amount = jugador.getSaludMaxima() * pct / 100;
+        jugador.setSalud(std::min(jugador.getSaludMaxima(), jugador.getSalud() + amount));
+
+        // El tile de curacion no tiene zona propia; restaurar el terreno base del nivel.
+        char terrenoBase = '.';
+        for (const auto& candidate : metadata.zones) {
+            if (candidate.tile != '\0' && candidate.tile != 's') {
+                terrenoBase = candidate.tile;
+                break;
+            }
+        }
+        mapa.setTile(jugador.getPosX(), jugador.getPosY(), terrenoBase);
         CacheManager::guardarMapa(mapa);
     }
 }
@@ -315,7 +442,12 @@ void GameManager::mostrarInventario() {
  * y crea una instancia de Enemigo lista para batalla().
  */
 void GameManager::iniciarCombate() {
-    Enemigo enemigo = enemyFactory.crearEnemigo(jugador.getNivel());
+    const ZoneMetadata* zone = zonaActual();
+    Enemigo enemigo = zone && !zone->enemies.empty()
+        ? enemyFactory.crearEnemigo(zone->enemies, zone->statMultiplier, zone->xpMultiplier)
+        : enemyFactory.crearEnemigo(jugador.getNivel());
+    auto color = metadata.tierColors.find(enemigo.getTier());
+    enemigo.setDisplayColor(color != metadata.tierColors.end() ? color->second : COL_WHITE);
     batalla(jugador, enemigo);
 }
 
@@ -325,26 +457,29 @@ void GameManager::iniciarCombate() {
  * muestra un mensaje y cae en un combate aleatorio normal.
  */
 void GameManager::iniciarCombateJefe() {
-    if (enemyFactory.hayJefe(jugador.getNivel())) {
-        Enemigo jefe = enemyFactory.crearJefe(jugador.getNivel());
-        batalla(jugador, jefe);
+    const ZoneMetadata* zone = zonaJefeActual();
+    if (zone && !zone->bossId.empty()) {
+        Enemigo jefe = enemyFactory.crearPorId(zone->bossId);
+        jefe.setXpMultiplier(zone->xpMultiplier);
+        jefe.aplicarMultiplicadorStats(zone->statMultiplier);
+        auto color = metadata.tierColors.find(jefe.getTier());
+        jefe.setDisplayColor(color != metadata.tierColors.end() ? color->second : COL_BRED);
+        bool esUltimoNivel = !std::ifstream(Config::mapaPath(nivelActual + 1)).good();
+        batalla(jugador, jefe, true, esUltimoNivel);
     } else {
-        std::cout << "Aun no hay un jefe para tu nivel...\n";
-        std::cout << "Un enemigo aparece de todas formas!\n";
-        std::cout << "Presiona Enter para continuar...";
-        std::cin.get();
-        iniciarCombate();
+        std::cerr << "Error de configuracion: no hay jefe para esta zona.\n";
     }
 }
 
-void GameManager::cargarNivel(int nivel){
+bool GameManager::cargarNivel(int nivel){
     std::string path = Config::mapaPath(nivel);
     if(!mapa.cargar(path)){
         std::cerr << "No se pudo cargar el nivel " << nivel << "\n";
-        return;
+        return false;
     }
 
-    // Configurar terreno segun el nivel
+    cargarMetadata(nivel);
+    // Configurar terreno segun el nivel (fallback para mapas sin metadata)
     switch(nivel){
         case 1: encounterMgr.setTerreno(EncounterManager::Terreno::LLANURA); break;
         case 2: encounterMgr.setTerreno(EncounterManager::Terreno::MAZMORRA); break;
@@ -353,13 +488,17 @@ void GameManager::cargarNivel(int nivel){
     }
     encounterMgr.resetear();
 
-    // Buscar spawn point del nuevo mapa
-    // Cuando encuentra el 'P' reeemplaza ese valor por '.' y pasa esa posición al jugador.
+    nivelActual = nivel;
+    jugador.setNivelActual(nivelActual);
+    jefeDerrotado = false;
+
+    // El spawn del mapa nuevo se convierte en la posición inicial del jugador.
     for (int y = 0; y < mapa.getAlto(); y++){
         for (int x = 0; x < mapa.getAncho(); x++){
             if(mapa.getTile(x, y) == 'P'){
                 jugador.setPos(x, y);
-                mapa.setTile(x, y, '.');
+                mapa.setTile(x, y, 's');
+                y = mapa.getAlto();
                 break;
             }
         }
@@ -367,6 +506,8 @@ void GameManager::cargarNivel(int nivel){
 
     CacheManager::guardarMapa(mapa);
     CacheManager::guardarHeroe(jugador);
+    CacheManager::guardarEstado({nivelActual, jefeDerrotado, haGanadoFinal});
+    return true;
 }
 
 /**
@@ -408,7 +549,11 @@ void GameManager::run() {
                     case 'i': case 'I': 
                         mostrarInventario(); 
                         continue;
-                    case 'q': case 'Q':
+                                case '8': case static_cast<char>(-8):
+                                    limiteNivelActivo = !limiteNivelActivo;
+                                    jugador.setIgnorarLimiteNivel(!limiteNivelActivo);
+                                    continue;
+                                case 'q': case 'Q':
                         guardarPartida();
                         return;
                     default: continue;

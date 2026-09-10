@@ -1,0 +1,82 @@
+{
+  "section": 5,
+  "level_cap": 5,
+  "encounter": {
+    "base": 19, 
+    "multiplier": 1.0, 
+    "growth_cap": 0.2, 
+    "grace_steps": 4
+  },
+  "healing": {"h": 15, "H": 35, "G": 100},
+  "tier_colors": {"1": 37, "2": 33, "3": 91, "4": 95},
+  "zones": [
+    {
+      "id":"final_dungeon", "tile":"f",
+      "terrain":"final_dungeon", "color":31,
+      "encounter_multiplier":1.0, 
+      "stat_multiplier":1.5, 
+      "xp_multiplier":1.5,
+      "enemies":[
+        {"id":"gargola_wifi","weight":8},
+        {"id":"ogro_procrastinador","weight":6}
+        ],
+      "boss_id":"administrador_final", "restore_tile":"f"},
+    {
+      "id":"safe_start", "tile":"s",
+      "terrain":"safe", "color":36,
+      "safe":true,
+      "encounter_multiplier":0, 
+      "enemies":[]
+    },
+    {
+      "id":"dungeon_lower", "tile":"d",
+      "terrain":"dungeon", "color":35,
+      "encounter_multiplier":1.0, 
+      "stat_multiplier":1.5, 
+      "xp_multiplier":1.3,
+      "enemies":[
+        {"id":"esqueleto","weight":10},
+        {"id":"golem_facturas","weight":6},
+        {"id":"bruja","weight":5}
+      ],
+      "boss_id":"caballero_cebolla", "restore_tile":"d"
+    },
+    {
+      "id":"forest", "tile":"^",
+      "terrain":"forest", "color":92,
+      "encounter_multiplier":1.0, 
+      "stat_multiplier":2.0, 
+      "xp_multiplier":1.15,
+      "enemies":[
+        {"id":"duende_cable","weight":10},
+        {"id":"espectro_rojo","weight":7},
+        {"id":"ciclope","weight":4}
+      ],
+      "boss_id":"ent_ancestral", "restore_tile":"^"
+    },
+    {
+      "id":"pradera", "tile":",",
+      "terrain":"pradera", "color":32,
+      "encounter_multiplier":1.0, 
+      "stat_multiplier":2.1, 
+      "xp_multiplier":1.0,
+      "enemies":[
+        {"id":"murcielago","weight":10},
+        {"id":"orco","weight":9},
+        {"id":"jabalina_pradera","weight":5}
+      ],
+      "boss_id":"rey_maleza", "restore_tile":","
+    },
+    {
+      "id":"camino", "tile":".",
+      "terrain":"camino", "color":37,
+      "encounter_multiplier":0.8, 
+      "stat_multiplier":2.2, 
+      "xp_multiplier":0.8,
+      "enemies":[
+        {"id":"slime_cafe","weight":12},
+        {"id":"goblin","weight":8}
+      ]
+    }
+  ]
+}

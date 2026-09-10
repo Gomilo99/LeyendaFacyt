@@ -1,4 +1,4 @@
-obj/batalla.o: src/batalla.cpp src/../lib/Platform.hpp \
+obj/Batalla.o: src/Batalla.cpp src/../lib/Platform.hpp \
  src/../lib/batalla.hpp src/../lib/Enemigo.hpp src/../lib/personaje.hpp \
  src/../lib/Output.hpp src/../lib/objeto.hpp src/../lib/Jugador.hpp \
  src/../lib/Personaje.hpp src/../lib/GameBalance.hpp \

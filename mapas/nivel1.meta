@@ -1,0 +1,33 @@
+{
+  "section": 1,
+  "level_cap": 1,
+  "encounter": 
+  {
+    "base": 6, 
+    "multiplier": 0.9, 
+    "growth_cap": 0.2, 
+    "grace_steps": 4
+  },
+  "healing": {"h": 25, "H": 50, "G": 100},
+  "tier_colors": {"1": 37, "2": 33, "3": 91, "4": 95},
+  "zones": [
+    {
+      "id":"tutorial", "tile":".",
+      "terrain":"tutorial", "color":37,
+      "encounter_multiplier":0.8, 
+      "stat_multiplier":0.9, 
+      "xp_multiplier":0.8,
+      "enemies":[
+        {"id":"slime_cafe","weight":12},
+        {"id":"goblin","weight":8}
+      ],
+      "boss_id":"guardian_tutorial", "restore_tile":"."},
+    {
+      "id":"safe_start", "tile":"s",
+      "terrain":"safe", "color":36,
+      "safe":true,
+      "encounter_multiplier":0, 
+      "enemies":[]
+    }
+  ]
+}

@@ -22,15 +22,20 @@ private:
     int posX, posY;
 
     int nivelActual = 1;
+    int nivelMaximoPermitido = 2;
+    bool ignorarLimiteNivel = false;
 public:
     Jugador(std::string nombre);
     Jugador(std::string nom, int hp, int atk, int def, int lvl, int poc);
 
     int getExperiencia() const { return experiencia; }
-    void setExperiencia(int nuevaExperiencia) { experiencia = nuevaExperiencia; }
+    void setExperiencia(int nuevaExperiencia) { experiencia = std::max(0, std::min(nuevaExperiencia, expNecesaria)); }
     
     int getExperienciaNecesaria() const { return expNecesaria; }
-    void setExperienciaNecesaria(int nuevaExpNecesaria) { expNecesaria = nuevaExpNecesaria; }
+    void setExperienciaNecesaria(int nuevaExpNecesaria) {
+        expNecesaria = std::max(1, nuevaExpNecesaria);
+        experiencia = std::min(experiencia, expNecesaria);
+    }
     
     int getPociones() const { return pociones; }
     void setPociones(int nuevasPociones) { pociones = nuevasPociones; }
@@ -73,6 +78,9 @@ public:
     std::vector<std::pair<std::string, std::shared_ptr<Objeto> > > getItemsList() const;
 
     void obtenerExperiencia(int cantidad);
+    void setNivelMaximoPermitido(int maximo) { nivelMaximoPermitido = std::max(1, maximo); }
+    int getNivelMaximoPermitido() const { return nivelMaximoPermitido; }
+    void setIgnorarLimiteNivel(bool value) { ignorarLimiteNivel = value; }
 
     int getNivelActual() const {return nivelActual; }
     void setNivelActual(int n){ nivelActual = n; }
