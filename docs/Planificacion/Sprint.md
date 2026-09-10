@@ -37,7 +37,12 @@ Trabajo planificado para el sprint actual. Al terminar una tarea, marcar como `[
 
 ## Tareas pendientes (próximo sprint)
 
-
+- [ ] Rediseñar la ventana del enemigo vencido y la subida de nivel, donde se pueda visualizar el aumento de daño, la experiencia ganada, etc.
+- [ ] Rediseño de pantallas de finalización de partida: game over, victoria
+- [ ] Ajustar los sprites para que coincida la versión json con el resultado final
+- [ ] Refactorizar para que el enemigo final no aparezca antes (no aparezca por el nivel sino por el flujo nuevo `BOSS` -> `KEY` -> `MAP CHANGE`)
+- [ ] Eliminar la pantalla intermedia de enemigos normales
+- [ ] Limitar la tasa de encuentros y balancear las estadísticas con la experiencia.
 ## Completado este sprint
 
 _(al terminar una tarea, moverla aquí)_

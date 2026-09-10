@@ -1,13 +1,13 @@
 {
-    "arma": "La Pluma de la Deuda",
-    "ataque": 57,
+    "arma": "Espada Gallo",
+    "ataque": 47,
     "defensa": 35,
-    "exp": 1400,
+    "exp": 1650,
     "expMax": 700,
     "inventario": [
         {
             "cant": 1,
-            "nombre": "La Pluma de la Deuda"
+            "nombre": "Alka-Seltzer"
         },
         {
             "cant": 1,
@@ -17,10 +17,11 @@
     "mana": 50,
     "manaMaxima": 50,
     "nivel": 3,
-    "nombre": "Yisu",
-    "pociones": 3,
-    "posX": 6,
-    "posY": 4,
+    "nivelActual": 3,
+    "nombre": "Heroe",
+    "pociones": 1,
+    "posX": 20,
+    "posY": 5,
     "salud": 350,
     "saludMaxima": 350
 }
