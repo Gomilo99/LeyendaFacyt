@@ -16,7 +16,8 @@ constexpr int SALUD_POR_NIVEL       = 50;   // HP_max += SAUD_POR_NIVEL * (nivel
 constexpr int ATAQUE_POR_NIVEL      = 5;    // ataque += ATAQUE_POR_NIVEL * (nivel+1)
 constexpr int DEFENSA_POR_NIVEL     = 5;    // defensa += DEFENSA_POR_NIVEL * (nivel+1)
 constexpr int EXP_INCREMENTO        = 200;  // expNecesaria += EXP_INCREMENTO por nivel
-constexpr int EXP_NIVEL_3           = 700;  // caso especial para nivel 3
+// anulada por pruebas
+//constexpr int EXP_NIVEL_3           = 700;  // caso especial para nivel 3
 constexpr int EXP_UMBRAL_BASE       = 100;  // expNecesaria inicial (Jugador.hpp:19)
 
 // === Magia ===

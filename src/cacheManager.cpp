@@ -15,9 +15,13 @@ bool CacheManager::existePartida(){
 
 void CacheManager::crearPartida(const Mapa &mapa, const Jugador &jugador){
     fs::create_directory(Config::SAVE_DIR);
+    guardarPartida(mapa, jugador);
+    std::ofstream flag(Config::SAVE_DIR + "partida.flag");
+}
+
+void CacheManager::guardarPartida(const Mapa &mapa, const Jugador &jugador){
     guardarMapa(mapa);
     guardarHeroe(jugador);
-    std::ofstream flag(Config::SAVE_DIR + "partida.flag");
 }
 
 bool CacheManager::guardarMapa(const Mapa &mapa){

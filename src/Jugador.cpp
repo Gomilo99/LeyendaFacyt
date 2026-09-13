@@ -43,28 +43,28 @@ void Jugador::usarMagia(Personaje* objetivo) {
 
 void Jugador::mostrarEstado() const {
     std::cout << "\n" << nombre << " - Salud: " << salud << "/" << saludMaxima
-              << " | Mana: " << mana << "/" << manaMaxima
-              << " | Ataque: " << ataque << " | Defensa: " << defensa;
+            << " | Mana: " << mana << "/" << manaMaxima
+            << " | Ataque: " << ataque << " | Defensa: " << defensa;
     if (armaEquipada) {
         std::cout << "\nArma equipada: " << armaEquipada->getNombre()
-                  << " | dano: " << armaEquipada->getDano();
+                << " | dano: " << armaEquipada->getDano();
     } else {
         std::cout << "\nArma equipada: ninguna";
     }
     std::cout << "\nNivel: " << nivel << " | Experiencia: " << experiencia
-              << "/" << expNecesaria << std::endl;
+            << "/" << expNecesaria << std::endl;
 }
 
 void Jugador::mostrarInventario(){
     std::cout << "Inventario:\n";
     for (const auto& par : inventario) {
         std::cout << "- " << par.first << " x" << par.second << "\n"
-                  << objetosInventario[par.first]->getDescripcion() << std::endl;
+                << objetosInventario[par.first]->getDescripcion() << std::endl;
     }
     if(armaEquipada){
         std::cout << "\nArma equipada: " << armaEquipada->getNombre()
-                  << " (" << armaEquipada->getDano() << " de dano)\n"
-                  << armaEquipada->getDescripcion() << std::endl;
+                << " (" << armaEquipada->getDano() << " de dano)\n"
+                << armaEquipada->getDescripcion() << std::endl;
     } else {
         std::cout << "No tienes un arma equipada.\n";
     }
@@ -129,23 +129,31 @@ std::vector<std::pair<std::string, std::shared_ptr<Objeto> >> Jugador::getItemsL
     return items;
 }
 
-void Jugador::obtenerExperiencia(int cantidad) {
-    experiencia += cantidad;
-    std::cout << "Has ganado " << cantidad << " de experiencia!\n";
+LevelUpResult Jugador::obtenerExperiencia(int cantidad) {
+    LevelUpResult res;
+    res.expGanada = cantidad;
+    res.nivelAnterior = this->nivel;
 
-    if(experiencia >= expNecesaria){
-        std::cout << "Has subido de nivel!\n";
-        saludMaxima += SALUD_POR_NIVEL * (nivel + 1);
-        salud = saludMaxima;
-        ataque += ATAQUE_POR_NIVEL * (nivel + 1);
-        defensa += DEFENSA_POR_NIVEL * (nivel + 1);
-        nivel++;
-        expNecesaria += EXP_INCREMENTO;
-        if(nivel == 3) expNecesaria = EXP_NIVEL_3;
+    this->experiencia += cantidad;
 
-        std::cout << "Subida de Estadisticas!!\n";
-        std::cout << "Nivel: " << nivel << " | Salud: " << salud << "/" << saludMaxima
-                  << " | Ataque: " << ataque << " | Defensa: " << defensa
-                  << " | Experiencia: " << experiencia << "/" << expNecesaria << std::endl;
+    if (this->experiencia >= this->expNecesaria){
+        res.subioDeNivel = true;
+        res.saludMaxGanada = SALUD_POR_NIVEL * (nivel + 1);
+        res.ataqueGanado = ATAQUE_POR_NIVEL * (nivel + 1);
+        res.defensaGanada = DEFENSA_POR_NIVEL * (nivel + 1);
+
+        this->saludMaxima += res.saludMaxGanada;
+        this->salud = this->saludMaxima;
+        this->ataque += res.ataqueGanado;
+        this->defensa += res.defensaGanada;
+        this->nivel++;
+        res.nivelNuevo = this->nivel;
+
+        this->expNecesaria += EXP_INCREMENTO;
+        // anulado por pruebas
+        // if(this->nivel == 3) this->expNecesaria = EXP_NIVEL_3;
+    }else{
+        res.nivelNuevo = this->nivel;
     }
+    return res;
 }

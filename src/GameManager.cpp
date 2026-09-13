@@ -160,8 +160,7 @@ bool GameManager::cargarPartidaExistente() {
  * Guarda el estado actual del heroe y el mapa en cache/.
  */
 void GameManager::guardarPartida() {
-    CacheManager::guardarHeroe(jugador);
-    CacheManager::guardarMapa(mapa);
+    CacheManager::guardarPartida(mapa, jugador);
 }
 
 /**
@@ -371,8 +370,7 @@ void GameManager::cargarNivel(int nivel){
         }
     }
 
-    CacheManager::guardarMapa(mapa);
-    CacheManager::guardarHeroe(jugador);
+    CacheManager::guardarPartida(mapa, jugador);
 }
 
 /**

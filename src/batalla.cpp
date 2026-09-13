@@ -516,16 +516,18 @@ void batalla(Jugador& jugador, Enemigo& enemigo) {
     BattleSystem system(jugador, enemigo);
     system.run();
 
-    if (system.hasFled()) {
-        std::cout << "\nHas escapado del combate.\nPresiona Enter para continuar...";
+    BattleResult res = system.procesarResultado();
+
+    if (res.outcome == BattleResult::Outcome::FLEE){
+        std::cout << "\nHas escapado del combate. \nPresiona Enter para continuar...";
         std::cin.get();
         return;
     }
 
-    if (!jugador.estaVivo()) {
+    if (res.outcome == BattleResult::Outcome::DEFEAT){
         std::cout << "\nHas sido derrotado por " << enemigo.getNombre() << "!\n";
         CacheManager::guardarHeroe(jugador);
-        std::cout << "Presiona Enter para continuar...";
+        std::cout << "Presionar Enter para continuar...";
         std::cin.get();
         return;
     }
@@ -533,38 +535,64 @@ void batalla(Jugador& jugador, Enemigo& enemigo) {
     // Victoria
     limpiarPantalla();
     std::cout << "\n\nHAS DERROTADO A '" << enemigo.getNombre() << "' !\n";
+    std::cout << "Has ganado " << res.expObtenida << " de experiencia!\n";
+
+    if (res.levelUp.subioDeNivel) {
+        std::cout << "\n¡HAS SUBIDO AL NIVEL " << res.levelUp.nivelNuevo << "!\n";
+        std::cout << "Salud Máxima: +" << res.levelUp.saludMaxGanada << "\n";
+        std::cout << "Ataque: +" << res.levelUp.ataqueGanado << "\n";
+        std::cout << "Defensa: +" << res.levelUp.defensaGanada << "\n";
+    }
+
+    if (res.lootObtenido) {
+        std::cout << "Has obtenido: " << res.lootObtenido->getNombre() << "\n";
+    }
+    
     if (jefefinal) {
-        std::cout << "Felicidades, has derrotado al jefe final!\n";
-        std::cout << "...\n";
+        std::cout << "\nFelicidades, has derrotado al jefe final!\n";
         std::cout << "Has ganado el juego!\n";
         jugador.setHaGanado(true);
-    }
-
-    // Otorgar experiencia
-    int exp = enemigo.getExpBase() * (enemigo.getNivel() * (XP_POR_BATALLA / 5));
-    jugador.obtenerExperiencia(exp);
-
-    // Calcular loot segun probabilidades del enemigo (recorre el vector botin)
-    std::uniform_int_distribution<int> distLoot(0, 99);
-    int chance = distLoot(DataManager::rng());
-    std::shared_ptr<Objeto> lootGanado = nullptr;
-
-    const auto& botin = enemigo.getBotin();
-    int acumulado = 0;
-    for (const auto& drop : botin) {
-        acumulado += drop.probabilidad;
-        if (chance < acumulado) {
-            lootGanado = drop.objeto;
-            break;
-        }
-    }
-
-    if (lootGanado) {
-        std::cout << "Has obtenido: " << lootGanado->getNombre() << "\n";
-        jugador.agregarObjeto(lootGanado);
     }
 
     CacheManager::guardarHeroe(jugador);
     std::cout << "Presiona Enter para continuar...";
     std::cin.get();
+}
+
+BattleResult BattleSystem::procesarResultado() {
+    BattleResult res;
+
+    if(fled){
+        res.outcome = BattleResult::Outcome::FLEE;
+        return res;
+    }
+
+    if (!player->estaVivo()){
+        res.outcome = BattleResult::Outcome::DEFEAT;
+        return res;
+    }
+
+    // En caso contrario, el jugador venció
+    res.outcome = BattleResult::Outcome::VICTORY;
+
+    // 1. Calcular XP
+    int exp = currentEnemy->getExpBase() * (currentEnemy->getNivel() * (XP_POR_BATALLA / 5));
+    res.expObtenida = exp;
+    res.levelUp = player->obtenerExperiencia(exp);
+
+    // 2. Calcular Loot Probabilistico
+    std::uniform_int_distribution<int> distLoot(0, 99);
+    int chance = distLoot(DataManager::rng());
+    int acumulado = 0;
+
+    for( const auto& drop: currentEnemy->getBotin()){
+        acumulado += drop.probabilidad;
+        if (chance < acumulado) {
+            res.lootObtenido = drop.objeto;
+            player->agregarObjeto(drop.objeto);
+            break;
+        }
+    }
+
+    return res;
 }

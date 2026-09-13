@@ -9,6 +9,16 @@
 #include <string>
 #include <vector>
 
+struct LevelUpResult {
+    bool subioDeNivel = false;
+    int nivelAnterior = 0;
+    int nivelNuevo = 0;
+    int saludMaxGanada = 0;
+    int ataqueGanado = 0;
+    int defensaGanada = 0;
+    int expGanada = 0;
+};
+
 class Jugador : public Personaje {
 private:
     int pociones;
@@ -73,7 +83,7 @@ public:
     // Método de envío de inventario para el renderizador
     std::vector<std::pair<std::string, std::shared_ptr<Objeto> > > getItemsList() const;
 
-    void obtenerExperiencia(int cantidad);
+    LevelUpResult obtenerExperiencia(int cantidad);
 
     int getNivelActual() const {return nivelActual; }
     void setNivelActual(int n){ nivelActual = n; }
