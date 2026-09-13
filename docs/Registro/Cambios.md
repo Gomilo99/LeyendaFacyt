@@ -12,6 +12,27 @@ dificultad: Media
 version: 1.0.0
 ---
 ## Log
+### Log 13/09/2026 - Sprint 2: Ordenar la casa (Refactorización P2)
+#### Cambios realizados
+
+##### 1. Estructuración del resultado de nivelación (`LevelUpResult`)
+- Se creó la estructura `LevelUpResult` en `lib/Jugador.hpp` que devuelve el delta de salud máxima, ataque, defensa y nuevo nivel.
+- `Jugador::obtenerExperiencia()` ya no imprime directamente a `std::cout`, permitiendo que la capa de UI presente la información según corresponda.
+
+##### 2. Estructuración y resolución del Combate (`BattleResult`)
+- Se creó `BattleResult` en `lib/Batalla.hpp` con el enum `Outcome` (`VICTORY`, `DEFEAT`, `FLEE`), experiencia ganada, level-up y botín.
+- Se implementó `BattleSystem::procesarResultado()` para encapsular el cálculo de loot probabilístico y distribución de experiencia.
+- Se simplificó `void batalla()` delegando la lógica de resolución en `BattleSystem`.
+
+##### 3. Persistencia unificada y consistente (`CacheManager::guardarPartida`)
+- Se agregó `CacheManager::guardarPartida(mapa, jugador)` para guardar atómicamente el estado del mapa y del personaje.
+- Se actualizaron `crearPartida()`, `GameManager::guardarPartida()` y `GameManager::cargarNivel()` para usar el guardado consistente.
+
+##### 4. Configuración de Terrenos Desacoplada (`EncounterManager::configurarPorNivel`)
+- Se añadieron `terrenoPorNivel(int nivel)` y `configurarPorNivel(int nivel)` en `EncounterManager`.
+- Se eliminó el `switch(nivel)` de `GameManager::cargarNivel()`.
+- Se corrigió el bug de carga de partida en `GameManager::cargarPartidaExistente()` para que configure el terreno según el `nivelActual` guardado del héroe.
+
 ### Log 13/09/2026 - Sprint 1: Cortar la hemorragia (Refactorización P1)
 #### Cambios realizados
 

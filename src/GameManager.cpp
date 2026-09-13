@@ -107,7 +107,7 @@ void GameManager::inicializarNuevaPartida() {
     }
 
     // === Configuracion de terreno segun el nivel ===
-    encounterMgr.setTerreno(EncounterManager::Terreno::LLANURA);
+    encounterMgr.configurarPorNivel(1);
 
     // Carga de personaje y spawn
     jugador = Jugador("Heroe");
@@ -143,13 +143,11 @@ bool GameManager::cargarPartidaExistente() {
         return false;
     }
 
-    // === Configuracion del terreno en función del nivel cargado ===
-    // Por ahora se carga el nivel 1 siempre. Cuando haya multi-nivel 
-    // se guardara el nivel en CacheManager y se usará aquí
-    encounterMgr.setTerreno(EncounterManager::Terreno::LLANURA);
-
     //  === Carga de jugador ===
     jugador = CacheManager::cargarHeroe(objetos);
+
+    // === Configuracion del terreno en función del nivel cargado ===
+    encounterMgr.configurarPorNivel(jugador.getNivelActual());
 
     // === Carga del mundo ===
     state = GameState::OVERWORLD;
@@ -350,13 +348,7 @@ void GameManager::cargarNivel(int nivel){
     }
 
     // Configurar terreno segun el nivel
-    switch(nivel){
-        case 1: encounterMgr.setTerreno(EncounterManager::Terreno::LLANURA); break;
-        case 2: encounterMgr.setTerreno(EncounterManager::Terreno::MAZMORRA); break;
-        case 3: encounterMgr.setTerreno(EncounterManager::Terreno::BOSQUE); break;
-        case 4: encounterMgr.setTerreno(EncounterManager::Terreno::CAMINO); break;
-    }
-    encounterMgr.resetear();
+    encounterMgr.configurarPorNivel(nivel);
 
     // Buscar spawn point del nuevo mapa
     // Cuando encuentra el 'P' reeemplaza ese valor por '.' y pasa esa posición al jugador.

@@ -28,11 +28,11 @@ Trabajo planificado para el sprint actual. Al terminar una tarea, marcar como `[
 - [x] #9 Agregar versión de formato de guardado (`j["version"] = 1`) y usar `.value()` en `CacheManager` 📅 2026-09-15 ⏫ #sistema/guardado [completion:: 2026-09-13]
 
 ## Sprint 2 — Ordenar la casa (P2 - Importante)
-- [ ] #4 Refactorizar `batalla()` para retornar `BattleResult` y mover post-combate a `BattleSystem` 📅 2026-09-20 🔺 #refactor #sistema/combate
-- [ ] #6 Hacer que `Jugador::obtenerExperiencia()` retorne `LevelUpResult` sin `cout` directo 📅 2026-09-20 🔺 #refactor #sistema/combate
-- [ ] #10 Guardar/cargar `saludMaxima` y `manaMaxima` explícitamente en `CacheManager` 📅 2026-09-20 🔺 #sistema/guardado
-- [ ] #11 Centralizar guardado en `SaveController` 📅 2026-09-20 🔺 #sistema/guardado
-- [ ] #17 Mover configuración de terreno al `.meta` del mapa o JSON de niveles 📅 2026-09-20 🔺 #sistema/mapa
+- [x] #4 Refactorizar `batalla()` para retornar `BattleResult` y mover post-combate a `BattleSystem` 📅 2026-09-20 🔺 #refactor #sistema/combate [completion:: 2026-09-13]
+- [x] #6 Hacer que `Jugador::obtenerExperiencia()` retorne `LevelUpResult` sin `cout` directo 📅 2026-09-20 🔺 #refactor #sistema/combate [completion:: 2026-09-13]
+- [x] #10 Guardar/cargar `saludMaxima` y `manaMaxima` explícitamente en `CacheManager` 📅 2026-09-20 🔺 #sistema/guardado [completion:: 2026-09-13]
+- [x] #11 Centralizar guardado en `SaveController` / `CacheManager::guardarPartida` 📅 2026-09-20 🔺 #sistema/guardado [completion:: 2026-09-13]
+- [x] #17 Mover configuración de terreno a `EncounterManager::configurarPorNivel` 📅 2026-09-20 🔺 #sistema/mapa [completion:: 2026-09-13]
 
 ## Sprint 3 — Pulir balance y UX (P3 - Mejora)
 - [ ] #7 Eliminar función muerta `Jugador::mostrarInventario()` 📅 2026-09-25 🔽 #limpieza
