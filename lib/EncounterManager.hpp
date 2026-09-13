@@ -46,10 +46,17 @@ public:
 
     /// Resetea el contador de pasos (llamado tras un encuentro)
     void resetear();
+    void configurar(int base, float multiplier, float growthCap, int graceSteps, bool safe = false);
+    void setSeguro(bool safe);
 
 private:
     Terreno terrenoActual;    ///< Terreno donde se mueve el jugador
     int pasosDesdeUltimo;     ///< Pasos desde el último encuentro
+    int probabilidadBase;
+    float multiplicador;
+    float topeCrecimiento;
+    int pasosGracia;
+    bool terrenoSeguro;
 
     /// Devuelve la probabilidad base según el terreno actual
     int getProbabilidadBase() const;

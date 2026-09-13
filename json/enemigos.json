@@ -1,56 +1,13 @@
 {
   "1": [
     {
-      "id": "goblin",
-      "nombre": "Goblin",
-      "salud": 30,
-      "ataque": 8,
-      "defensa": 2,
-      "peso": 10,
-      "ascii": [
-        "     /\\",
-        "    /  \\",
-        "   | <> |",
-        "   | <> |",
-        "   /    \\",
-        "  /______\\"
-      ],
-      "botin": [
-        { "nombre": "Pocion Milagrosa", "prob": 70 },
-        { "nombre": "Aire siniestro", "prob": 30 }
-      ],
-      "boss": false,
-      "exp": 30
-    },
-    {
-      "id": "orco",
-      "nombre": "Orco",
-      "salud": 45,
-      "ataque": 12,
-      "defensa": 4,
-      "peso": 7,
-      "ascii": [
-        "    /^^^\\",
-        "   | . . |",
-        "   |  _  |",
-        "   | / \\ |",
-        "   |/   \\|",
-        "  _/     \\_"
-      ],
-      "botin": [
-        { "nombre": "Pocion Milagrosa", "prob": 60 },
-        { "nombre": "Sopladora", "prob": 40 }
-      ],
-      "boss": false,
-      "exp": 40
-    },
-    {
       "id": "slime_cafe",
       "nombre": "Slime de Cafe Vencido",
-      "salud": 35,
+      "salud": 30,
       "ataque": 7,
-      "defensa": 3,
-      "peso": 8,
+      "defensa": 2,
+      "peso": 12,
+      "tier": 1,
       "ascii": [
         "     .-.",
         "    (o o)",
@@ -60,19 +17,103 @@
         "  /       \\"
       ],
       "botin": [
-        { "nombre": "Expreso", "prob": 80 },
-        { "nombre": "Expreso", "prob": 20 }
+        {
+          "nombre": "Pocion Pequena",
+          "prob": 25
+        }
       ],
       "boss": false,
       "exp": 20
     },
     {
+      "id": "goblin",
+      "nombre": "Goblin",
+      "salud": 38,
+      "ataque": 9,
+      "defensa": 3,
+      "peso": 9,
+      "tier": 1,
+      "ascii": [
+        "     /\\",
+        "    /  \\",
+        "   | <> |",
+        "   | <> |",
+        "   /    \\",
+        "  /______\\"
+      ],
+      "botin": [
+        {
+          "nombre": "Pocion Pequena",
+          "prob": 30
+        },
+        {
+          "nombre": "Sopladora",
+          "prob": 12
+        }
+      ],
+      "boss": false,
+      "exp": 25
+    },
+    {
+      "id": "guardian_tutorial",
+      "nombre": "Guardian del Tutorial",
+      "salud": 80,
+      "ataque": 12,
+      "defensa": 5,
+      "peso": 1,
+      "tier": 2,
+      "ascii": [
+        "    /^^^\\",
+        "   | . . |",
+        "   |  _  |",
+        "   | / \\ |",
+        "   |/   \\|",
+        "  _/     \\_"
+      ],
+      "botin": [
+        {
+          "nombre": "Sopladora",
+          "prob": 100
+        }
+      ],
+      "boss": true,
+      "exp": 40
+    }
+  ],
+  "2": [
+    {
+      "id": "orco",
+      "nombre": "Orco de la Pradera",
+      "salud": 65,
+      "ataque": 13,
+      "defensa": 5,
+      "peso": 9,
+      "tier": 1,
+      "ascii": [
+        "    /^^^\\",
+        "   | . . |",
+        "   |  _  |",
+        "   | / \\ |",
+        "   |/   \\|",
+        "  _/     \\_"
+      ],
+      "botin": [
+        {
+          "nombre": "Pocion Pequena",
+          "prob": 35
+        }
+      ],
+      "boss": false,
+      "exp": 40
+    },
+    {
       "id": "murcielago",
       "nombre": "Murcielago Rascao",
-      "salud": 25,
-      "ataque": 10,
-      "defensa": 1,
-      "peso": 9,
+      "salud": 52,
+      "ataque": 15,
+      "defensa": 3,
+      "peso": 10,
+      "tier": 1,
       "ascii": [
         "     /\\",
         "    /  \\",
@@ -82,19 +123,82 @@
         "  /______\\"
       ],
       "botin": [
-        { "nombre": "Alka-Seltzer", "prob": 75 },
-        { "nombre": "Alka-Seltzer", "prob": 25 }
+        {
+          "nombre": "Pocion Pequena",
+          "prob": 30
+        }
       ],
       "boss": false,
-      "exp": 25
+      "exp": 35
     },
     {
-      "id": "zombie_lunes",
-      "nombre": "Zombie del Lunes",
-      "salud": 50,
-      "ataque": 12,
-      "defensa": 3,
-      "peso": 5,
+      "id": "jabalina_pradera",
+      "nombre": "Jabalina de la Pradera",
+      "salud": 88,
+      "ataque": 17,
+      "defensa": 6,
+      "peso": 6,
+      "tier": 2,
+      "ascii": [
+        "      /\\",
+        "  ___/  \\___",
+        " /   o  o   \\",
+        "|     __     |",
+        " \\___/  \\___/",
+        "    /____\\"
+      ],
+      "botin": [
+        {
+          "nombre": "Sopladora",
+          "prob": 25
+        },
+        {
+          "nombre": "Pocion Mediana",
+          "prob": 20
+        }
+      ],
+      "boss": false,
+      "exp": 55
+    },
+    {
+      "id": "rey_maleza",
+      "nombre": "Rey de la Maleza",
+      "salud": 150,
+      "ataque": 20,
+      "defensa": 8,
+      "peso": 1,
+      "tier": 3,
+      "ascii": [
+        "     /\\/\\",
+        "    / BOSS\\",
+        "   |  ..  |",
+        "   | /__\\ |",
+        "   |/    \\|",
+        "  _/______\\_"
+      ],
+      "botin": [
+        {
+          "nombre": "Lanza de Zarzas",
+          "prob": 100
+        },
+        {
+          "nombre": "Pocion Mediana",
+          "prob": 60
+        }
+      ],
+      "boss": true,
+      "exp": 70
+    }
+  ],
+  "3": [
+    {
+      "id": "duende_cable",
+      "nombre": "Duende de Cable",
+      "salud": 95,
+      "ataque": 18,
+      "defensa": 7,
+      "peso": 9,
+      "tier": 1,
       "ascii": [
         "     ___",
         "    / . \\",
@@ -104,65 +208,111 @@
         "  _/     \\_"
       ],
       "botin": [
-        { "nombre": "Expreso", "prob": 65 },
-        { "nombre": "La Taza de Cafe Rancia", "prob": 35 }
+        {
+          "nombre": "Pocion Mediana",
+          "prob": 30
+        }
       ],
       "boss": false,
-      "exp": 50
+      "exp": 55
+    },
+    {
+      "id": "espectro_rojo",
+      "nombre": "Espectro Rojo",
+      "salud": 110,
+      "ataque": 21,
+      "defensa": 8,
+      "peso": 7,
+      "tier": 2,
+      "ascii": [
+        "       .-.",
+        "      (o o)",
+        "      | O |",
+        "     /|___|\\",
+        "    / /   \\ \\",
+        "   / /     \\ \\"
+      ],
+      "botin": [
+        {
+          "nombre": "Lanza de Zarzas",
+          "prob": 25
+        },
+        {
+          "nombre": "Pocion Mediana",
+          "prob": 25
+        }
+      ],
+      "boss": false,
+      "exp": 65
+    },
+    {
+      "id": "ciclope",
+      "nombre": "Ciclope del Bosque",
+      "salud": 145,
+      "ataque": 24,
+      "defensa": 11,
+      "peso": 4,
+      "tier": 2,
+      "ascii": [
+        "      ___",
+        "     / O \\",
+        "    |  ^  |",
+        "    | --- |",
+        "    | / \\ |",
+        "   _/_____\\_"
+      ],
+      "botin": [
+        {
+          "nombre": "Lanza de Zarzas",
+          "prob": 35
+        },
+        {
+          "nombre": "Pocion Grande",
+          "prob": 15
+        }
+      ],
+      "boss": false,
+      "exp": 80
+    },
+    {
+      "id": "ent_ancestral",
+      "nombre": "Ent Ancestral",
+      "salud": 240,
+      "ataque": 29,
+      "defensa": 14,
+      "peso": 1,
+      "tier": 3,
+      "ascii": [
+        "      /|\\",
+        "   __/ | \\__",
+        "  /   BOSS   \\",
+        " |    /|\\    |",
+        " |___/ | \\___|",
+        "    __/ \\__"
+      ],
+      "botin": [
+        {
+          "nombre": "Mazo de Mineral",
+          "prob": 100
+        },
+        {
+          "nombre": "Pocion Grande",
+          "prob": 70
+        }
+      ],
+      "boss": true,
+      "exp": 100
     }
   ],
-  "2": [
-    {
-      "id": "fantasma",
-      "nombre": "Fantasma",
-      "salud": 50,
-      "ataque": 16,
-      "defensa": 3,
-      "peso": 8,
-      "ascii": [
-        "       .-.",
-        "      (o o)",
-        "      | O |",
-        "     /|___|\\",
-        "    / /   \\ \\",
-        "   / /     \\ \\"
-      ],
-      "botin": [
-        { "nombre": "Expreso", "prob": 55 },
-        { "nombre": "El Llavero Perdido", "prob": 45 }
-      ],
-      "boss": false,
-      "exp": 40
-    },
-    {
-      "id": "fantasma_remuerto",
-      "nombre": "Fantasma Re-Muerto",
-      "salud": 55,
-      "ataque": 14,
-      "defensa": 4,
-      "peso": 6,
-      "ascii": [
-        "       .-.",
-        "      (o o)",
-        "      | O |",
-        "     /|___|\\",
-        "    / /   \\ \\",
-        "   / /     \\ \\"
-      ],
-      "botin": [
-        { "nombre": "Pocion de Pensamiento Critico", "prob": 50 },
-        { "nombre": "El Telefono Sin Bateria", "prob": 50 }
-      ],
-      "boss": false,
-      "exp": 45
-    },
+  "4": [
     {
       "id": "esqueleto",
-      "nombre": "Esqueleto",
-      "salud": 55,
-      "ataque": 14,
-      "defensa": 5,
-      "peso": 7,
+      "nombre": "Esqueleto Minero",
+      "salud": 145,
+      "ataque": 25,
+      "defensa": 12,
+      "peso": 9,
+      "tier": 1,
       "ascii": [
         "      .-.",
         "     ( . )",
@@ -172,85 +322,51 @@
         "      / \\"
       ],
       "botin": [
-        { "nombre": "Expreso", "prob": 55 },
-        { "nombre": "El Reloj Detenido", "prob": 45 }
+        {
+          "nombre": "Pocion Mediana",
+          "prob": 30
+        }
       ],
       "boss": false,
-      "exp": 45
-    },
-    {
-      "id": "carlos",
-      "nombre": "Carlos",
-      "salud": 100,
-      "ataque": 10,
-      "defensa": 3,
-      "peso": 5,
-      "ascii": [
-        "     /\\",
-        "    /  \\",
-        "   | {} |",
-        "   | {} |",
-        "   /    \\",
-        "  /______\\"
-      ],
-      "botin": [
-        { "nombre": "Pocion Milagrosa", "prob": 50 },
-        { "nombre": "Dildo", "prob": 50 }
-      ],
-      "boss": false,
-      "exp": 70
-    },
-    {
-      "id": "golem_plastilina",
-      "nombre": "Golem de Plastilina Seca",
-      "salud": 65,
-      "ataque": 12,
-      "defensa": 7,
-      "peso": 6,
-      "ascii": [
-        "      ___________",
-        "     /           \\",
-        "    |  O       O  |",
-        "    |      _      |",
-        "    |     |_|     |",
-        "    |___/    \\___|"
-      ],
-      "botin": [
-        { "nombre": "Suavitel", "prob": 45 },
-        { "nombre": "El Rodillo de Amasar", "prob": 55 }
-      ],
-      "boss": false,
-      "exp": 50
+      "exp": 80
     },
     {
       "id": "golem_facturas",
       "nombre": "Golem de Facturas",
-      "salud": 65,
-      "ataque": 7,
-      "defensa": 12,
-      "peso": 5,
+      "salud": 210,
+      "ataque": 27,
+      "defensa": 18,
+      "peso": 6,
+      "tier": 2,
       "ascii": [
-        "      ___________",
-        "     /           \\",
-        "    |  O       O  |",
-        "    |      _      |",
-        "    |     |_|     |",
-        "    |___/    \\___|"
+        "      _________",
+        "     /         \\",
+        "    |  O     O  |",
+        "    |     _     |",
+        "    |    |_|    |",
+        "    |___/   \\___|"
       ],
       "botin": [
-        { "nombre": "Adblock", "prob": 35 },
-        { "nombre": "La Pluma de la Deuda", "prob": 65 }
+        {
+          "nombre": "Mazo de Mineral",
+          "prob": 30
+        },
+        {
+          "nombre": "Pocion Grande",
+          "prob": 35
+        }
       ],
       "boss": false,
-      "exp": 50
+      "exp": 110
     },
     {
       "id": "bruja",
-      "nombre": "Bruja Joe Francisco",
-      "salud": 100,
-      "ataque": 20,
-      "defensa": 5,
-      "peso": 4,
+      "nombre": "Bruja del Archivo",
+      "salud": 175,
+      "ataque": 32,
+      "defensa": 13,
+      "peso": 5,
+      "tier": 2,
       "ascii": [
         "     ___",
         "    / . \\",
@@ -260,107 +376,53 @@
         "  _/     \\_"
       ],
       "botin": [
-        { "nombre": "Pocion de Lagrimas Cachondas", "prob": 40 },
-        { "nombre": "La Cuchara de la Desesperaci\u00f3n", "prob": 60 }
+        {
+          "nombre": "Pocion Grande",
+          "prob": 35
+        }
       ],
       "boss": false,
-      "exp": 50
-    },
-    {
-      "id": "cajero",
-      "nombre": "Cajero Automatico",
-      "salud": 120,
-      "ataque": 25,
-      "defensa": 8,
-      "peso": 3,
-      "ascii": [
-        "  +-----------+",
-        "  | [__] [__] |",
-        "  |  _    _   |",
-        "  | |_|  |_|  |",
-        "  |    ___    |",
-        "  +-----------+"
-      ],
-      "botin": [
-        { "nombre": "Tarjeta de Credito Ilimitada", "prob": 30 },
-        { "nombre": "El Lector de Tarjetas", "prob": 70 }
-      ],
-      "boss": false,
-      "exp": 50
-    },
-    {
-      "id": "gargola_wifi",
-      "nombre": "Gargola del Wi-Fi",
-      "salud": 130,
-      "ataque": 18,
-      "defensa": 7,
-      "peso": 5,
-      "ascii": [
-        "     /\\",
-        "    /  \\",
-        "   | ._.|",
-        "   |_/ \\_|",
-        "    |   |",
-        "   /     \\"
-      ],
-      "botin": [
-        { "nombre": "Expreso", "prob": 45 },
-        { "nombre": "El Router Roto", "prob": 55 }
-      ],
-      "boss": false,
-      "exp": 50
-    },
-    {
-      "id": "caballero_control",
-      "nombre": "Caballero del Control Remoto",
-      "salud": 135,
-      "ataque": 19,
-      "defensa": 9,
-      "peso": 4,
-      "ascii": [
-        "     /\\",
-        "    /  \\",
-        "   | ._.|",
-        "   |_/ \\_|",
-        "    |   |",
-        "   /     \\"
-      ],
-      "botin": [
-        { "nombre": "Expreso", "prob": 40 },
-        { "nombre": "La Espada del Zapping", "prob": 60 }
-      ],
-      "boss": false,
-      "exp": 50
-    },
-    {
-      "id": "caballero_basura",
-      "nombre": "Caballero de la Basura",
-      "salud": 140,
-      "ataque": 17,
-      "defensa": 9,
-      "peso": 4,
-      "ascii": [
-        "     /\\",
-        "    /  \\",
-        "   | ._.|",
-        "   |_/ \\_|",
-        "    |   |",
-        "   /     \\"
-      ],
-      "botin": [
-        { "nombre": "Suavitel", "prob": 40 },
-        { "nombre": "La Pala de Recogida", "prob": 60 }
-      ],
-      "boss": false,
-      "exp": 50
+      "exp": 115
     },
     {
       "id": "caballero_cebolla",
       "nombre": "Caballero Cebolla",
-      "salud": 150,
-      "ataque": 20,
-      "defensa": 10,
-      "peso": 3,
+      "salud": 330,
+      "ataque": 38,
+      "defensa": 21,
+      "peso": 1,
+      "tier": 3,
+      "ascii": [
+        "     /\\",
+        "    /  \\",
+        "   |BOSS|",
+        "   |/__\\|",
+        "   |    |",
+        "  _/____\\_"
+      ],
+      "botin": [
+        {
+          "nombre": "Espada del Codigo Fuente",
+          "prob": 100
+        },
+        {
+          "nombre": "Pocion Grande",
+          "prob": 100
+        }
+      ],
+      "boss": true,
+      "exp": 150
+    }
+  ],
+  "5": [
+    {
+      "id": "gargola_wifi",
+      "nombre": "Gargola del Wi-Fi",
+      "salud": 240,
+      "ataque": 34,
+      "defensa": 18,
+      "peso": 8,
+      "tier": 1,
       "ascii": [
         "     /\\",
         "    /  \\",
@@ -370,169 +432,67 @@
         "   /     \\"
       ],
       "botin": [
-        { "nombre": "Pocion de Lagrimas Cachondas", "prob": 35 },
-        { "nombre": "Espada del Descongelamiento", "prob": 65 }
+        {
+          "nombre": "Pocion Grande",
+          "prob": 35
+        }
       ],
       "boss": false,
-      "exp": 70
-    }
-  ],
-  "3": [
-    {
-      "id": "dragon_pubico",
-      "nombre": "Dragon Pubico",
-      "salud": 160,
-      "ataque": 22,
-      "defensa": 11,
-      "peso": 5,
-      "ascii": [
-        "     /\\/\\/\\/\\/\\/\\/\\/\\",
-        "    /     BOSS        \\",
-        "   /  /\\          /\\  \\",
-        "  /  /  \\        /  \\  \\",
-        " /  /    \\      /    \\  \\",
-        "/__/______\\____/______\\__\\"
-      ],
-      "botin": [
-        { "nombre": "Suavitel", "prob": 35 },
-        { "nombre": "El Aspirador del Vacio", "prob": 65 }
-      ],
-      "boss": false,
-      "exp": 80
-    },
-    {
-      "id": "golem_ropa",
-      "nombre": "Golem de Ropa Sucia",
-      "salud": 165,
-      "ataque": 21,
-      "defensa": 10,
-      "peso": 6,
-      "ascii": [
-        "      ___________",
-        "     /           \\",
-        "    |  O       O  |",
-        "    |      _      |",
-        "    |     |_|     |",
-        "    |___/    \\___|"
-      ],
-      "botin": [
-        { "nombre": "Suavitel", "prob": 35 },
-        { "nombre": "La Lavadora de Almas", "prob": 65 }
-      ],
-      "boss": false,
-      "exp": 70
+      "exp": 120
     },
     {
       "id": "ogro_procrastinador",
       "nombre": "Ogro Procrastinador",
-      "salud": 170,
-      "ataque": 24,
-      "defensa": 13,
-      "peso": 5,
+      "salud": 300,
+      "ataque": 39,
+      "defensa": 22,
+      "peso": 6,
+      "tier": 2,
       "ascii": [
-        "      ___________",
-        "     /           \\",
-        "    |  O       O  |",
-        "    |      _      |",
-        "    |     |_|     |",
-        "    |___/    \\___|"
-      ],
-      "botin": [
-        { "nombre": "Adblock", "prob": 30 },
-        { "nombre": "El Mazo", "prob": 70 }
-      ],
-      "boss": false,
-      "exp": 70
-    },
-    {
-      "id": "duende_cable",
-      "nombre": "Duende Cable Pelao",
-      "salud": 60,
-      "ataque": 8,
-      "defensa": 2,
-      "peso": 8,
-      "ascii": [
-        "     /\\",
-        "    /  \\",
-        "   | <> |",
-        "   | <> |",
-        "   /    \\",
-        "  /______\\"
-      ],
-      "botin": [
-        { "nombre": "Alka-Seltzer", "prob": 70 },
-        { "nombre": "Alka-Seltzer", "prob": 30 }
-      ],
-      "boss": false,
-      "exp": 70
-    },
-    {
-      "id": "ciclope",
-      "nombre": "Ciclope miope",
-      "salud": 180,
-      "ataque": 28,
-      "defensa": 15,
-      "peso": 4,
-      "ascii": [
-        "     ______",
-        "    | O   |",
+        "     /^^^\\",
+        "    | . . |",
         "    |  _  |",
-        "    | | | |",
-        "    |_| |_|",
-        "     /   \\"
+        "    | / \\ |",
+        "    |/   \\|",
+        "   _/     \\_"
       ],
       "botin": [
-        { "nombre": "Pocion de Pensamiento Critico", "prob": 30 },
-        { "nombre": "Ojo miope", "prob": 70 }
+        {
+          "nombre": "Pocion Grande",
+          "prob": 45
+        }
       ],
       "boss": false,
-      "exp": 80
+      "exp": 155
     },
     {
-      "id": "espectro_rojo",
-      "nombre": "Espectro Rojo",
-      "salud": 75,
-      "ataque": 11,
-      "defensa": 3,
-      "peso": 7,
+      "id": "administrador_final",
+      "nombre": "Administrador Final",
+      "salud": 420,
+      "ataque": 48,
+      "defensa": 28,
+      "peso": 1,
+      "tier": 4,
       "ascii": [
-        "       .-.",
-        "      (o o)",
-        "      | O |",
-        "     /|___|\\",
-        "    / /   \\ \\",
-        "   / /     \\ \\"
+        "   ___________",
+        "  /  FINAL    \\",
+        " |   BOSS      |",
+        " |  /-----\\    |",
+        " | |  !!!  |   |",
+        " |_|_______|___|"
       ],
       "botin": [
-        { "nombre": "Adblock", "prob": 45 },
-        { "nombre": "El Banner Ineludible", "prob": 55 }
-      ],
-      "boss": false,
-      "exp": 60
-    }
-  ],
-  "4": [
-    {
-      "id": "admin_servidor",
-      "nombre": "El Gran Administrador del Servidor Caido",
-      "salud": 200,
-      "ataque": 30,
-      "defensa": 12,
-      "peso": 10,
-      "ascii": [
-        "     /\\/\\/\\/\\/\\/\\/\\/\\",
-        "    /     BOSS        \\",
-        "   /  /\\          /\\  \\",
-        "  /  /  \\        /  \\  \\",
-        " /  /    \\      /    \\  \\",
-        "/__/______\\____/______\\__\\"
-      ],
-      "botin": [
-        { "nombre": "Pocion Cubana", "prob": 40 },
-        { "nombre": "La Espada del Codigo Fuente", "prob": 60 }
+        {
+          "nombre": "Espada del Codigo Fuente",
+          "prob": 100
+        },
+        {
+          "nombre": "Pocion Grande",
+          "prob": 100
+        }
       ],
       "boss": true,
-      "exp": 200
+      "exp": 220
     }
   ]
 }

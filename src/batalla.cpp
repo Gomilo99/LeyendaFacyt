@@ -180,14 +180,15 @@ int ScreenBuffer::getTerminalHeight() {
 // ==================== RENDERER ====================
 
 Renderer::Renderer(ScreenBuffer& buffer)
-    : buf(buffer), selOpt(0), enemyHP(0), enemyMaxHP(1),
-      playerHP(0), playerMaxHP(1), playerMP(0), playerMaxMP(1) {}
+    : buf(buffer), selOpt(0), enemyColor(COL_WHITE), enemyHP(0), enemyMaxHP(1),
+    playerHP(0), playerMaxHP(1), playerMP(0), playerMaxMP(1), canFlee(true) {}
 
 // Almacena la informacion del enemigo para el proximo frame
-void Renderer::setEnemyInfo(const std::string& name, int hp, int maxHp, const std::string art[6]) {
+void Renderer::setEnemyInfo(const std::string& name, int hp, int maxHp, int color, const std::string art[6]) {
     enemyName = name;
     enemyHP = hp;
     enemyMaxHP = std::max(maxHp, 1);
+    enemyColor = color;
     for (int i = 0; i < 6; i++) enemyArt[i] = art[i];
 }
 
@@ -210,15 +211,18 @@ void Renderer::drawBackground() {
 void Renderer::drawEnemy() {
     int cx = SCREEN_WIDTH / 2;
     int nameLen = (int)enemyName.size();
-    int boxW = std::max(nameLen + 4, 18);
+    int artWidth = 0;
+    for (const auto& line : enemyArt)
+        artWidth = std::max(artWidth, static_cast<int>(line.size()));
+    int boxW = std::max({nameLen + 4, artWidth + 4, 36});
     int boxX = cx - boxW / 2;
 
     buf.drawBox(boxX, 2, boxW, 2, COL_CYAN);
-    buf.drawString(cx - nameLen / 2, 3, enemyName, COL_BRED);
+    buf.drawString(cx - nameLen / 2, 3, enemyName, enemyColor);
 
     for (int i = 0; i < 6; i++) {
         int artX = cx - (int)enemyArt[i].size() / 2;
-        buf.drawString(artX, 6 + i, enemyArt[i], COL_WHITE);
+        buf.drawString(artX, 6 + i, enemyArt[i], enemyColor);
     }
 }
 
@@ -240,29 +244,66 @@ void Renderer::drawEnemyHealthBar() {
 void Renderer::drawCombatMenu() {
     int menuX = 3;
     int menuY = 12;
-    int menuW = 22; // Probando, antes estaba en 22, se cambio a 26
+
+    const char* options[] = { "Atacar", "Magia", "Inventario", canFlee ? "Huir" : "No huir" };
+    int maxLength = 0;
+    for (int i = 0; i < 4; i++) {
+        std::string line = (i == selOpt) ? " > " + std::string(options[i])
+                                        : "   " + std::string(options[i]);
+        if ((int)line.size() > maxLength) {
+            maxLength = (int)line.size();
+        }
+    }
+    // Considerar el texto de navegación también
+    std::string navText = "[W/S] Navegar [SPACE] OK";
+    if ((int)navText.size() > maxLength) {
+        maxLength = (int)navText.size();
+    }
+    
+    int menuW = maxLength + 4; // Añadir margen para los bordes
     int menuH = 7;
 
     buf.drawBox(menuX, menuY, menuW, menuH, COL_CYAN);
 
-    const char* options[] = { "Atacar", "Magia", "Inventario", "Huir" };
     for (int i = 0; i < 4; i++) {
         int optY = menuY + 1 + i;
         int selColor = (i == selOpt) ? COL_BYELLOW : COL_DEFAULT;
         std::string line = (i == selOpt) ? " > " + std::string(options[i])
-                                         : "   " + std::string(options[i]);
+                                        : "   " + std::string(options[i]);
         buf.drawString(menuX + 2, optY, line, selColor);
     }
 
-    buf.drawString(menuX + 2, menuY + 5, "[W/S] Navegar [SPACE] OK", COL_CYAN);
+    buf.drawString(menuX + 2, menuY + 5, navText, COL_CYAN);
 }
 
 // Dibuja el panel del jugador con nombre, barra de HP (verde/amarillo/rojo) y MP (azul)
 void Renderer::drawPlayerInfo() {
-    int infoX = SCREEN_WIDTH - 28;
     int infoY = 12;
-    int infoW = 26;
     int infoH = 7;
+
+    // Calcular el ancho máximo del contenido
+    int currentMaxContentWidth = 0;
+
+    // 1. playerName
+    currentMaxContentWidth = std::max(currentMaxContentWidth, (int)playerName.size());
+
+    // 2. "HP" + 3 espacios + barra (16)
+    currentMaxContentWidth = std::max(currentMaxContentWidth, (int)std::string("HP").size() + 3 + 16);
+
+    // 3. "MP" + 3 espacios + barra (16)
+    currentMaxContentWidth = std::max(currentMaxContentWidth, (int)std::string("MP").size() + 3 + 16);
+
+    // 4. hpNum
+    std::string hpNumStr = std::to_string(playerHP) + "/" + std::to_string(playerMaxHP);
+    currentMaxContentWidth = std::max(currentMaxContentWidth, (int)hpNumStr.size());
+
+    // 5. mpNum
+    std::string mpNumStr = std::to_string(playerMP) + "/" + std::to_string(playerMaxMP);
+    currentMaxContentWidth = std::max(currentMaxContentWidth, (int)mpNumStr.size());
+
+    int infoW = currentMaxContentWidth + 4; // Añadir margen para los bordes y el padding (2 a cada lado)
+
+    int infoX = SCREEN_WIDTH - infoW; // Ajustar la posición X para alinearlo a la derecha
 
     buf.drawBox(infoX, infoY, infoW, infoH, COL_CYAN);
     buf.drawString(infoX + 2, infoY + 1, playerName, COL_BWHITE);
@@ -275,10 +316,8 @@ void Renderer::drawPlayerInfo() {
     buf.drawString(infoX + 2, infoY + 3, "MP", COL_BLUE);
     buf.drawBar(infoX + 5, infoY + 3, 16, playerMP, playerMaxMP, COL_BLUE);
 
-    std::string hpNum = std::to_string(playerHP) + "/" + std::to_string(playerMaxHP);
-    buf.drawString(infoX + infoW - 1 - (int)hpNum.size(), infoY + 4, hpNum, hpColor);
-    std::string mpNum = std::to_string(playerMP) + "/" + std::to_string(playerMaxMP);
-    buf.drawString(infoX + infoW - 1 - (int)mpNum.size(), infoY + 5, mpNum, COL_BLUE);
+    buf.drawString(infoX + infoW - 1 - (int)hpNumStr.size(), infoY + 4, hpNumStr, hpColor);
+    buf.drawString(infoX + infoW - 1 - (int)mpNumStr.size(), infoY + 5, mpNumStr, COL_BLUE);
 }
 
 // Dibuja el mensaje de log centrado en la ultima linea del buffer
@@ -317,10 +356,11 @@ void InputHandler::moveDown() {
 
 // ==================== BATTLE SYSTEM ====================
 
-BattleSystem::BattleSystem(Jugador& p, Enemigo& e)
+BattleSystem::BattleSystem(Jugador& p, Enemigo& e, bool allowFlee)
     : currentState(BattleState::PLAYER_TURN), currentEnemy(&e), player(&p),
-      screenBuffer(), renderer(screenBuffer), inputHandler(),
-      battleOver(false), victory(false), fled(false) {
+    screenBuffer(), renderer(screenBuffer), inputHandler(),
+    battleOver(false), victory(false), fled(false), canFlee(allowFlee) {
+    renderer.setCanFlee(canFlee);
     const std::string* art = e.getAsciiArt();
     for (int i = 0; i < 6; i++) enemyArt[i] = art[i];
 }
@@ -420,6 +460,13 @@ void BattleSystem::doPlayerAction() {
 
         case 3: // Huir: 50% de probabilidad de exito
         {
+            if (!canFlee) {
+                setLog("No puedes huir de un combate contra un jefe!");
+                render();
+                std::this_thread::sleep_for(std::chrono::milliseconds(800));
+                currentState = BattleState::PLAYER_TURN;
+                return;
+            }
             std::uniform_int_distribution<int> dist(0, 99);
             int chance = dist(DataManager::rng());
             if (chance < 50) {
@@ -467,6 +514,7 @@ void BattleSystem::render() {
         currentEnemy->getNombre(),
         currentEnemy->getSalud(),
         currentEnemy->getSaludMaxima(),
+        currentEnemy->getDisplayColor(),
         enemyArt
     );
     renderer.setPlayerInfo(
@@ -520,12 +568,10 @@ void BattleSystem::run() {
 // 1. Muestra intro (jefe final o enemigo normal)
 // 2. Instancia y ejecuta BattleSystem
 // 3. Post-batalla: maneja huida, derrota, victoria, experiencia y loot
-void batalla(Jugador& jugador, Enemigo& enemigo) {
+void batalla(Jugador& jugador, Enemigo& enemigo, bool esJefe, bool esJefeFinal) {
     limpiarPantalla();
 
-    bool jefefinal = (enemigo.getNivel() >= 4);
-
-    if (jefefinal) {
+    if (esJefeFinal) {
         std::cout << "Estas en una oscura cueva, sientes una presencia extrana...\n";
         std::cout << "Ha aparecido el jefe final!!!\nHa aparecido " << enemigo.getNombre() << std::endl;
     } else {
@@ -534,7 +580,7 @@ void batalla(Jugador& jugador, Enemigo& enemigo) {
     std::cout << "Presiona Enter para comenzar la batalla...";
     std::cin.get();
 
-    BattleSystem system(jugador, enemigo);
+    BattleSystem system(jugador, enemigo, !esJefe);
     system.run();
 
     if (system.hasFled()) {
@@ -554,15 +600,12 @@ void batalla(Jugador& jugador, Enemigo& enemigo) {
     // Victoria
     limpiarPantalla();
     std::cout << "\n\nHAS DERROTADO A '" << enemigo.getNombre() << "' !\n";
-    if (jefefinal) {
-        std::cout << "Felicidades, has derrotado al jefe final!\n";
-        std::cout << "...\n";
-        std::cout << "Has ganado el juego!\n";
-        jugador.setHaGanado(true);
+    if (esJefeFinal) {
+        std::cout << "Has derrotado al jefe final. Busca la llave final.\n";
     }
 
     // Otorgar experiencia
-    int exp = enemigo.getExpBase() * (enemigo.getNivel() * (XP_POR_BATALLA / 5));
+    int exp = enemigo.experienciaCalculada();
     jugador.obtenerExperiencia(exp);
 
     // Calcular loot segun probabilidades del enemigo (recorre el vector botin)

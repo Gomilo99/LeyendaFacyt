@@ -1,0 +1,35 @@
+{
+  "section": 3,
+  "level_cap": 3,
+  "encounter": 
+  {
+    "base": 12, 
+    "multiplier": 1.0, 
+    "growth_cap": 0.2, 
+    "grace_steps": 4
+  },
+  "healing": {"h": 20, "H": 45, "G": 100},
+  "tier_colors": {"1": 37, "2": 33, "3": 91, "4": 95},
+  "zones": [
+    {
+      "id":"forest", "tile":"^",
+      "terrain":"forest", "color":32,
+      "encounter_multiplier":1.0, 
+      "stat_multiplier":1.08, 
+      "xp_multiplier":1.15,
+      "enemies":[
+        {"id":"duende_cable","weight":10},
+        {"id":"espectro_rojo","weight":7},
+        {"id":"ciclope","weight":4}
+      ],
+      "boss_id":"ent_ancestral", "restore_tile":"."
+    },
+    {
+      "id":"safe_start", "tile":"s",
+      "terrain":"safe", "color":36,
+      "safe":true,
+      "encounter_multiplier":0, 
+      "enemies":[]
+    }
+  ]
+}

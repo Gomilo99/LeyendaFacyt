@@ -1,26 +1,35 @@
 {
-    "arma": "La Pluma de la Deuda",
+    "arma": "Lanza de Zarzas",
     "ataque": 57,
     "defensa": 35,
-    "exp": 1400,
+    "exp": 700,
     "expMax": 700,
     "inventario": [
         {
-            "cant": 1,
-            "nombre": "La Pluma de la Deuda"
+            "cant": 2,
+            "nombre": "Lanza de Zarzas"
         },
         {
             "cant": 1,
-            "nombre": "Pocion Milagrosa"
+            "nombre": "Mazo de Mineral"
+        },
+        {
+            "cant": 1,
+            "nombre": "Pocion Pequena"
+        },
+        {
+            "cant": 1,
+            "nombre": "Sopladora"
         }
     ],
-    "mana": 50,
+    "mana": 30,
     "manaMaxima": 50,
     "nivel": 3,
-    "nombre": "Yisu",
+    "nivelActual": 3,
+    "nombre": "Heroe",
     "pociones": 3,
-    "posX": 6,
+    "posX": 20,
     "posY": 4,
-    "salud": 350,
+    "salud": 296,
     "saludMaxima": 350
 }

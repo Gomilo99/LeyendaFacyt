@@ -25,7 +25,7 @@ Para el trabajo actual del sprint, ver [[Sprint]]. Para ideas futuras, ver [[Bac
 |----------|--------|------------|
 | 25% — Funcionamiento general | ✅ | 2026-06-19 |
 | 40% — Sistemas responsive | ✅ | 2026-06-19 |
-| 50% — Multi-nivel y balanceo | 🔄 En progreso | — |
+| 50% — Multi-nivel y balanceo | ✅ | 2026-09-08 |
 | 75% — Historia, animaciones, subjefes | ⏳ Pendiente | — |
 | 85% — NPC tienda, puzzles | ⏳ Pendiente | — |
 | 95% — Polish y playtesting | ⏳ Pendiente | — |
@@ -81,16 +81,39 @@ Para el trabajo actual del sprint, ver [[Sprint]]. Para ideas futuras, ver [[Bac
 
 > Establecimiento de diseño de niveles, rutas de progreso, progresión y balanceo de niveles y construcción del mundo.
 
-- [ ] Transición entre niveles (nivel 1 → 2 → 3 → jefe final) 📅 2026-08-15 ⏫ #plan/sprint #sistema/mapa
-  Actualmente solo nivel1.txt es accesible. Ver [[Sistemas/Mapa#Mapas actuales]].
+- [x] Transición entre niveles (nivel 1 → 2 → 3 → jefe final) 📅 2026-08-15 ⏫ #plan/sprint #sistema/mapa [completion:: 2026-09-08]
+  Ver [[Sistemas/Mapa#Mapas actuales]] y [[Sistemas/Guardado]].
 - [x] Configurar terreno por mapa en EncounterManager 📅 2026-08-01 🔺 #plan/sprint #sistema/enemigos  [completion:: 2026-09-07]
   Ver [[Registro/Decisiones#Terreno no configurado]].
 - [x] Reemplazar magic numbers por constexpr 📅 2026-08-01 🔺 #plan/sprint #deuda-tecnica  [completion:: 2026-09-07]
   Ver [[Sistemas/Combate#Sistema de nivelación]], [[Cambios#Magic Numbers]].
-- [ ] Curva de dificultad verificable entre niveles 📅 2026-08-15 ⏫ #plan/sprint
-- [ ] 3+ mapas con diseños distintos y temáticas 📅 2026-08-30 🔺 #plan/sprint #sistema/mapa
+- [x] Curva de dificultad verificable entre niveles 📅 2026-08-15 ⏫ #plan/sprint [completion:: 2026-09-08]
+- [x] 3+ mapas con diseños distintos y temáticas 📅 2026-08-30 🔺 #plan/sprint #sistema/mapa [completion:: 2026-09-08]
 - [x] Eliminar DataManager::guardarHeroe/cargarHeroe legacy 📅 2026-08-01 🔽 #deuda-tecnica  [completion:: 2026-09-07]
   Ver [[Registro/Decisiones#DataManager legacy]].
+
+### Resultado técnico del objetivo
+
+La progresión dejó de depender únicamente del nivel del héroe. Cada mapa se
+divide lógicamente en una sección y un conjunto pequeño de zonas identificadas
+por tile en un archivo `.meta`. Esto permite que el diseño visual siga en
+el `.txt`, mientras el balance puede cambiarse sin redibujar la geometría.
+
+La sección controla el límite de nivel del jugador y los parámetros globales de
+encuentros. La zona controla el terreno, la tabla ponderada de enemigos, la
+seguridad del área y los multiplicadores de estadísticas y XP. Cada carácter de
+terreno se asocia a una zona mediante `tile`; un refugio o una sala especial se
+representa dibujando su carácter en el `.txt`.
+
+El ritmo de progresión queda controlado por tres mecanismos independientes:
+
+1. límite de nivel por sección;
+2. enemigos definidos por zona y no por nivel del jugador;
+3. XP calculada a partir del nivel y tier propios del enemigo.
+
+La tarea restante de este objetivo es de validación de balance: medir tiempos
+de recorrido, frecuencia real de encuentros, duración de combates y consumo de
+curación mediante partidas de prueba.
 
 ---
 

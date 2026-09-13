@@ -151,10 +151,15 @@ std::vector<std::pair<std::string, std::shared_ptr<Objeto> >> Jugador::getItemsL
 }
 
 void Jugador::obtenerExperiencia(int cantidad) {
-    experiencia += cantidad;
+    if (!ignorarLimiteNivel && nivel >= nivelMaximoPermitido){
+        experiencia = expNecesaria;
+        return;
+    }
+
+    experiencia = std::min(expNecesaria, experiencia + std::max(0, cantidad));
     std::cout << "Has ganado " << cantidad << " de experiencia!\n";
 
-    if(experiencia >= expNecesaria){
+    if(experiencia >= expNecesaria && (ignorarLimiteNivel || nivel < nivelMaximoPermitido)){
         std::cout << "Has subido de nivel!\n";
         saludMaxima += SALUD_POR_NIVEL * (nivel + 1);
         salud = saludMaxima;
@@ -163,6 +168,7 @@ void Jugador::obtenerExperiencia(int cantidad) {
         nivel++;
         expNecesaria += EXP_INCREMENTO;
         if(nivel == 3) expNecesaria = EXP_NIVEL_3;
+        experiencia = std::min(experiencia, expNecesaria);
 
         std::cout << "Subida de Estadisticas!!\n";
         std::cout << "Nivel: " << nivel << " | Salud: " << salud << "/" << saludMaxima

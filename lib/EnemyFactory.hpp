@@ -39,6 +39,9 @@ public:
      * @throws std::runtime_error si no hay enemigos para ese nivel
      */
     Enemigo crearEnemigo(int nivel);
+    Enemigo crearEnemigo(const std::vector<std::pair<std::string, int>>& entries,
+                         float statMultiplier = 1.0f, float xpMultiplier = 1.0f);
+    Enemigo crearPorId(const std::string& id) const;
 
     /**
      * Crea el jefe del nivel (el primer boss:true desde nivel hacia abajo).
@@ -72,6 +75,7 @@ private:
         std::vector<Drop> botin; ///< Array de objetos con probabilidad
         bool boss;              ///< true si es el jefe del nivel
         int exp_base;           ///< Experiencia Base del enemigo
+        int tier;
     };
 
     /// Almacén principal: nivel -> vector de plantillas
