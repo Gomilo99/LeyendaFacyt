@@ -1,6 +1,6 @@
 ---
 creado: 22/07/2026
-modificado: 08/09/2026
+modificado: 13/09/2026
 tipo: Avance
 tags: # deuda-tecnica, idea-loca, bug-critico, bug, refactor
 titulo: Roadmap
@@ -21,15 +21,15 @@ Para el trabajo actual del sprint, ver [[Sprint]]. Para ideas futuras, ver [[Bac
 
 ## Estado actual
 
-| Objetivo | Estado | Completado |
-|----------|--------|------------|
-| 25% — Funcionamiento general | ✅ | 2026-06-19 |
-| 40% — Sistemas responsive | ✅ | 2026-06-19 |
-| 50% — Multi-nivel y balanceo | 🔄 En progreso | — |
-| 75% — Historia, animaciones, subjefes | ⏳ Pendiente | — |
-| 85% — NPC tienda, puzzles | ⏳ Pendiente | — |
-| 95% — Polish y playtesting | ⏳ Pendiente | — |
-| 100% — Arte y publicación | ⏳ Pendiente | — |
+| Objetivo                              | Estado         | Completado |
+| ------------------------------------- | -------------- | ---------- |
+| 25% — Funcionamiento general          | ✅              | 2026-06-19 |
+| 40% — Sistemas responsive             | ✅              | 2026-06-19 |
+| 50% — Multi-nivel y balanceo          | 🔄 En progreso | —          |
+| 75% — Historia, animaciones, subjefes | ⏳ Pendiente    | —          |
+| 85% — NPC tienda, puzzles             | ⏳ Pendiente    | —          |
+| 95% — Polish y playtesting            | ⏳ Pendiente    | —          |
+| 100% — Arte y publicación             | ⏳ Pendiente    | —          |
 
 **Fecha prevista de entrega**: Finales de 2026
 
@@ -81,14 +81,14 @@ Para el trabajo actual del sprint, ver [[Sprint]]. Para ideas futuras, ver [[Bac
 
 > Establecimiento de diseño de niveles, rutas de progreso, progresión y balanceo de niveles y construcción del mundo.
 
-- [ ] Transición entre niveles (nivel 1 → 2 → 3 → jefe final) 📅 2026-08-15 ⏫ #plan/sprint #sistema/mapa
+- [x] Transición entre niveles (nivel 1 → 2 → 3 → jefe final) 📅 2026-08-15 ⏫ #plan/sprint #sistema/mapa  [completion:: 2026-09-13]
   Actualmente solo nivel1.txt es accesible. Ver [[Sistemas/Mapa#Mapas actuales]].
 - [x] Configurar terreno por mapa en EncounterManager 📅 2026-08-01 🔺 #plan/sprint #sistema/enemigos  [completion:: 2026-09-07]
   Ver [[Registro/Decisiones#Terreno no configurado]].
 - [x] Reemplazar magic numbers por constexpr 📅 2026-08-01 🔺 #plan/sprint #deuda-tecnica  [completion:: 2026-09-07]
   Ver [[Sistemas/Combate#Sistema de nivelación]], [[Cambios#Magic Numbers]].
-- [ ] Curva de dificultad verificable entre niveles 📅 2026-08-15 ⏫ #plan/sprint
-- [ ] 3+ mapas con diseños distintos y temáticas 📅 2026-08-30 🔺 #plan/sprint #sistema/mapa
+- [x] Curva de dificultad verificable entre niveles 📅 2026-08-15 ⏫ #plan/sprint  [completion:: 2026-09-13]
+- [x] 3+ mapas con diseños distintos y temáticas 📅 2026-08-30 🔺 #plan/sprint #sistema/mapa  [completion:: 2026-09-13]
 - [x] Eliminar DataManager::guardarHeroe/cargarHeroe legacy 📅 2026-08-01 🔽 #deuda-tecnica  [completion:: 2026-09-07]
   Ver [[Registro/Decisiones#DataManager legacy]].
 
