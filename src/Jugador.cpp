@@ -14,7 +14,6 @@ Jugador::Jugador(std::string nom, int hp, int atk, int def, int lvl, int poc)
     armaEquipada(nullptr), experiencia(0) {}
 
 void Jugador::atacar(Personaje* objetivo) {
-    std::cout << nombre << " Atacas a " << objetivo->getNombre() << "!\n";
     objetivo->recibirDano(ataque);
 }
 
@@ -23,9 +22,6 @@ void Jugador::usarPocion() {
         int curacion = POCION_CURACION_DEFAULT;
         salud = std::min(salud + curacion, saludMaxima);
         pociones--;
-        std::cout << "Usas una pocion. Salud recuperdad: +" << curacion << std::endl;
-    } else {
-        std::cout << "No tienes pociones restantes!\n";
     }
 }
 
@@ -34,9 +30,6 @@ void Jugador::usarPocion(Objeto* pocion){
     if (pocionPtr) {
         int curacion = pocionPtr->getCuracion();
         salud = std::min(salud + curacion, saludMaxima);
-        std::cout << "\nSalud recuperada: +" << curacion << std::endl;
-    } else {
-        std::cout << "\nEl objeto no es una pocion valida.\n";
     }
 }
 
@@ -44,10 +37,7 @@ void Jugador::usarMagia(Personaje* objetivo) {
     if (mana >= COSTO_MAGIA) {
         int danoMagico = ataque * MULT_DANO_MAGICO + nivel * BONUS_DANO_NIVEL;
         mana -= COSTO_MAGIA;
-        std::cout << nombre << " lanza un hechizo a " << objetivo->getNombre() << "!\n";
         objetivo->recibirDano(danoMagico);
-    } else {
-        std::cout << "No tienes suficiente mana!\n";
     }
 }
 
@@ -100,17 +90,6 @@ void Jugador::agregarObjeto(std::shared_ptr<Objeto> objeto){
     std::string nombre = objeto->getNombre();
     inventario[nombre]++;
     objetosInventario[nombre] = objeto;
-
-    auto arma = std::dynamic_pointer_cast<Arma>(objeto);
-    if (arma) {
-        std::cout << "Has encontrado el arma: " << arma->getNombre() << " (" << arma->getDano() << " de daño).\n";
-        std::cout << "¿Deseas equiparla? (s/n): ";
-        char r;
-        std::cin >> r;
-        if(r == 's' || r == 'S') {
-            equiparArma(arma);
-        }
-    }
 }
 
 void Jugador::agregarObjetoSilencioso(std::shared_ptr<Objeto> objeto){

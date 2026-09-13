@@ -37,6 +37,5 @@ Enemigo::Enemigo(const Enemigo& copia)
  * al objetivo (jugador) a través de Personaje::recibirDano.
  */
 void Enemigo::atacar(Personaje* objetivo) {
-    std::cout << nombre << " te ataca!\n";
     objetivo->recibirDano(ataque);
 }

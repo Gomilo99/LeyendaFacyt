@@ -21,6 +21,7 @@
 GameManager::GameManager()
     : jugador("Heroe"), state(GameState::MAIN_MENU), spawnX(1), spawnY(1)
 {
+    inicializarTileRegistry();
     objetos = DataManager::cargarObjetos();
     if (objetos.empty()) {
         std::cerr << "No se pudieron cargar los objetos desde el archivo JSON.\n";
@@ -268,36 +269,41 @@ void GameManager::moverJugador(int dx, int dy) {
 }
 
 /**
- * Procesa tiles especiales del mapa y persiste los cambios en cache.
- *
- * B: Inicia combate contra el jefe del nivel
- * K: Marca victoria (jugador encontró la llave)
- * H: Usa una poción y elimina el tile del mapa
+ * Inicializa los manejadores de eventos para cada tipo de tile especial.
  */
-void GameManager::handleTile(char tile) {
-    if (tile == 'B'){
+void GameManager::inicializarTileRegistry() {
+    tileRegistry.registrarManejador('B', [this](GameManager&, int x, int y) {
         iniciarCombateJefe();
         if (jugador.estaVivo()){
-            mapa.setTile(jugador.getPosX(), jugador.getPosY(), '.');
+            mapa.setTile(x, y, '.');
             CacheManager::guardarMapa(mapa);
         }
-    }
-    if (tile == 'K'){
+    });
+
+    tileRegistry.registrarManejador('K', [this](GameManager&, int, int) {
         int siguienteNivel = jugador.getNivelActual() + 1;
-        if(siguienteNivel > 3){ // 3 niveles totales
+        if (siguienteNivel > 3){
             std::cout << "Has completado todos los niveles!\n";
             jugador.setHaGanado(true);
-        }else{
+        } else {
             std::cout << "Has encontrado la llave del nivel " << siguienteNivel << "!\n";
             jugador.setNivelActual(siguienteNivel);
             cargarNivel(siguienteNivel);
         }
-    }
-    if (tile == 'H'){
+    });
+
+    tileRegistry.registrarManejador('H', [this](GameManager&, int x, int y) {
         jugador.usarPocion();
-        mapa.setTile(jugador.getPosX(), jugador.getPosY(), '.');
+        mapa.setTile(x, y, '.');
         CacheManager::guardarMapa(mapa);
-    }
+    });
+}
+
+/**
+ * Procesa tiles especiales del mapa mediante el registro TileRegistry.
+ */
+void GameManager::handleTile(char tile) {
+    tileRegistry.ejecutarManejador(tile, *this, jugador.getPosX(), jugador.getPosY());
 }
 
 void GameManager::mostrarInventario() {

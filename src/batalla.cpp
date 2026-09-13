@@ -325,19 +325,6 @@ BattleSystem::BattleSystem(Jugador& p, Enemigo& e)
     for (int i = 0; i < 6; i++) enemyArt[i] = art[i];
 }
 
-// Redirige cout a un stringstream interno para silenciar salida durante acciones de combate
-void BattleSystem::suppressCout() {
-    oldCoutBuf = std::cout.rdbuf();
-    std::cout.rdbuf(coutSink.rdbuf());
-}
-
-// Restaura cout a su buffer original y descarta lo acumulado
-void BattleSystem::restoreCout() {
-    std::cout.rdbuf(oldCoutBuf);
-    coutSink.str("");
-    coutSink.clear();
-}
-
 void BattleSystem::setLog(const std::string& msg) {
     logMessage = msg;
     renderer.setLogMessage(logMessage);
@@ -369,9 +356,7 @@ void BattleSystem::doPlayerAction() {
             setLog(player->getNombre() + " ataca a " + currentEnemy->getNombre() + "!");
             render();
             std::this_thread::sleep_for(std::chrono::milliseconds(400));
-            suppressCout();
             player->atacar(currentEnemy);
-            restoreCout();
             if (!currentEnemy->estaVivo()) {
                 setLog("Has derrotado a " + currentEnemy->getNombre() + "!");
                 render();
@@ -395,9 +380,7 @@ void BattleSystem::doPlayerAction() {
             setLog(player->getNombre() + " lanza un hechizo!");
             render();
             std::this_thread::sleep_for(std::chrono::milliseconds(400));
-            suppressCout();
             player->usarMagia(currentEnemy);
-            restoreCout();
             if (!currentEnemy->estaVivo()) {
                 setLog("Has derrotado a " + currentEnemy->getNombre() + "!");
                 render();
@@ -411,9 +394,7 @@ void BattleSystem::doPlayerAction() {
             break;
 
         case 2: // Inventario: muestra estado e inventario, permite usar objetos por nombre
-            //suppressCout();
             invUI.run();
-            //restoreCout();
             screenBuffer.forceRedraw();
             currentState = BattleState::PLAYER_TURN;
             break;
@@ -446,9 +427,7 @@ void BattleSystem::doEnemyTurn() {
     render();
     std::this_thread::sleep_for(std::chrono::milliseconds(400));
 
-    suppressCout();
     currentEnemy->atacar(player);
-    restoreCout();
 
     if (!player->estaVivo()) {
         setLog("Has sido derrotado!");

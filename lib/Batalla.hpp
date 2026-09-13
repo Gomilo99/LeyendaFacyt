@@ -139,12 +139,6 @@ class BattleSystem {
     std::string enemyArt[6];
     std::string logMessage;
 
-    // Supresion de cout para evitar que atacar/recibirDano ensucien la terminal
-    std::streambuf* oldCoutBuf;
-    std::ostringstream coutSink;
-    void suppressCout();
-    void restoreCout();
-
     // Lee W/S/SPACE del stdin durante PLAYER_TURN
     void processInput();
     // Ejecuta la opcion seleccionada del menu

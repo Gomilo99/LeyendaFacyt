@@ -51,6 +51,7 @@ public:
     int getDefensa() const { return defensa; }
     int getNivel() const { return nivel; }
     void setSalud(int nuevaSalud) { salud = nuevaSalud; }
+    void setSaludMaxima(int hpMax) { saludMaxima = hpMax; }
     void setAtaque(int nuevoAtaque) { ataque = nuevoAtaque; }
     void setDefensa(int nuevaDefensa) { defensa = nuevaDefensa; }
     void setNivel(int nuevoNivel) { nivel = nuevoNivel; }

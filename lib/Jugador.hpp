@@ -38,6 +38,7 @@ public:
     int getMana() const { return mana; }
     int getManaMaxima() const { return manaMaxima; }
     void setMana(int nuevaMana) { mana = nuevaMana; }
+    void setManaMaxima(int max) { manaMaxima = max; }
     
     bool getHaGanado() const { return haGanado; }
     void setHaGanado(bool ganado) { haGanado = ganado; }

@@ -12,6 +12,26 @@ dificultad: Media
 version: 1.0.0
 ---
 ## Log
+### Log 13/09/2026 - Sprint 1: Cortar la hemorragia (Refactorización P1)
+#### Cambios realizados
+
+##### 1. Versionado y carga segura en Persistencia (`CacheManager`)
+- Se incluyó la propiedad `"version": 1` al serializar héroes en `CacheManager::guardarHeroe()`.
+- Se refactorizó `CacheManager::cargarHeroe()` para emplear lecturas seguras mediante `.value()` en todas las propiedades del JSON, garantizando tolerancia a faltas de campos.
+- Se agregaron restauraciones explícitas de `saludMaxima` y `manaMaxima` en el héroe para prevenir distorsión de HP/MP al cargar partidas guardadas.
+
+##### 2. Desacoplamiento de I/O en Modelo (`Jugador`)
+- Se eliminó la interacción de `std::cin` de `Jugador::agregarObjeto()`, transformándola en un método mutador puro del modelo.
+- Se eliminaron las salidas directas a consola de `Jugador::atacar()` y `Jugador::usarMagia()`.
+
+##### 3. Eliminación de supresión de `std::cout` en Combate (`batalla.cpp`)
+- Se eliminaron las funciones de parche `suppressCout()` y `restoreCout()` de `BattleSystem`.
+- El sistema de combate interactúa limpiamente a través de su buffer visual sin manipulación de buffers de salida estándar.
+
+##### 4. Abstracción de Eventos de Mapas y Tiles (`TileRegistry` & `GameManager`)
+- Se creó `lib/TileHandler.hpp` con la clase `TileRegistry` para registrar acciones de tiles mediante lambdas y callbacks.
+- Se reemplazó el bloque condicional hardcoded de `GameManager::handleTile()` por `tileRegistry.ejecutarManejador()`.
+
 ### Log 23/07/2026 - Corrección de Deudas técnicas
 #### Cambios realizados
 ##### Eliminación de Magic numbers
