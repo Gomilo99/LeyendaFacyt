@@ -40,7 +40,7 @@ public:
      */
     Enemigo crearEnemigo(int nivel);
     Enemigo crearEnemigo(const std::vector<std::pair<std::string, int>>& entries,
-                         float statMultiplier = 1.0f, float xpMultiplier = 1.0f);
+                         float statMultiplier = 1.0f);
     Enemigo crearPorId(const std::string& id) const;
 
     /**

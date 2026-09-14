@@ -40,7 +40,6 @@ bool MapMetadata::load(const std::string& path) {
         z.safe = value.value("safe", false);
         z.encounterMultiplier = value.value("encounter_multiplier", 1.0f);
         z.statMultiplier = value.value("stat_multiplier", 1.0f);
-        z.xpMultiplier = value.value("xp_multiplier", 1.0f);
         z.bossId = value.value("boss_id", "");
         const std::string restoreTile = value.value("restore_tile", "");
         if (!restoreTile.empty()) z.restoreTile = restoreTile.front();

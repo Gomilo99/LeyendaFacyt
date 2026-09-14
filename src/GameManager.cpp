@@ -22,6 +22,7 @@ GameManager::GameManager()
     : jugador("Heroe"), state(GameState::MAIN_MENU), spawnX(1), spawnY(1),
     nivelActual(1), jefeDerrotado(false), haGanadoFinal(false)
 {
+    inicializarTileRegistry();
     objetos = DataManager::cargarObjetos();
     if (objetos.empty()) {
         std::cerr << "No se pudieron cargar los objetos desde el archivo JSON.\n";
@@ -140,10 +141,11 @@ void GameManager::inicializarNuevaPartida() {
         return;
     }
 
-    nivelActual = 1;
+nivelActual = 1;
     jefeDerrotado = false;
     haGanadoFinal = false;
     cargarMetadata(1);
+    encounterMgr.configurarPorNivel(1);
 
     // Carga de personaje y spawn
     jugador = Jugador("Heroe");
@@ -183,7 +185,7 @@ bool GameManager::cargarPartidaExistente() {
     //  === Carga de jugador ===
     jugador = CacheManager::cargarHeroe(objetos);
 
-    CacheManager::EstadoPartida estado;
+CacheManager::EstadoPartida estado;
     if (CacheManager::cargarEstado(estado)) {
         nivelActual = estado.nivelActual;
         jefeDerrotado = estado.jefeDerrotado;
@@ -205,9 +207,8 @@ bool GameManager::cargarPartidaExistente() {
     }
     jugador.setNivelActual(nivelActual);
     cargarMetadata(nivelActual);
-    encounterMgr.resetear();
+    encounterMgr.configurarPorNivel(nivelActual);
     if (haGanadoFinal) jugador.setHaGanado(true);
-
     state = GameState::OVERWORLD;
     return true;
 }
@@ -216,8 +217,7 @@ bool GameManager::cargarPartidaExistente() {
  * Guarda el estado actual del heroe y el mapa en cache/.
  */
 void GameManager::guardarPartida() {
-    CacheManager::guardarHeroe(jugador);
-    CacheManager::guardarMapa(mapa);
+    CacheManager::guardarPartida(mapa, jugador);
     CacheManager::guardarEstado({nivelActual, jefeDerrotado, haGanadoFinal});
 }
 
@@ -368,14 +368,14 @@ void GameManager::moverJugador(int dx, int dy) {
 }
 
 /**
- * Procesa tiles especiales del mapa y persiste los cambios en cache.
+ * Inicializa los manejadores de eventos para cada tipo de tile especial.
  *
- * B: Inicia combate contra el jefe del nivel y habilita K al ganar
+ * B: Inicia el combate contra el jefe de la zona y habilita K al ganar
  * K: Carga el siguiente nivel si el jefe fue derrotado
- * H: Usa una poción y elimina el tile del mapa
+ * H/h/G: Curación porcentual y restauración del terreno base del nivel
  */
-void GameManager::handleTile(char tile) {
-    if (tile == 'B'){
+void GameManager::inicializarTileRegistry() {
+    tileRegistry.registrarManejador('B', [this](GameManager&, int, int) {
         const ZoneMetadata* zone = zonaJefeActual();
         if (!zone || zone->bossId.empty()) {
             std::cerr << "Error de configuracion: el tile B no tiene jefe asignado.\n";
@@ -389,8 +389,9 @@ void GameManager::handleTile(char tile) {
                         (zone->tile != '\0' ? zone->tile : '.'));
             guardarPartida();
         }
-    }
-    if (tile == 'K'){
+    });
+
+    tileRegistry.registrarManejador('K', [this](GameManager&, int, int) {
         if (!jefeDerrotado) {
             std::cout << "El portal esta sellado. Derrota al jefe primero.\n";
             return;
@@ -406,8 +407,10 @@ void GameManager::handleTile(char tile) {
             std::cout << "Has avanzado al nivel " << siguienteNivel << "!\n";
             guardarPartida();
         }
-    }
-    if (tile == 'H' || tile == 'h' || tile == 'G'){
+    });
+
+    auto manejadorCuracion = [this](GameManager&, int x, int y) {
+        char tile = mapa.getTile(x, y);
         int pct = 100;
         auto healing = metadata.healing.find(tile);
         if (healing != metadata.healing.end()) pct = healing->second;
@@ -422,9 +425,19 @@ void GameManager::handleTile(char tile) {
                 break;
             }
         }
-        mapa.setTile(jugador.getPosX(), jugador.getPosY(), terrenoBase);
+        mapa.setTile(x, y, terrenoBase);
         CacheManager::guardarMapa(mapa);
-    }
+    };
+    tileRegistry.registrarManejador('H', manejadorCuracion);
+    tileRegistry.registrarManejador('h', manejadorCuracion);
+    tileRegistry.registrarManejador('G', manejadorCuracion);
+}
+
+/**
+ * Procesa tiles especiales del mapa mediante el registro TileRegistry.
+ */
+void GameManager::handleTile(char tile) {
+    tileRegistry.ejecutarManejador(tile, *this, jugador.getPosX(), jugador.getPosY());
 }
 
 void GameManager::mostrarInventario() {
@@ -444,7 +457,7 @@ void GameManager::mostrarInventario() {
 void GameManager::iniciarCombate() {
     const ZoneMetadata* zone = zonaActual();
     Enemigo enemigo = zone && !zone->enemies.empty()
-        ? enemyFactory.crearEnemigo(zone->enemies, zone->statMultiplier, zone->xpMultiplier)
+        ? enemyFactory.crearEnemigo(zone->enemies, zone->statMultiplier)
         : enemyFactory.crearEnemigo(jugador.getNivel());
     auto color = metadata.tierColors.find(enemigo.getTier());
     enemigo.setDisplayColor(color != metadata.tierColors.end() ? color->second : COL_WHITE);
@@ -460,7 +473,6 @@ void GameManager::iniciarCombateJefe() {
     const ZoneMetadata* zone = zonaJefeActual();
     if (zone && !zone->bossId.empty()) {
         Enemigo jefe = enemyFactory.crearPorId(zone->bossId);
-        jefe.setXpMultiplier(zone->xpMultiplier);
         jefe.aplicarMultiplicadorStats(zone->statMultiplier);
         auto color = metadata.tierColors.find(jefe.getTier());
         jefe.setDisplayColor(color != metadata.tierColors.end() ? color->second : COL_BRED);
@@ -478,15 +490,8 @@ bool GameManager::cargarNivel(int nivel){
         return false;
     }
 
+encounterMgr.configurarPorNivel(nivel);
     cargarMetadata(nivel);
-    // Configurar terreno segun el nivel (fallback para mapas sin metadata)
-    switch(nivel){
-        case 1: encounterMgr.setTerreno(EncounterManager::Terreno::LLANURA); break;
-        case 2: encounterMgr.setTerreno(EncounterManager::Terreno::MAZMORRA); break;
-        case 3: encounterMgr.setTerreno(EncounterManager::Terreno::BOSQUE); break;
-        case 4: encounterMgr.setTerreno(EncounterManager::Terreno::CAMINO); break;
-    }
-    encounterMgr.resetear();
 
     nivelActual = nivel;
     jugador.setNivelActual(nivelActual);
@@ -504,8 +509,7 @@ bool GameManager::cargarNivel(int nivel){
         }
     }
 
-    CacheManager::guardarMapa(mapa);
-    CacheManager::guardarHeroe(jugador);
+CacheManager::guardarPartida(mapa, jugador);
     CacheManager::guardarEstado({nivelActual, jefeDerrotado, haGanadoFinal});
     return true;
 }

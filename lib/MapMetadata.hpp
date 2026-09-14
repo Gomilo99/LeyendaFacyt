@@ -13,7 +13,6 @@ struct ZoneMetadata {
     bool safe = false;
     float encounterMultiplier = 1.0f;
     float statMultiplier = 1.0f;
-    float xpMultiplier = 1.0f;
     std::vector<std::pair<std::string, int>> enemies;
     std::string bossId;
     char restoreTile = '\0';

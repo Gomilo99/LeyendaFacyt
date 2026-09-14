@@ -15,9 +15,13 @@ bool CacheManager::existePartida(){
 
 void CacheManager::crearPartida(const Mapa &mapa, const Jugador &jugador){
     fs::create_directory(Config::SAVE_DIR);
+    guardarPartida(mapa, jugador);
+    std::ofstream flag(Config::SAVE_DIR + "partida.flag");
+}
+
+void CacheManager::guardarPartida(const Mapa &mapa, const Jugador &jugador){
     guardarMapa(mapa);
     guardarHeroe(jugador);
-    std::ofstream flag(Config::SAVE_DIR + "partida.flag");
 }
 
 bool CacheManager::guardarMapa(const Mapa &mapa){
@@ -55,20 +59,21 @@ bool CacheManager::cargarEstado(EstadoPartida& estado){
 
 void CacheManager::guardarHeroe(const Jugador &jugador){
     json j;
-    j["nombre"]     = jugador.getNombre();
-    j["salud"]      = jugador.getSalud();
+    j["version"]     = 1;
+    j["nombre"]      = jugador.getNombre();
+    j["salud"]       = jugador.getSalud();
     j["saludMaxima"] = jugador.getSaludMaxima();
-    j["ataque"]     = jugador.getAtaque();
-    j["defensa"]    = jugador.getDefensa();
-    j["nivel"]      = jugador.getNivel();
-    j["pociones"]   = jugador.getPociones();
-    j["mana"]       = jugador.getMana();
-    j["manaMaxima"] = jugador.getManaMaxima();
-    j["posX"]       = jugador.getPosX();
-    j["posY"]       = jugador.getPosY();
-    j["exp"]        = jugador.getExperiencia();
-    j["expMax"]     = jugador.getExperienciaNecesaria();
-    j["arma"]       = jugador.getArmaNombre();
+    j["ataque"]      = jugador.getAtaque();
+    j["defensa"]     = jugador.getDefensa();
+    j["nivel"]       = jugador.getNivel();
+    j["pociones"]    = jugador.getPociones();
+    j["mana"]        = jugador.getMana();
+    j["manaMaxima"]  = jugador.getManaMaxima();
+    j["posX"]        = jugador.getPosX();
+    j["posY"]        = jugador.getPosY();
+    j["exp"]         = jugador.getExperiencia();
+    j["expMax"]      = jugador.getExperienciaNecesaria();
+    j["arma"]        = jugador.getArmaNombre();
     j["nivelActual"] = jugador.getNivelActual();
 
     json inventarioArr = json::array();
@@ -86,13 +91,16 @@ Jugador CacheManager::cargarHeroe(const std::map<std::string, std::shared_ptr<Ob
     json j;
     file >> j;
 
-    std::string nombre    = j["nombre"];
-    int salud             = j["salud"];
-    int ataque            = j["ataque"];
-    int defensa           = j["defensa"];
-    int nivel             = j["nivel"];
+    int version           = j.value("version", 1);
+    std::string nombre    = j.value("nombre", "Heroe");
+    int salud             = j.value("salud", 100);
+    int saludMaxima       = j.value("saludMaxima", salud);
+    int ataque            = j.value("ataque", 15);
+    int defensa           = j.value("defensa", 10);
+    int nivel             = j.value("nivel", 1);
     int pociones          = j.value("pociones", 3);
     int mana              = j.value("mana", 50);
+    int manaMaxima        = j.value("manaMaxima", 50);
     int exp               = j.value("exp", 0);
     int expMax            = j.value("expMax", 100);
     int posX              = j.value("posX", 1);
@@ -100,17 +108,20 @@ Jugador CacheManager::cargarHeroe(const std::map<std::string, std::shared_ptr<Ob
     int nivelActual       = j.value("nivelActual", 1);
 
     Jugador jugador(nombre, salud, ataque, defensa, nivel, pociones);
+    jugador.setSaludMaxima(saludMaxima);
+    jugador.setSalud(salud);
+    jugador.setMana(mana);
+    jugador.setManaMaxima(manaMaxima);
     jugador.setPos(posX, posY);
     jugador.setExperiencia(exp);
     jugador.setExperienciaNecesaria(expMax);
-    jugador.setMana(mana);
     jugador.setNivelActual(nivelActual);
 
     // Cargar inventario desde el array
-    if (j.contains("inventario")) {
+    if (j.contains("inventario") && j["inventario"].is_array()) {
         for (const auto& item : j["inventario"]) {
-            std::string nombreObj = item["nombre"];
-            int cant = item["cant"];
+            std::string nombreObj = item.value("nombre", "");
+            int cant = item.value("cant", 0);
             auto it = objetos.find(nombreObj);
             if (it != objetos.end()) {
                 for (int i = 0; i < cant; i++)
@@ -120,7 +131,7 @@ Jugador CacheManager::cargarHeroe(const std::map<std::string, std::shared_ptr<Ob
     }
 
     // Equipar arma guardada
-    if (j.contains("arma") && !j["arma"].get<std::string>().empty()) {
+    if (j.contains("arma") && j["arma"].is_string() && !j["arma"].get<std::string>().empty()) {
         std::string armaNombre = j["arma"];
         auto it = objetos.find(armaNombre);
         if (it != objetos.end()) {

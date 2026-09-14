@@ -365,19 +365,6 @@ BattleSystem::BattleSystem(Jugador& p, Enemigo& e, bool allowFlee)
     for (int i = 0; i < 6; i++) enemyArt[i] = art[i];
 }
 
-// Redirige cout a un stringstream interno para silenciar salida durante acciones de combate
-void BattleSystem::suppressCout() {
-    oldCoutBuf = std::cout.rdbuf();
-    std::cout.rdbuf(coutSink.rdbuf());
-}
-
-// Restaura cout a su buffer original y descarta lo acumulado
-void BattleSystem::restoreCout() {
-    std::cout.rdbuf(oldCoutBuf);
-    coutSink.str("");
-    coutSink.clear();
-}
-
 void BattleSystem::setLog(const std::string& msg) {
     logMessage = msg;
     renderer.setLogMessage(logMessage);
@@ -409,9 +396,7 @@ void BattleSystem::doPlayerAction() {
             setLog(player->getNombre() + " ataca a " + currentEnemy->getNombre() + "!");
             render();
             std::this_thread::sleep_for(std::chrono::milliseconds(400));
-            suppressCout();
             player->atacar(currentEnemy);
-            restoreCout();
             if (!currentEnemy->estaVivo()) {
                 setLog("Has derrotado a " + currentEnemy->getNombre() + "!");
                 render();
@@ -435,9 +420,7 @@ void BattleSystem::doPlayerAction() {
             setLog(player->getNombre() + " lanza un hechizo!");
             render();
             std::this_thread::sleep_for(std::chrono::milliseconds(400));
-            suppressCout();
             player->usarMagia(currentEnemy);
-            restoreCout();
             if (!currentEnemy->estaVivo()) {
                 setLog("Has derrotado a " + currentEnemy->getNombre() + "!");
                 render();
@@ -451,9 +434,7 @@ void BattleSystem::doPlayerAction() {
             break;
 
         case 2: // Inventario: muestra estado e inventario, permite usar objetos por nombre
-            //suppressCout();
             invUI.run();
-            //restoreCout();
             screenBuffer.forceRedraw();
             currentState = BattleState::PLAYER_TURN;
             break;
@@ -493,9 +474,7 @@ void BattleSystem::doEnemyTurn() {
     render();
     std::this_thread::sleep_for(std::chrono::milliseconds(400));
 
-    suppressCout();
     currentEnemy->atacar(player);
-    restoreCout();
 
     if (!player->estaVivo()) {
         setLog("Has sido derrotado!");
@@ -583,16 +562,18 @@ void batalla(Jugador& jugador, Enemigo& enemigo, bool esJefe, bool esJefeFinal) 
     BattleSystem system(jugador, enemigo, !esJefe);
     system.run();
 
-    if (system.hasFled()) {
-        std::cout << "\nHas escapado del combate.\nPresiona Enter para continuar...";
+    BattleResult res = system.procesarResultado();
+
+    if (res.outcome == BattleResult::Outcome::FLEE){
+        std::cout << "\nHas escapado del combate. \nPresiona Enter para continuar...";
         std::cin.get();
         return;
     }
 
-    if (!jugador.estaVivo()) {
+    if (res.outcome == BattleResult::Outcome::DEFEAT){
         std::cout << "\nHas sido derrotado por " << enemigo.getNombre() << "!\n";
         CacheManager::guardarHeroe(jugador);
-        std::cout << "Presiona Enter para continuar...";
+        std::cout << "Presionar Enter para continuar...";
         std::cin.get();
         return;
     }
@@ -600,35 +581,61 @@ void batalla(Jugador& jugador, Enemigo& enemigo, bool esJefe, bool esJefeFinal) 
     // Victoria
     limpiarPantalla();
     std::cout << "\n\nHAS DERROTADO A '" << enemigo.getNombre() << "' !\n";
+std::cout << "Has ganado " << res.expObtenida << " de experiencia!\n";
+
+    if (res.levelUp.subioDeNivel) {
+        std::cout << "\n¡HAS SUBIDO AL NIVEL " << res.levelUp.nivelNuevo << "!\n";
+        std::cout << "Salud Máxima: +" << res.levelUp.saludMaxGanada << "\n";
+        std::cout << "Ataque: +" << res.levelUp.ataqueGanado << "\n";
+        std::cout << "Defensa: +" << res.levelUp.defensaGanada << "\n";
+    }
+
+    if (res.lootObtenido) {
+        std::cout << "Has obtenido: " << res.lootObtenido->getNombre() << "\n";
+    }
+
     if (esJefeFinal) {
         std::cout << "Has derrotado al jefe final. Busca la llave final.\n";
     }
+    CacheManager::guardarHeroe(jugador);
+    std::cout << "Presiona Enter para continuar...";
+    std::cin.get();
+}
 
-    // Otorgar experiencia
-    int exp = enemigo.experienciaCalculada();
-    jugador.obtenerExperiencia(exp);
+BattleResult BattleSystem::procesarResultado() {
+    BattleResult res;
 
-    // Calcular loot segun probabilidades del enemigo (recorre el vector botin)
+    if(fled){
+        res.outcome = BattleResult::Outcome::FLEE;
+        return res;
+    }
+
+    if (!player->estaVivo()){
+        res.outcome = BattleResult::Outcome::DEFEAT;
+        return res;
+    }
+
+    // En caso contrario, el jugador venció
+    res.outcome = BattleResult::Outcome::VICTORY;
+
+    // 1. Calcular XP
+    int exp = currentEnemy->experienciaCalculada();
+    res.expObtenida = exp;
+    res.levelUp = player->obtenerExperiencia(exp);
+
+    // 2. Calcular Loot Probabilistico
     std::uniform_int_distribution<int> distLoot(0, 99);
     int chance = distLoot(DataManager::rng());
-    std::shared_ptr<Objeto> lootGanado = nullptr;
-
-    const auto& botin = enemigo.getBotin();
     int acumulado = 0;
-    for (const auto& drop : botin) {
+
+    for( const auto& drop: currentEnemy->getBotin()){
         acumulado += drop.probabilidad;
         if (chance < acumulado) {
-            lootGanado = drop.objeto;
+            res.lootObtenido = drop.objeto;
+            player->agregarObjeto(drop.objeto);
             break;
         }
     }
 
-    if (lootGanado) {
-        std::cout << "Has obtenido: " << lootGanado->getNombre() << "\n";
-        jugador.agregarObjeto(lootGanado);
-    }
-
-    CacheManager::guardarHeroe(jugador);
-    std::cout << "Presiona Enter para continuar...";
-    std::cin.get();
+    return res;
 }

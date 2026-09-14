@@ -1,6 +1,6 @@
 ---
 creado: 22/07/2026
-modificado: 08/09/2026
+modificado: 13/09/2026
 tipo: Avance
 tags: # deuda-tecnica, idea-loca, bug-critico, bug, refactor
 titulo: Roadmap

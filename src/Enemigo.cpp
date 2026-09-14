@@ -29,7 +29,7 @@ Enemigo::Enemigo(std::string id, std::string nom, int hp, int atk, int def, int 
  */
 Enemigo::Enemigo(const Enemigo& copia)
     : Personaje(copia), id(copia.id), botin(copia.botin),
-    exp_base(copia.exp_base), tier(copia.tier), xpMultiplier(copia.xpMultiplier) {
+    exp_base(copia.exp_base), tier(copia.tier) {
     for (int i = 0; i < 6; i++) asciiArt[i] = copia.asciiArt[i];
 }
 void Enemigo::aplicarMultiplicadorStats(float value) {
@@ -40,7 +40,7 @@ void Enemigo::aplicarMultiplicadorStats(float value) {
 }
 int Enemigo::experienciaCalculada() const {
     const int tierBonus = std::max(1, tier);
-    return std::max(1, static_cast<int>(50.0f * nivel * tierBonus * xpMultiplier));
+    return std::max(1, exp_base * nivel * tierBonus);
 }
 
 /**
@@ -49,6 +49,5 @@ int Enemigo::experienciaCalculada() const {
  * al objetivo (jugador) a través de Personaje::recibirDano.
  */
 void Enemigo::atacar(Personaje* objetivo) {
-    std::cout << nombre << " te ataca!\n";
     objetivo->recibirDano(ataque);
 }

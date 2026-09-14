@@ -136,7 +136,7 @@ Enemigo EnemyFactory::crearPorId(const std::string& id) const {
 }
 Enemigo EnemyFactory::crearEnemigo(
     const std::vector<std::pair<std::string, int>>& entries,
-    float statMultiplier, float xpMultiplier) {
+    float statMultiplier) {
     if (entries.empty()) return crearEnemigo(1);
     int total = 0; for (const auto& e : entries) total += std::max(0, e.second);
     std::uniform_int_distribution<int> dist(0, std::max(0, total - 1));
@@ -146,7 +146,6 @@ Enemigo EnemyFactory::crearEnemigo(
         if (roll < 0) {
             Enemigo result = crearPorId(e.first);
             result.aplicarMultiplicadorStats(statMultiplier);
-            result.setXpMultiplier(xpMultiplier);
             return result;
         }
     }

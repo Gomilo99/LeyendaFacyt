@@ -14,7 +14,6 @@ Jugador::Jugador(std::string nom, int hp, int atk, int def, int lvl, int poc)
     armaEquipada(nullptr), experiencia(0) {}
 
 void Jugador::atacar(Personaje* objetivo) {
-    std::cout << nombre << " Atacas a " << objetivo->getNombre() << "!\n";
     objetivo->recibirDano(ataque);
 }
 
@@ -23,9 +22,6 @@ void Jugador::usarPocion() {
         int curacion = POCION_CURACION_DEFAULT;
         salud = std::min(salud + curacion, saludMaxima);
         pociones--;
-        std::cout << "Usas una pocion. Salud recuperdad: +" << curacion << std::endl;
-    } else {
-        std::cout << "No tienes pociones restantes!\n";
     }
 }
 
@@ -34,9 +30,6 @@ void Jugador::usarPocion(Objeto* pocion){
     if (pocionPtr) {
         int curacion = pocionPtr->getCuracion();
         salud = std::min(salud + curacion, saludMaxima);
-        std::cout << "\nSalud recuperada: +" << curacion << std::endl;
-    } else {
-        std::cout << "\nEl objeto no es una pocion valida.\n";
     }
 }
 
@@ -44,37 +37,34 @@ void Jugador::usarMagia(Personaje* objetivo) {
     if (mana >= COSTO_MAGIA) {
         int danoMagico = ataque * MULT_DANO_MAGICO + nivel * BONUS_DANO_NIVEL;
         mana -= COSTO_MAGIA;
-        std::cout << nombre << " lanza un hechizo a " << objetivo->getNombre() << "!\n";
         objetivo->recibirDano(danoMagico);
-    } else {
-        std::cout << "No tienes suficiente mana!\n";
     }
 }
 
 void Jugador::mostrarEstado() const {
     std::cout << "\n" << nombre << " - Salud: " << salud << "/" << saludMaxima
-              << " | Mana: " << mana << "/" << manaMaxima
-              << " | Ataque: " << ataque << " | Defensa: " << defensa;
+            << " | Mana: " << mana << "/" << manaMaxima
+            << " | Ataque: " << ataque << " | Defensa: " << defensa;
     if (armaEquipada) {
         std::cout << "\nArma equipada: " << armaEquipada->getNombre()
-                  << " | dano: " << armaEquipada->getDano();
+                << " | dano: " << armaEquipada->getDano();
     } else {
         std::cout << "\nArma equipada: ninguna";
     }
     std::cout << "\nNivel: " << nivel << " | Experiencia: " << experiencia
-              << "/" << expNecesaria << std::endl;
+            << "/" << expNecesaria << std::endl;
 }
 
 void Jugador::mostrarInventario(){
     std::cout << "Inventario:\n";
     for (const auto& par : inventario) {
         std::cout << "- " << par.first << " x" << par.second << "\n"
-                  << objetosInventario[par.first]->getDescripcion() << std::endl;
+                << objetosInventario[par.first]->getDescripcion() << std::endl;
     }
     if(armaEquipada){
         std::cout << "\nArma equipada: " << armaEquipada->getNombre()
-                  << " (" << armaEquipada->getDano() << " de dano)\n"
-                  << armaEquipada->getDescripcion() << std::endl;
+                << " (" << armaEquipada->getDano() << " de dano)\n"
+                << armaEquipada->getDescripcion() << std::endl;
     } else {
         std::cout << "No tienes un arma equipada.\n";
     }
@@ -100,17 +90,6 @@ void Jugador::agregarObjeto(std::shared_ptr<Objeto> objeto){
     std::string nombre = objeto->getNombre();
     inventario[nombre]++;
     objetosInventario[nombre] = objeto;
-
-    auto arma = std::dynamic_pointer_cast<Arma>(objeto);
-    if (arma) {
-        std::cout << "Has encontrado el arma: " << arma->getNombre() << " (" << arma->getDano() << " de daño).\n";
-        std::cout << "¿Deseas equiparla? (s/n): ";
-        char r;
-        std::cin >> r;
-        if(r == 's' || r == 'S') {
-            equiparArma(arma);
-        }
-    }
 }
 
 void Jugador::agregarObjetoSilencioso(std::shared_ptr<Objeto> objeto){
@@ -150,29 +129,36 @@ std::vector<std::pair<std::string, std::shared_ptr<Objeto> >> Jugador::getItemsL
     return items;
 }
 
-void Jugador::obtenerExperiencia(int cantidad) {
+LevelUpResult Jugador::obtenerExperiencia(int cantidad) {
+    LevelUpResult res;
+    res.expGanada = cantidad;
+    res.nivelAnterior = this->nivel;
+
     if (!ignorarLimiteNivel && nivel >= nivelMaximoPermitido){
         experiencia = expNecesaria;
-        return;
+        res.nivelNuevo = this->nivel;
+        return res;
     }
 
-    experiencia = std::min(expNecesaria, experiencia + std::max(0, cantidad));
-    std::cout << "Has ganado " << cantidad << " de experiencia!\n";
+    this->experiencia += std::max(0, cantidad);
 
-    if(experiencia >= expNecesaria && (ignorarLimiteNivel || nivel < nivelMaximoPermitido)){
-        std::cout << "Has subido de nivel!\n";
-        saludMaxima += SALUD_POR_NIVEL * (nivel + 1);
-        salud = saludMaxima;
-        ataque += ATAQUE_POR_NIVEL * (nivel + 1);
-        defensa += DEFENSA_POR_NIVEL * (nivel + 1);
-        nivel++;
-        expNecesaria += EXP_INCREMENTO;
-        if(nivel == 3) expNecesaria = EXP_NIVEL_3;
-        experiencia = std::min(experiencia, expNecesaria);
+    if (this->experiencia >= this->expNecesaria){
+        res.subioDeNivel = true;
+        res.saludMaxGanada = SALUD_POR_NIVEL * (nivel + 1);
+        res.ataqueGanado = ATAQUE_POR_NIVEL * (nivel + 1);
+        res.defensaGanada = DEFENSA_POR_NIVEL * (nivel + 1);
 
-        std::cout << "Subida de Estadisticas!!\n";
-        std::cout << "Nivel: " << nivel << " | Salud: " << salud << "/" << saludMaxima
-                  << " | Ataque: " << ataque << " | Defensa: " << defensa
-                  << " | Experiencia: " << experiencia << "/" << expNecesaria << std::endl;
+        this->saludMaxima += res.saludMaxGanada;
+        this->salud = this->saludMaxima;
+        this->ataque += res.ataqueGanado;
+        this->defensa += res.defensaGanada;
+        this->nivel++;
+        res.nivelNuevo = this->nivel;
+
+        this->expNecesaria += EXP_INCREMENTO;
+        this->experiencia = std::min(this->experiencia, this->expNecesaria);
+    }else{
+        res.nivelNuevo = this->nivel;
     }
+    return res;
 }

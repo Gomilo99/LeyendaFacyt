@@ -18,11 +18,13 @@ namespace CacheManager{
     bool existePartida();
     void crearPartida(const Mapa &mapa, const Jugador &jugador);
 
-    // Mapa
+    // Guardado completo unificado (Mapa + Heroe)
+    void guardarPartida(const Mapa &mapa, const Jugador &jugador);
+
+    // Guardado individual de componentes
     bool guardarMapa(const Mapa &mapa);
     bool cargarMapa(Mapa &mapa);
 
-    // Heroe
     void guardarHeroe(const Jugador &jugador);
     Jugador cargarHeroe(const std::map<std::string, std::shared_ptr<Objeto>>& objetos);
 

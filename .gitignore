@@ -5,10 +5,9 @@
 /.idea/
 /.dist/
 /obj-dist/
-/a
-
-/batalla.exe
 /packages
 /cache
 /obj
-/cache
+*.exe
+/Enemigo.o
+/Inventario.o

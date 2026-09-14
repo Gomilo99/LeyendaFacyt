@@ -1,6 +1,6 @@
 ---
 creado: 22/07/2026
-modificado: 10/09/2026
+modificado: 13/09/2026
 tipo: Avance
 tags: # deuda-tecnica, idea-loca, bug-critico, bug, refactor
 titulo: Sprint
@@ -15,37 +15,52 @@ version: 1.0.0
 
 Trabajo planificado para el sprint actual. Al terminar una tarea, marcar como `[x]` y agregar entrada en [[Cambios]].
 
-> **Sprint**: Julio 2026 — Fase de multi-nivel y limpieza de código
-> **Objetivo**: Completar la transición entre niveles y eliminar deuda técnica básica
+> **Sprint**: Septiembre 2026 — Refactorización de Arquitectura y Limpieza de Deuda Técnica
+> **Objetivo**: Ejecutar los 4 Sprints de la Auditoría de Sistemas (P1 a P4)
 
 ---
 
-## Tareas activas
-- [x] Transición entre niveles 📅 2026-08-15 ⏫ #sistema/mapa
-  Requiere:
-  - Modificar `handleTile('K')` para cargar siguiente nivel en vez de terminar el juego
-  - Mantener estado del jugador entre niveles (nivel actual, stats, inventario)
-  - CacheManager debe soportar múltiples mapas
-  - Crear `mapas/nivel3.txt` si no existe
+## Sprint 1 — Cortar la hemorragia (P1 - Urgente)
+- [x] #1 Extraer lógica de tiles y nivelación de `GameManager` hacia `TileHandler` y controladores específicos 📅 2026-09-15 ⏫ #arquitectura #deuda-tecnica [completion:: 2026-09-13]
+- [x] #2 Reemplazar `handleTile()` hardcoded por registro `TileEvent` (`map<char, TileHandler>`) 📅 2026-09-15 ⏫ #arquitectura #sistema/mapa [completion:: 2026-09-13]
+- [x] #3 Eliminar `suppressCout()`/`restoreCout()` refactorizando `atacar()` y `usarMagia()` para retornar `ActionResult` 📅 2026-09-15 ⏫ #refactor #sistema/combate [completion:: 2026-09-13]
+- [x] #5 Eliminar `cin` de `Jugador::agregarObjeto()`, delegando la decisión de equipar a la UI 📅 2026-09-15 ⏫ #refactor #sistema/inventario [completion:: 2026-09-13]
+- [x] #9 Agregar versión de formato de guardado (`j["version"] = 1`) y usar `.value()` en `CacheManager` 📅 2026-09-15 ⏫ #sistema/guardado [completion:: 2026-09-13]
 
-- [x] Curva de dificultad verificable 📅 2026-08-15 ⏫
-  Verificar que:
-  - Nivel 1: enemigos con HP 25-50, ATK 7-12 → jugador nivel 1-2 puede ganar
-  - Nivel 2: enemigos con HP 50-150, ATK 7-25 → jugador nivel 3-5 necesita buen equipo
-  - Nivel 3: enemigos con HP 60-180, ATK 8-28 → jugador nivel 5-7 con armadura
+## Sprint 2 — Ordenar la casa (P2 - Importante)
+- [x] #4 Refactorizar `batalla()` para retornar `BattleResult` y mover post-combate a `BattleSystem` 📅 2026-09-20 🔺 #refactor #sistema/combate [completion:: 2026-09-13]
+- [x] #6 Hacer que `Jugador::obtenerExperiencia()` retorne `LevelUpResult` sin `cout` directo 📅 2026-09-20 🔺 #refactor #sistema/combate [completion:: 2026-09-13]
+- [x] #10 Guardar/cargar `saludMaxima` y `manaMaxima` explícitamente en `CacheManager` 📅 2026-09-20 🔺 #sistema/guardado [completion:: 2026-09-13]
+- [x] #11 Centralizar guardado en `SaveController` / `CacheManager::guardarPartida` 📅 2026-09-20 🔺 #sistema/guardado [completion:: 2026-09-13]
+- [x] #17 Mover configuración de terreno a `EncounterManager::configurarPorNivel` 📅 2026-09-20 🔺 #sistema/mapa [completion:: 2026-09-13]
 
-- [ ] Rediseñar la ventana del enemigo vencido y la subida de nivel, donde se pueda visualizar el aumento de daño, la experiencia ganada, etc.
-- [ ] Rediseño de pantallas de finalización de partida: game over, victoria
-- [ ] Ajustar los sprites para que coincida la versión json con el resultado final
-- [x] Refactorizar para que el enemigo final no aparezca antes (no aparezca por el nivel sino por el flujo nuevo `BOSS` -> `KEY` -> `MAP CHANGE`)  [completion:: 2026-09-09]
-- [ ] Eliminar la pantalla intermedia de enemigos normales
-- [ ] Limitar la tasa de encuentros y balancear las estadísticas con la experiencia.
-## Tareas pendientes (próximo sprint)
+## Sprint 3 — Pulir balance y UX (P3 - Mejora)
+- [ ] #7 Eliminar función muerta `Jugador::mostrarInventario()` 📅 2026-09-25 🔽 #limpieza
+- [ ] #13 Simplificar fórmula de XP en batallas a `exp_base * nivel_factor` 📅 2026-09-25 🔽 #balance
+- [ ] #14 Reemplazar escalado cuadrático de estadísticas por curva controlada 📅 2026-09-25 🔽 #balance
+- [ ] #15 Definir tabla de XP por nivel `EXP_TABLE[]` en `GameBalance.hpp` 📅 2026-09-25 🔽 #balance
+- [ ] #18 Extraer `OverworldRenderer` utilizando `ScreenBuffer` para renderizar el mapa 📅 2026-09-25 🔽 #refactor #ui
 
+## Sprint 4 — Dar personalidad (P4 - Nice to have)
+- [ ] #12 Implementar patrón Strategy `EnemyBehavior` para variedad de comportamiento 📅 2026-09-30 🔽 #sistema/enemigos
+- [ ] #16 Agregar factor de nivel del jugador a la probabilidad de encuentros aleatorios 📅 2026-09-30 🔽 #balance
+- [ ] #19 Mover `InventoryUI` como miembro re-usable de `BattleSystem` 📅 2026-09-30 🔽 #refactor
+- [ ] #20 Mover `limpiarBuffer()` y `limpiarPantalla()` a `Platform::` 📅 2026-09-30 🔽 #limpieza
 
 ## Completado este sprint
 
+
 _(al terminar una tarea, moverla aquí)_
+
+- [x] Transición entre niveles (nivel 1 → 2 → 3 → jefe final) 📅 2026-08-15 ⏫ #sistema/mapa  [completion:: 2026-09-08]
+  - Modificar `handleTile('K')` para cargar siguiente nivel en vez de terminar el juego
+  - Mantener estado del jugador entre niveles (nivel actual, stats, inventario)
+  - CacheManager soporta múltiples mapas y partida unificada
+
+- [x] Curva de dificultad verificable 📅 2026-08-15 ⏫  [completion:: 2026-09-08]
+  - Nivel 1: enemigos con HP 25-50, ATK 7-12 → jugador nivel 1-2 puede ganar
+  - Nivel 2: enemigos con HP 50-150, ATK 7-25 → jugador nivel 3-5 necesita buen equipo
+  - Nivel 3: enemigos con HP 60-180, ATK 8-28 → jugador nivel 5-7 con armadura
 
 - [x] Progresión por secciones y configuración `.meta` 📅 2026-09-08 ⏫ #sistema/mapa #sistema/enemigos
   - Límites de nivel por sección con interruptor de depuración `8`/`F8`.

@@ -1,6 +1,10 @@
 ---
+creado: 13/09/2026
+modificado: 14/09/2026
+---
+---
 creado: 22/07/2026
-modificado: 08/09/2026
+modificado: 13/09/2026
 tipo: Avance
 tags: # deuda-tecnica, idea-loca, bug-critico, bug, refactor
 titulo: Cambios
@@ -12,6 +16,47 @@ dificultad: Media
 version: 1.0.0
 ---
 ## Log
+### Log 13/09/2026 - Sprint 2: Ordenar la casa (Refactorización P2)
+#### Cambios realizados
+
+##### 1. Estructuración del resultado de nivelación (`LevelUpResult`)
+- Se creó la estructura `LevelUpResult` en `lib/Jugador.hpp` que devuelve el delta de salud máxima, ataque, defensa y nuevo nivel.
+- `Jugador::obtenerExperiencia()` ya no imprime directamente a `std::cout`, permitiendo que la capa de UI presente la información según corresponda.
+
+##### 2. Estructuración y resolución del Combate (`BattleResult`)
+- Se creó `BattleResult` en `lib/Batalla.hpp` con el enum `Outcome` (`VICTORY`, `DEFEAT`, `FLEE`), experiencia ganada, level-up y botín.
+- Se implementó `BattleSystem::procesarResultado()` para encapsular el cálculo de loot probabilístico y distribución de experiencia.
+- Se simplificó `void batalla()` delegando la lógica de resolución en `BattleSystem`.
+
+##### 3. Persistencia unificada y consistente (`CacheManager::guardarPartida`)
+- Se agregó `CacheManager::guardarPartida(mapa, jugador)` para guardar atómicamente el estado del mapa y del personaje.
+- Se actualizaron `crearPartida()`, `GameManager::guardarPartida()` y `GameManager::cargarNivel()` para usar el guardado consistente.
+
+##### 4. Configuración de Terrenos Desacoplada (`EncounterManager::configurarPorNivel`)
+- Se añadieron `terrenoPorNivel(int nivel)` y `configurarPorNivel(int nivel)` en `EncounterManager`.
+- Se eliminó el `switch(nivel)` de `GameManager::cargarNivel()`.
+- Se corrigió el bug de carga de partida en `GameManager::cargarPartidaExistente()` para que configure el terreno según el `nivelActual` guardado del héroe.
+
+### Log 13/09/2026 - Sprint 1: Cortar la hemorragia (Refactorización P1)
+#### Cambios realizados
+
+##### 1. Versionado y carga segura en Persistencia (`CacheManager`)
+- Se incluyó la propiedad `"version": 1` al serializar héroes en `CacheManager::guardarHeroe()`.
+- Se refactorizó `CacheManager::cargarHeroe()` para emplear lecturas seguras mediante `.value()` en todas las propiedades del JSON, garantizando tolerancia a faltas de campos.
+- Se agregaron restauraciones explícitas de `saludMaxima` y `manaMaxima` en el héroe para prevenir distorsión de HP/MP al cargar partidas guardadas.
+
+##### 2. Desacoplamiento de I/O en Modelo (`Jugador`)
+- Se eliminó la interacción de `std::cin` de `Jugador::agregarObjeto()`, transformándola en un método mutador puro del modelo.
+- Se eliminaron las salidas directas a consola de `Jugador::atacar()` y `Jugador::usarMagia()`.
+
+##### 3. Eliminación de supresión de `std::cout` en Combate (`batalla.cpp`)
+- Se eliminaron las funciones de parche `suppressCout()` y `restoreCout()` de `BattleSystem`.
+- El sistema de combate interactúa limpiamente a través de su buffer visual sin manipulación de buffers de salida estándar.
+
+##### 4. Abstracción de Eventos de Mapas y Tiles (`TileRegistry` & `GameManager`)
+- Se creó `lib/TileHandler.hpp` con la clase `TileRegistry` para registrar acciones de tiles mediante lambdas y callbacks.
+- Se reemplazó el bloque condicional hardcoded de `GameManager::handleTile()` por `tileRegistry.ejecutarManejador()`.
+
 ### Log 09/09/2026 - Correcciones de interfaz, HUD y terrenos de curación
 #### Cambios realizados
 - Se corrigió la superposición de mensajes al equipar armas desde el inventario.
@@ -70,15 +115,15 @@ version: 1.0.0
   multiplicador del mapa, pasos de gracia, crecimiento máximo de encuentros,
   estilos de terreno, curación porcentual y zonas asociadas a tiles.
 - Las zonas seleccionan enemigos por peso y pueden aplicar multiplicadores de
-  estadísticas y experiencia. El nivel del jugador ya no determina la tabla de
+  estadísticas. El nivel del jugador ya no determina la tabla de
   enemigos de una zona.
 - Los tiles `B` usan el `boss_id` de la zona actual y no buscan un jefe por
   nivel del jugador. Un `B` sin jefe configurado se reporta como error de
   configuración.
 - Se añadió el terreno seguro, que desactiva encuentros aleatorios.
-- La experiencia se calcula usando nivel y tier del enemigo, además de los
-  modificadores de zona. La XP del héroe se limita al umbral actual (`200/200`,
-  por ejemplo) y no se acumula por encima de él.
+- La experiencia se calcula usando nivel y tier del enemigo. La XP del héroe se
+  limita al umbral actual (`200/200`, por ejemplo) y no se acumula por encima
+  de él.
 - Se añadieron pociones porcentuales: `h` (25%), `H` (50%) y `G` (100%).
 - El HUD muestra sección, zona, terreno y límite de nivel. `8`/`F8` permite
   desactivar temporalmente el límite para depuración.
@@ -103,7 +148,7 @@ probabilidad base, los multiplicadores y los pasos de gracia. `EnemyFactory`
 recibe la tabla ponderada de esa zona, crea el enemigo por ID y aplica sus
 modificadores antes del combate.
 
-El tile `B` ya no significa “buscar cualquier jefe disponible”: resuelve la
+El tile `B` ya no significa "buscar cualquier jefe disponible": resuelve la
 zona actual y su `boss_id`. Si falta configuración, se informa un error en vez
 de lanzar un jefe incorrecto. `K` sigue siendo la transición de campaña y solo
 se habilita cuando el jefe de la sección fue derrotado.
@@ -121,7 +166,7 @@ final demasiado pronto.
 
 También se reemplazaron los mapas anteriores por tutorial, pradera, bosque,
 mazmorra 1 y mazmorra final. La dificultad sube mediante probabilidad de
-encuentro, multiplicador de estadísticas, multiplicador de XP y disponibilidad
+encuentro, multiplicador de estadísticas y disponibilidad
 de curación, todos definidos en `.meta`. El nivel del jugador no altera la
 selección de enemigos.
 

@@ -49,6 +49,23 @@ public:
     void configurar(int base, float multiplier, float growthCap, int graceSteps, bool safe = false);
     void setSeguro(bool safe);
 
+    /// Devuelve el tipo de terreno configurado para un nivel
+    static Terreno terrenoPorNivel(int nivel){
+        switch (nivel){
+            case 1: return Terreno::LLANURA;
+            case 2: return Terreno::MAZMORRA;
+            case 3: return Terreno::BOSQUE;
+            case 4: return Terreno::CAMINO;
+            default: return Terreno::LLANURA;
+        }
+    }
+
+    /// Configura el terreno y resetea los pasos según el nivel
+    void configurarPorNivel(int nivel){
+        setTerreno(terrenoPorNivel(nivel));
+        resetear();
+    }
+
 private:
     Terreno terrenoActual;    ///< Terreno donde se mueve el jugador
     int pasosDesdeUltimo;     ///< Pasos desde el último encuentro
@@ -61,5 +78,6 @@ private:
     /// Devuelve la probabilidad base según el terreno actual
     int getProbabilidadBase() const;
 };
+
 
 #endif

@@ -24,6 +24,7 @@
 #include "enemyFactory.hpp"
 #include "encounterManager.hpp"
 #include "MapMetadata.hpp"
+#include "TileHandler.hpp"
 
 class GameManager {
 public:
@@ -47,11 +48,14 @@ private:
     std::map<std::string, std::shared_ptr<Objeto>> objetos;
     EnemyFactory enemyFactory;
     EncounterManager encounterMgr;
+    TileRegistry tileRegistry;
     GameState state;
     int spawnX, spawnY;                     ///< Posición inicial en el mapa original
     int nivelActual;
     bool jefeDerrotado;
     bool haGanadoFinal;
+
+    void inicializarTileRegistry();
 
     void mostrarMenuPrincipal();
     void inicializarNuevaPartida();

@@ -11,17 +11,6 @@
 const int SCREEN_WIDTH = 84;
 const int SCREEN_HEIGHT = 25;
 
-// Maquina de estados del combate por turnos
-enum class BattleState {
-    PLAYER_TURN,   // Esperando entrada del jugador (W/S/SPACE)
-    PLAYER_ACTION, // Ejecutando la accion seleccionada
-    ENEMY_TURN,    // Turno del enemigo (con pausa animada)
-    ANIMATION,     // Reservado para animaciones futuras
-    VICTORY,       // Enemigo derrotado
-    DEFEAT,        // Jugador sin HP
-    FLEE           // Jugador huyo del combate
-};
-
 // Buffer de pantalla con doble capa (chars + colores) y redibujado diferencial
 class ScreenBuffer {
     // Capa de caracteres visibles
@@ -128,6 +117,29 @@ public:
     void moveDown();
 };
 
+// ====== Battle System ======
+
+// Empaquetador del resultado final de un combate
+struct BattleResult{
+    enum class Outcome { VICTORY, DEFEAT, FLEE};
+    Outcome outcome = Outcome::DEFEAT;
+    int expObtenida = 0;
+    LevelUpResult levelUp;
+    std::shared_ptr<Objeto> lootObtenido = nullptr;
+};
+
+// Maquina de estados del combate por turnos
+enum class BattleState {
+    PLAYER_TURN,   // Esperando entrada del jugador (W/S/SPACE)
+    PLAYER_ACTION, // Ejecutando la accion seleccionada
+    ENEMY_TURN,    // Turno del enemigo (con pausa animada)
+    ANIMATION,     // Reservado para animaciones futuras
+    VICTORY,       // Enemigo derrotado
+    DEFEAT,        // Jugador sin HP
+    FLEE           // Jugador huyo del combate
+};
+
+
 // Maquina de estados del combate. Coordina ScreenBuffer, Renderer e InputHandler.
 class BattleSystem {
     BattleState currentState;
@@ -142,12 +154,6 @@ class BattleSystem {
     bool canFlee;
     std::string enemyArt[6];
     std::string logMessage;
-
-    // Supresion de cout para evitar que atacar/recibirDano ensucien la terminal
-    std::streambuf* oldCoutBuf;
-    std::ostringstream coutSink;
-    void suppressCout();
-    void restoreCout();
 
     // Lee W/S/SPACE del stdin durante PLAYER_TURN
     void processInput();
@@ -165,6 +171,8 @@ public:
     bool isOver() const { return battleOver; }
     bool isVictory() const { return victory; }
     bool hasFled() const { return fled; }
+
+    BattleResult procesarResultado();
     // Bucle principal del combate: PLAYER_TURN → accion → ENEMY_TURN → loop
     void run();
 };

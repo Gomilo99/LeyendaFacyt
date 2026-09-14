@@ -9,6 +9,16 @@
 #include <string>
 #include <vector>
 
+struct LevelUpResult {
+    bool subioDeNivel = false;
+    int nivelAnterior = 0;
+    int nivelNuevo = 0;
+    int saludMaxGanada = 0;
+    int ataqueGanado = 0;
+    int defensaGanada = 0;
+    int expGanada = 0;
+};
+
 class Jugador : public Personaje {
 private:
     int pociones;
@@ -43,6 +53,7 @@ public:
     int getMana() const { return mana; }
     int getManaMaxima() const { return manaMaxima; }
     void setMana(int nuevaMana) { mana = nuevaMana; }
+    void setManaMaxima(int max) { manaMaxima = max; }
     
     bool getHaGanado() const { return haGanado; }
     void setHaGanado(bool ganado) { haGanado = ganado; }
@@ -77,7 +88,7 @@ public:
     // Método de envío de inventario para el renderizador
     std::vector<std::pair<std::string, std::shared_ptr<Objeto> > > getItemsList() const;
 
-    void obtenerExperiencia(int cantidad);
+LevelUpResult obtenerExperiencia(int cantidad);
     void setNivelMaximoPermitido(int maximo) { nivelMaximoPermitido = std::max(1, maximo); }
     int getNivelMaximoPermitido() const { return nivelMaximoPermitido; }
     void setIgnorarLimiteNivel(bool value) { ignorarLimiteNivel = value; }
