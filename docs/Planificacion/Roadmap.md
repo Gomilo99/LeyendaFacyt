@@ -1,6 +1,6 @@
 ---
 creado: 22/07/2026
-modificado: 13/09/2026
+modificado: 14/09/2026
 tipo: Avance
 tags: # deuda-tecnica, idea-loca, bug-critico, bug, refactor
 titulo: Roadmap
@@ -21,15 +21,15 @@ Para el trabajo actual del sprint, ver [[Sprint]]. Para ideas futuras, ver [[Bac
 
 ## Estado actual
 
-| Objetivo | Estado | Completado |
-|----------|--------|------------|
-| 25% — Funcionamiento general | ✅ | 2026-06-19 |
-| 40% — Sistemas responsive | ✅ | 2026-06-19 |
-| 50% — Multi-nivel y balanceo | ✅ | 2026-09-08 |
-| 75% — Historia, animaciones, subjefes | ⏳ Pendiente | — |
-| 85% — NPC tienda, puzzles | ⏳ Pendiente | — |
-| 95% — Polish y playtesting | ⏳ Pendiente | — |
-| 100% — Arte y publicación | ⏳ Pendiente | — |
+| Objetivo                              | Estado      | Completado |
+| ------------------------------------- | ----------- | ---------- |
+| 25% — Funcionamiento general          | ✅           | 2026-06-19 |
+| 40% — Sistemas responsive             | ✅           | 2026-06-19 |
+| 50% — Multi-nivel y balanceo          | ✅           | 2026-09-08 |
+| 75% — Historia, animaciones, subjefes | ⏳ Pendiente | —          |
+| 85% — NPC tienda, puzzles             | ⏳ Pendiente | —          |
+| 95% — Polish y playtesting            | ⏳ Pendiente | —          |
+| 100% — Arte y publicación             | ⏳ Pendiente | —          |
 
 **Fecha prevista de entrega**: Finales de 2026
 

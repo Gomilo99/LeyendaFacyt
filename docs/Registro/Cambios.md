@@ -1,10 +1,6 @@
 ---
-creado: 13/09/2026
-modificado: 14/09/2026
----
----
 creado: 22/07/2026
-modificado: 13/09/2026
+modificado: 14/09/2026
 tipo: Avance
 tags: # deuda-tecnica, idea-loca, bug-critico, bug, refactor
 titulo: Cambios
@@ -28,11 +24,11 @@ version: 1.0.0
 - Se implementó `BattleSystem::procesarResultado()` para encapsular el cálculo de loot probabilístico y distribución de experiencia.
 - Se simplificó `void batalla()` delegando la lógica de resolución en `BattleSystem`.
 
-##### 3. Persistencia unificada y consistente (`CacheManager::guardarPartida`)
+##### 3. Persistencia unificada y consistente (`CacheManager:guardarPartida`)
 - Se agregó `CacheManager::guardarPartida(mapa, jugador)` para guardar atómicamente el estado del mapa y del personaje.
 - Se actualizaron `crearPartida()`, `GameManager::guardarPartida()` y `GameManager::cargarNivel()` para usar el guardado consistente.
 
-##### 4. Configuración de Terrenos Desacoplada (`EncounterManager::configurarPorNivel`)
+##### 4. Configuración de Terrenos Desacoplada (`EncounterManager:configurarPorNivel`)
 - Se añadieron `terrenoPorNivel(int nivel)` y `configurarPorNivel(int nivel)` en `EncounterManager`.
 - Se eliminó el `switch(nivel)` de `GameManager::cargarNivel()`.
 - Se corrigió el bug de carga de partida en `GameManager::cargarPartidaExistente()` para que configure el terreno según el `nivelActual` guardado del héroe.
