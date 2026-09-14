@@ -43,7 +43,6 @@ jugador. Los archivos `mapas/nivelN.meta` definen listas ponderadas:
     {"id": "orco", "weight": 7}
   ],
   "stat_multiplier": 1.0,
-  "xp_multiplier": 1.0,
   "boss_id": "zombie_lunes"
 }
 ```
@@ -52,22 +51,23 @@ El terreno seguro usa `safe: true` y desactiva los encuentros. Las zonas
 rectangulares pueden superponerse; la zona más pequeña tiene prioridad, por lo
 que un refugio no obliga a dividir toda la cuadrícula.
 
-Los multiplicadores de estadísticas y XP pertenecen a la zona. Así una
+Los multiplicadores de estadísticas pertenecen a la zona. Así una
 mazmorra o bosque puede ser más peligroso sin escalar artificialmente según el
 nivel del héroe.
 
 ## XP calculada
 
-La recompensa usa el nivel propio del enemigo, su tier y el multiplicador de
-zona. El nivel del jugador no participa:
+La recompensa usa el campo `exp` del JSON como base, junto al nivel y el tier
+propios del enemigo. El nivel del jugador no participa:
 
 ```text
-XP = XP_BASE × nivelEnemigo × tier × multiplicadorZona
+XP = max(1, exp × nivelEnemigo × tier)
 ```
 
-El campo `exp` antiguo del JSON se mantiene por compatibilidad, pero el
-combate utiliza la recompensa calculada. La XP del jugador se limita al
-umbral actual y no puede mostrar valores superiores a `expMax`.
+Las zonas ya no definen `xp_multiplier`; el multiplicador de experiencia quedó
+eliminado, de modo que la recompensa depende únicamente del enemigo. La XP del
+jugador se limita al umbral actual y no puede mostrar valores superiores a
+`expMax`.
 
 ---
 
@@ -157,7 +157,7 @@ Rango [0, totalPeso) con pesos: Goblin=10, Orco=8, Slime=7, Murciélago=9, Zombi
 | Método | Comportamiento |
 |--------|---------------|
 | `crearEnemigo(nivel)` | Fallback compatible: selección ponderada por nivel de diseño |
-| `crearEnemigo(entries, statMultiplier, xpMultiplier)` | Selección desde la tabla de una zona y aplicación de modificadores |
+| `crearEnemigo(entries, statMultiplier)` | Selección desde la tabla de una zona y aplicación de modificadores de estadísticas |
 | `crearPorId(id)` | Crea el enemigo exacto asignado al `boss_id` de la zona |
 
 ---

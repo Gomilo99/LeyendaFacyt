@@ -77,7 +77,7 @@ Para el trabajo actual del sprint, ver [[Sprint]]. Para ideas futuras, ver [[Bac
 
 ---
 
-## Objetivo 50% — Multi-nivel y balanceo 🔄
+## Objetivo 50% — Multi-nivel y balanceo ✅
 
 > Establecimiento de diseño de niveles, rutas de progreso, progresión y balanceo de niveles y construcción del mundo.
 
@@ -101,7 +101,7 @@ el `.txt`, mientras el balance puede cambiarse sin redibujar la geometría.
 
 La sección controla el límite de nivel del jugador y los parámetros globales de
 encuentros. La zona controla el terreno, la tabla ponderada de enemigos, la
-seguridad del área y los multiplicadores de estadísticas y XP. Cada carácter de
+seguridad del área y los multiplicadores de estadísticas. Cada carácter de
 terreno se asocia a una zona mediante `tile`; un refugio o una sala especial se
 representa dibujando su carácter en el `.txt`.
 
@@ -109,7 +109,7 @@ El ritmo de progresión queda controlado por tres mecanismos independientes:
 
 1. límite de nivel por sección;
 2. enemigos definidos por zona y no por nivel del jugador;
-3. XP calculada a partir del nivel y tier propios del enemigo.
+3. XP = `exp_base × nivel × tier` del enemigo (multiplicador de zona eliminado).
 
 La tarea restante de este objetivo es de validación de balance: medir tiempos
 de recorrido, frecuencia real de encuentros, duración de combates y consumo de
