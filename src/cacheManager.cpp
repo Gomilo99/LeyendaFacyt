@@ -59,7 +59,7 @@ bool CacheManager::cargarEstado(EstadoPartida& estado){
 
 void CacheManager::guardarHeroe(const Jugador &jugador){
     json j;
-    j["version"]     = 1;
+    j["version"]     = 2;   // v2: la XP necesaria se deriva de EXP_TABLE (auditoría #15)
     j["nombre"]      = jugador.getNombre();
     j["salud"]       = jugador.getSalud();
     j["saludMaxima"] = jugador.getSaludMaxima();
@@ -113,8 +113,13 @@ Jugador CacheManager::cargarHeroe(const std::map<std::string, std::shared_ptr<Ob
     jugador.setMana(mana);
     jugador.setManaMaxima(manaMaxima);
     jugador.setPos(posX, posY);
-    jugador.setExperiencia(exp);
-    jugador.setExperienciaNecesaria(expMax);
+    // Migración de guardados v1: su "expMax" era un tope duro real (curva antigua).
+    // A partir de v2 la XP necesaria se deriva de EXP_TABLE, así que el expMax
+    // guardado deja de aplicarse y solo respeta el exp de la partida.
+    if (version < 2 && expMax > 0)
+        jugador.setExperiencia(std::min(exp, expMax));
+    else
+        jugador.setExperiencia(exp);
     jugador.setNivelActual(nivelActual);
 
     // Cargar inventario desde el array

@@ -12,6 +12,31 @@ dificultad: Media
 version: 1.0.0
 ---
 ## Log
+### Log 14/09/2026 - Sprint 3: Pulir balance y UX (P3 - Mejora)
+#### Cambios realizados
+
+##### 1. Curva de nivelación por tabla (`EXP_TABLE[]`)
+- Se definió `EXP_TABLE[]` y la función `expRequerida(nivel)` en `GameBalance.hpp` como **única fuente** de la curva de XP (#15). Fuera de la tabla, crecimiento lineal de respaldo (`EXP_CRECIMIENTO_EXTRA`).
+- `Jugador` deriva `getExperienciaNecesaria()` de la tabla: se eliminó el campo mutable `expNecesaria` y su incremento `+= EXP_INCREMENTO` al nivelar.
+- Se eliminaron `EXP_INCREMENTO`, `EXP_UMBRAL_BASE` y el caso especial muerto `EXP_NIVEL_3`.
+
+##### 2. Crecimiento de stats controlado (lineal)
+- `Jugador::obtenerExperiencia()` otorga incrementos **fijos** por nivel (`SALUD_POR_NIVEL`, `ATAQUE_POR_NIVEL`, `DEFENSA_POR_NIVEL`), eliminando el escalado cuadrático `*(nivel+1)` que rompía el balance (#14).
+
+##### 3. Fórmula XP de batalla canónica
+- `Enemigo::experienciaCalculada()` aplica ahora la fórmula declarada `exp_base × nivel_factor × bonus_tier`, con `xpNivelFactor()` (lineal con tope suave) definida en `GameBalance.hpp` (#13).
+- Se eliminaron las constantes muertas `XP_BASE`, `XP_MULT_JEFE`, `XP_MULT_CAMPEON`, `XP_MULT_ELITE` y `XP_MULT_AVANZADO`.
+
+##### 4. Migración de guardados v1 → v2
+- `CacheManager::guardarHeroe()` escribe `version: 2`. Al cargar, el `expMax` guardado actúa como tope solo para guardados de la curva antigua (v1); a partir de v2 la XP necesaria se deriva de `EXP_TABLE` (#15).
+
+##### 5. Eliminación de código muerto
+- Se eliminó `Jugador::mostrarInventario()`, obsoleta desde que `InventoryUI` lo reemplazó (#7).
+
+##### 6. Render del mundo extraído (`OverworldRenderer`)
+- Se creó `lib/OverworldRenderer.hpp` y `src/OverworldRenderer.cpp`: dibuja el mapa top-down (1 celda por tile, zona de terreno con prioridad) y el HUD sobre `ScreenBuffer`, con redibujado completo por frame para acompañar `limpiarPantalla()` (#18).
+- `GameManager::renderMapa()` pasó de ~100 líneas de ANSI a 5; el motor solo provee datos, el renderer pinta.
+
 ### Log 13/09/2026 - Sprint 2: Ordenar la casa (Refactorización P2)
 #### Cambios realizados
 

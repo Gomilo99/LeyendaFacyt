@@ -1,4 +1,5 @@
 #include "../lib/Enemigo.hpp"
+#include "../lib/GameBalance.hpp"
 #include <iostream>
 #include <cstring>
 #include <algorithm>
@@ -39,8 +40,12 @@ void Enemigo::aplicarMultiplicadorStats(float value) {
     defensa = std::max(0, static_cast<int>(defensa * value));
 }
 int Enemigo::experienciaCalculada() const {
+    // Fórmula canónica (auditoría #13):
+    // exp_base del JSON × nivel_factor (lineal con tope) × bonus de tier.
+    // El tier marca la clase de dificultad (1..4 en enemigos.json): enemigos
+    // más peligrosos dan mayor recompensa.
     const int tierBonus = std::max(1, tier);
-    return std::max(1, exp_base * nivel * tierBonus);
+    return std::max(1, exp_base * xpNivelFactor(nivel) * tierBonus);
 }
 
 /**

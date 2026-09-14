@@ -1,6 +1,8 @@
 #ifndef GAME_BALANCE_HPP
 #define GAME_BALANCE_HPP
 
+#include <algorithm>
+
 // === Stats base del heroe (constructor por defecto) ===
 constexpr int STAT_BASE_SALUD       = 100;  
 constexpr int STAT_BASE_ATAQUE      = 15;   
@@ -12,13 +14,31 @@ constexpr int STAT_BASE_POCIONES    = 3;
 constexpr int POCION_CURACION_DEFAULT = 30;
 
 // === Sistema de nivelación ===
-constexpr int SALUD_POR_NIVEL       = 50;   // HP_max += SAUD_POR_NIVEL * (nivel+1)
-constexpr int ATAQUE_POR_NIVEL      = 5;    // ataque += ATAQUE_POR_NIVEL * (nivel+1)
-constexpr int DEFENSA_POR_NIVEL     = 5;    // defensa += DEFENSA_POR_NIVEL * (nivel+1)
-constexpr int EXP_INCREMENTO        = 200;  // expNecesaria += EXP_INCREMENTO por nivel
-// anulada por pruebas
-//constexpr int EXP_NIVEL_3           = 700;  // caso especial para nivel 3
-constexpr int EXP_UMBRAL_BASE       = 100;  // expNecesaria inicial (Jugador.hpp:19)
+// Crecimiento de stats por nivel: FIJOS (lineal). Antes se usaba *(nivel+1),
+// lo que escalaba de forma cuadrática y rompía el balance. Ver auditoría #14.
+constexpr int SALUD_POR_NIVEL       = 50;   // +50 HP al subir de nivel
+constexpr int ATAQUE_POR_NIVEL      = 5;    // +5 ATAQUE
+constexpr int DEFENSA_POR_NIVEL     = 5;    // +5 DEFENSA
+
+// Curva de nivelación expresada como tabla (auditoría #15):
+// EXP necesaria para pasar del nivel N al N+1 (índice 0 = nivel 1).
+// La tabla es la ÚNICA fuente de verdad de la curva de nivel.
+constexpr int EXP_TABLE[] = {
+    100, 200, 350, 550, 800, 1100, 1500, 2000,
+    2600, 3300, 4100, 5000, 6000, 7100, 8300,
+    9600, 11000, 12500, 14100, 15800
+};
+constexpr int EXP_TABLE_SIZE = sizeof(EXP_TABLE) / sizeof(EXP_TABLE[0]);
+constexpr int EXP_CRECIMIENTO_EXTRA = 400;  // repliegue lineal tras superar la tabla
+
+// XP requerida para el nivel dado. Fuera de la tabla crece lineal con
+// EXP_CRECIMIENTO_EXTRA para que el juego nunca se atasque.
+inline int expRequerida(int nivel) {
+    int idx = std::max(1, nivel) - 1;
+    if (idx >= EXP_TABLE_SIZE)
+        return EXP_TABLE[EXP_TABLE_SIZE - 1] + (idx - EXP_TABLE_SIZE + 1) * EXP_CRECIMIENTO_EXTRA;
+    return EXP_TABLE[idx];
+}
 
 // === Magia ===
 constexpr int COSTO_MAGIA       = 10;   // MP minimo para lanzar
@@ -26,12 +46,14 @@ constexpr int MULT_DANO_MAGICO  = 2;    // ataque * MULT_DANO_MAGICO
 constexpr int BONUS_DANO_NIVEL  = 5;    // nivel * BONUS_DANO_NIVEL
 
 // === XP por batalla ===
-constexpr int XP_BASE    = 50;   // experiencia base
-constexpr float XP_MULT_JEFE = 4.0f;
-constexpr float XP_MULT_CAMPEON = 2.1f;
-
-constexpr float XP_MULT_ELITE = 1.8f;
-constexpr float XP_MULT_AVANZADO = 1.35f;
+// Fórmula canónica (auditoría #13):
+//   exp_base (del JSON del enemigo) × nivel_factor × bonus de tier
+// nivel_factor crece linealmente con el nivel del enemigo pero con tope suave,
+// para que los enemigos de zonas altas o los jefes no disparen la curva.
+constexpr int XP_NIVEL_FACTOR_MAX = 10;
+inline int xpNivelFactor(int nivel) {
+    return std::clamp(nivel, 1, XP_NIVEL_FACTOR_MAX);
+}
 
 
 

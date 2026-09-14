@@ -52,38 +52,7 @@ void Jugador::mostrarEstado() const {
         std::cout << "\nArma equipada: ninguna";
     }
     std::cout << "\nNivel: " << nivel << " | Experiencia: " << experiencia
-            << "/" << expNecesaria << std::endl;
-}
-
-void Jugador::mostrarInventario(){
-    std::cout << "Inventario:\n";
-    for (const auto& par : inventario) {
-        std::cout << "- " << par.first << " x" << par.second << "\n"
-                << objetosInventario[par.first]->getDescripcion() << std::endl;
-    }
-    if(armaEquipada){
-        std::cout << "\nArma equipada: " << armaEquipada->getNombre()
-                << " (" << armaEquipada->getDano() << " de dano)\n"
-                << armaEquipada->getDescripcion() << std::endl;
-    } else {
-        std::cout << "No tienes un arma equipada.\n";
-    }
-    std::string seleccion;
-    std::cout << "Deseas usar un objeto? (s/n): ";
-    std::cin >> seleccion;
-    std::cout << std::endl;
-    if(seleccion == "s" || seleccion == "S") {
-        std::string nombreObjeto;
-        std::cout << "\nIngresa el nombre del objeto: ";
-        std::cin >> nombreObjeto;
-        auto itObj = objetosInventario.find(nombreObjeto);
-        if (itObj != objetosInventario.end()) {
-            usarPocion(itObj->second.get());
-            eliminarObjeto(nombreObjeto);
-        } else {
-            std::cout << "No tienes ese objeto en tu inventario.\n";
-        }
-    }
+            << "/" << getExperienciaNecesaria() << std::endl;
 }
 
 void Jugador::agregarObjeto(std::shared_ptr<Objeto> objeto){
@@ -135,18 +104,19 @@ LevelUpResult Jugador::obtenerExperiencia(int cantidad) {
     res.nivelAnterior = this->nivel;
 
     if (!ignorarLimiteNivel && nivel >= nivelMaximoPermitido){
-        experiencia = expNecesaria;
+        experiencia = expRequerida(nivel);
         res.nivelNuevo = this->nivel;
         return res;
     }
 
     this->experiencia += std::max(0, cantidad);
 
-    if (this->experiencia >= this->expNecesaria){
+    if (this->experiencia >= expRequerida(this->nivel)){
         res.subioDeNivel = true;
-        res.saludMaxGanada = SALUD_POR_NIVEL * (nivel + 1);
-        res.ataqueGanado = ATAQUE_POR_NIVEL * (nivel + 1);
-        res.defensaGanada = DEFENSA_POR_NIVEL * (nivel + 1);
+        // #14: incrementos FIJOS por nivel (curva lineal). Antes *(nivel+1) era cuadrático.
+        res.saludMaxGanada = SALUD_POR_NIVEL;
+        res.ataqueGanado = ATAQUE_POR_NIVEL;
+        res.defensaGanada = DEFENSA_POR_NIVEL;
 
         this->saludMaxima += res.saludMaxGanada;
         this->salud = this->saludMaxima;
@@ -155,8 +125,8 @@ LevelUpResult Jugador::obtenerExperiencia(int cantidad) {
         this->nivel++;
         res.nivelNuevo = this->nivel;
 
-        this->expNecesaria += EXP_INCREMENTO;
-        this->experiencia = std::min(this->experiencia, this->expNecesaria);
+        // #15: la meta del nuevo nivel también sale de la tabla.
+        this->experiencia = std::min(this->experiencia, expRequerida(this->nivel));
     }else{
         res.nivelNuevo = this->nivel;
     }

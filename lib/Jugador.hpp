@@ -27,7 +27,6 @@ private:
     std::map<std::string, std::shared_ptr<Objeto>> objetosInventario;
     std::shared_ptr<Arma> armaEquipada;
     int experiencia;
-    int expNecesaria = EXP_UMBRAL_BASE;
     bool haGanado = false;
     int posX, posY;
 
@@ -39,13 +38,10 @@ public:
     Jugador(std::string nom, int hp, int atk, int def, int lvl, int poc);
 
     int getExperiencia() const { return experiencia; }
-    void setExperiencia(int nuevaExperiencia) { experiencia = std::max(0, std::min(nuevaExperiencia, expNecesaria)); }
-    
-    int getExperienciaNecesaria() const { return expNecesaria; }
-    void setExperienciaNecesaria(int nuevaExpNecesaria) {
-        expNecesaria = std::max(1, nuevaExpNecesaria);
-        experiencia = std::min(experiencia, expNecesaria);
-    }
+    void setExperiencia(int nuevaExperiencia) { experiencia = std::max(0, nuevaExperiencia); }
+
+    // La XP necesaria se DERIVA de la tabla de balance (GameBalance::expRequerida).
+    int getExperienciaNecesaria() const { return expRequerida(nivel); }
     
     int getPociones() const { return pociones; }
     void setPociones(int nuevasPociones) { pociones = nuevasPociones; }
@@ -71,7 +67,6 @@ public:
     void usarMagia(Personaje* objetivo);
 
     void mostrarEstado() const override;
-    void mostrarInventario();
 
     std::string getArmaNombre() const {
         return armaEquipada ? armaEquipada->getNombre() : "ninguna";

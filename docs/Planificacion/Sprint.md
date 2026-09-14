@@ -1,6 +1,6 @@
 ---
 creado: 22/07/2026
-modificado: 13/09/2026
+modificado: 14/09/2026
 tipo: Avance
 tags: # deuda-tecnica, idea-loca, bug-critico, bug, refactor
 titulo: Sprint
@@ -35,11 +35,11 @@ Trabajo planificado para el sprint actual. Al terminar una tarea, marcar como `[
 - [x] #17 Mover configuración de terreno a `EncounterManager::configurarPorNivel` 📅 2026-09-20 🔺 #sistema/mapa [completion:: 2026-09-13]
 
 ## Sprint 3 — Pulir balance y UX (P3 - Mejora)
-- [ ] #7 Eliminar función muerta `Jugador::mostrarInventario()` 📅 2026-09-25 🔽 #limpieza
-- [ ] #13 Simplificar fórmula de XP en batallas a `exp_base * nivel_factor` 📅 2026-09-25 🔽 #balance
-- [ ] #14 Reemplazar escalado cuadrático de estadísticas por curva controlada 📅 2026-09-25 🔽 #balance
-- [ ] #15 Definir tabla de XP por nivel `EXP_TABLE[]` en `GameBalance.hpp` 📅 2026-09-25 🔽 #balance
-- [ ] #18 Extraer `OverworldRenderer` utilizando `ScreenBuffer` para renderizar el mapa 📅 2026-09-25 🔽 #refactor #ui
+- [x] #7 Eliminar función muerta `Jugador::mostrarInventario()` 📅 2026-09-25 🔽 #limpieza [completion:: 2026-09-14]
+- [x] #13 Simplificar fórmula de XP en batallas a `exp_base * nivel_factor` 📅 2026-09-25 🔽 #balance [completion:: 2026-09-14]
+- [x] #14 Reemplazar escalado cuadrático de estadísticas por curva controlada 📅 2026-09-25 🔽 #balance [completion:: 2026-09-14]
+- [x] #15 Definir tabla de XP por nivel `EXP_TABLE[]` en `GameBalance.hpp` 📅 2026-09-25 🔽 #balance [completion:: 2026-09-14]
+- [x] #18 Extraer `OverworldRenderer` utilizando `ScreenBuffer` para renderizar el mapa 📅 2026-09-25 🔽 #refactor #ui [completion:: 2026-09-14]
 
 ## Sprint 4 — Dar personalidad (P4 - Nice to have)
 - [ ] #12 Implementar patrón Strategy `EnemyBehavior` para variedad de comportamiento 📅 2026-09-30 🔽 #sistema/enemigos

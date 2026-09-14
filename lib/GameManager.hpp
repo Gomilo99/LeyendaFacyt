@@ -25,6 +25,7 @@
 #include "encounterManager.hpp"
 #include "MapMetadata.hpp"
 #include "TileHandler.hpp"
+#include "OverworldRenderer.hpp"
 
 class GameManager {
 public:
@@ -45,6 +46,7 @@ public:
 private:
     Mapa mapa;
     Jugador jugador;
+    OverworldRenderer overworldRenderer;
     std::map<std::string, std::shared_ptr<Objeto>> objetos;
     EnemyFactory enemyFactory;
     EncounterManager encounterMgr;
