@@ -1,6 +1,6 @@
 ---
 creado: 22/07/2026
-modificado: 14/09/2026
+modificado: 15/09/2026
 tipo: Avance
 tags: # deuda-tecnica, idea-loca, bug-critico, bug, refactor
 titulo: Sprint
@@ -20,38 +20,38 @@ Trabajo planificado para el sprint actual. Al terminar una tarea, marcar como `[
 
 ---
 
-## Sprint 1 — Cortar la hemorragia (P1 - Urgente)
+## Completado este sprint
+_(al terminar una tarea, moverla aquí)_
+### Auditoria Sistemas Gemini 13-09-2026
+[[auditoria_sistemas_13_09_26]]
+#### Sprint 1 — Cortar la hemorragia (P1 - Urgente)
 - [x] #1 Extraer lógica de tiles y nivelación de `GameManager` hacia `TileHandler` y controladores específicos 📅 2026-09-15 ⏫ #arquitectura #deuda-tecnica [completion:: 2026-09-13]
 - [x] #2 Reemplazar `handleTile()` hardcoded por registro `TileEvent` (`map<char, TileHandler>`) 📅 2026-09-15 ⏫ #arquitectura #sistema/mapa [completion:: 2026-09-13]
 - [x] #3 Eliminar `suppressCout()`/`restoreCout()` refactorizando `atacar()` y `usarMagia()` para retornar `ActionResult` 📅 2026-09-15 ⏫ #refactor #sistema/combate [completion:: 2026-09-13]
 - [x] #5 Eliminar `cin` de `Jugador::agregarObjeto()`, delegando la decisión de equipar a la UI 📅 2026-09-15 ⏫ #refactor #sistema/inventario [completion:: 2026-09-13]
 - [x] #9 Agregar versión de formato de guardado (`j["version"] = 1`) y usar `.value()` en `CacheManager` 📅 2026-09-15 ⏫ #sistema/guardado [completion:: 2026-09-13]
 
-## Sprint 2 — Ordenar la casa (P2 - Importante)
+#### Sprint 2 — Ordenar la casa (P2 - Importante)
 - [x] #4 Refactorizar `batalla()` para retornar `BattleResult` y mover post-combate a `BattleSystem` 📅 2026-09-20 🔺 #refactor #sistema/combate [completion:: 2026-09-13]
 - [x] #6 Hacer que `Jugador::obtenerExperiencia()` retorne `LevelUpResult` sin `cout` directo 📅 2026-09-20 🔺 #refactor #sistema/combate [completion:: 2026-09-13]
 - [x] #10 Guardar/cargar `saludMaxima` y `manaMaxima` explícitamente en `CacheManager` 📅 2026-09-20 🔺 #sistema/guardado [completion:: 2026-09-13]
 - [x] #11 Centralizar guardado en `SaveController` / `CacheManager::guardarPartida` 📅 2026-09-20 🔺 #sistema/guardado [completion:: 2026-09-13]
 - [x] #17 Mover configuración de terreno a `EncounterManager::configurarPorNivel` 📅 2026-09-20 🔺 #sistema/mapa [completion:: 2026-09-13]
 
-## Sprint 3 — Pulir balance y UX (P3 - Mejora)
+#### Sprint 3 — Pulir balance y UX (P3 - Mejora)
 - [x] #7 Eliminar función muerta `Jugador::mostrarInventario()` 📅 2026-09-25 🔽 #limpieza [completion:: 2026-09-14]
 - [x] #13 Simplificar fórmula de XP en batallas a `exp_base * nivel_factor` 📅 2026-09-25 🔽 #balance [completion:: 2026-09-14]
 - [x] #14 Reemplazar escalado cuadrático de estadísticas por curva controlada 📅 2026-09-25 🔽 #balance [completion:: 2026-09-14]
 - [x] #15 Definir tabla de XP por nivel `EXP_TABLE[]` en `GameBalance.hpp` 📅 2026-09-25 🔽 #balance [completion:: 2026-09-14]
 - [x] #18 Extraer `OverworldRenderer` utilizando `ScreenBuffer` para renderizar el mapa 📅 2026-09-25 🔽 #refactor #ui [completion:: 2026-09-14]
 
-## Sprint 4 — Dar personalidad (P4 - Nice to have)
+#### Sprint 4 — Dar personalidad (P4 - Nice to have)
 - [x] #12 Implementar patrón Strategy `EnemyBehavior` para variedad de comportamiento 📅 2026-09-30 🔽 #sistema/enemigos [completion:: 2026-09-14]
 - [x] #16 Agregar factor de nivel del jugador a la probabilidad de encuentros aleatorios 📅 2026-09-30 🔽 #balance [completion:: 2026-09-14]
 - [x] #19 Mover `InventoryUI` como miembro re-usable de `BattleSystem` 📅 2026-09-30 🔽 #refactor [completion:: 2026-09-14]
 - [x] #20 Mover `limpiarBuffer()` y `limpiarPantalla()` a `Platform::` 📅 2026-09-30 🔽 #limpieza [completion:: 2026-09-14]
 
-## Completado este sprint
-
-
-_(al terminar una tarea, moverla aquí)_
-
+### Resto de Sprints Previos
 - [x] Transición entre niveles (nivel 1 → 2 → 3 → jefe final) 📅 2026-08-15 ⏫ #sistema/mapa  [completion:: 2026-09-08]
   - Modificar `handleTile('K')` para cargar siguiente nivel en vez de terminar el juego
   - Mantener estado del jugador entre niveles (nivel actual, stats, inventario)

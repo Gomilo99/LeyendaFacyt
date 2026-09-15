@@ -1,6 +1,6 @@
 ---
 creado: 22/07/2026
-modificado: 14/09/2026
+modificado: 15/09/2026
 tipo: Avance
 tags: # deuda-tecnica, idea-loca, bug-critico, bug, refactor
 titulo: Roadmap
@@ -21,15 +21,16 @@ Para el trabajo actual del sprint, ver [[Sprint]]. Para ideas futuras, ver [[Bac
 
 ## Estado actual
 
-| Objetivo                              | Estado      | Completado |
-| ------------------------------------- | ----------- | ---------- |
-| 25% — Funcionamiento general          | ✅           | 2026-06-19 |
-| 40% — Sistemas responsive             | ✅           | 2026-06-19 |
-| 50% — Multi-nivel y balanceo          | ✅           | 2026-09-08 |
-| 75% — Historia, animaciones, subjefes | ⏳ Pendiente | —          |
-| 85% — NPC tienda, puzzles             | ⏳ Pendiente | —          |
-| 95% — Polish y playtesting            | ⏳ Pendiente | —          |
-| 100% — Arte y publicación             | ⏳ Pendiente | —          |
+| Objetivo                              | Estado       | Completado |
+| ------------------------------------- | ------------ | ---------- |
+| 25% — Funcionamiento general          | ✅ Completado | 2026-06-19 |
+| 40% — Sistemas responsive             | ✅ Completado | 2026-06-19 |
+| 50% — Multi-nivel y balanceo          | ✅ Completado | 2026-09-08 |
+| 60% — Pulido y Refactor               | ✅ Completado | 2026-09-15 |
+| 75% — Historia, animaciones, subjefes | ⏳ Pendiente  | —          |
+| 85% — NPC tienda, puzzles             | ⏳ Pendiente  | —          |
+| 95% — Polish y playtesting            | ⏳ Pendiente  | —          |
+| 100% — Arte y publicación             | ⏳ Pendiente  | —          |
 
 **Fecha prevista de entrega**: Finales de 2026
 
@@ -116,7 +117,10 @@ de recorrido, frecuencia real de encuentros, duración de combates y consumo de
 curación mediante partidas de prueba.
 
 ---
+## Objetivo 60% — Pulido y Refactor
+Información de Sprints y objetivos en [[auditoria_sistemas_13_09_26]] y 
 
+---
 ## Objetivo 75% — Historia, animaciones, subjefes ⏳
 
 > Integración de animaciones (CLI) como movimientos de pantalla, efectos de sonido, música y el establecimiento de una historia. Establecimiento de Subjefes y jefe final.
