@@ -12,6 +12,57 @@ dificultad: Media
 version: 1.0.0
 ---
 ## Log
+### Log 14/09/2026 - Documentación de sistemas alineada al Sprint 4 (docs)
+#### Cambios realizados
+
+##### 1. `docs/Sistemas/Enemigos.md`
+- Nueva sección "Comportamiento de combate (patrón Strategy, #12)": reglas de las 3 estrategias, criterios de curación y wiring en `EnemyFactory`/`doEnemyTurn()`.
+- Nueva sección "Factor de nivel del jugador (#16)": fórmula `max(0.5, 1 - 0.15·dif)` y su aplicación en `verificarEncuentro()`, más el campo `"level"` de la zona (`.meta`).
+- Campo `behavior` agregado a la tabla de Campos del JSON y al ejemplo; árbol de `Enemigo` incluye `comportamiento`; lista `Archivos involucrados` actualizada con `EnemyBehavior`.
+
+##### 2. `docs/Sistemas/Combate.md`
+- Sección `suppressCout()` reemplazada por la realidad actual: acciones retornan `ActionResult` y `Personaje` usa la abstracción `Output` (#3).
+- Nueva sección "Turno del enemigo y comportamiento (#12)" con la tabla de estrategias.
+- "Sistema de nivelación" corregido: `EXP_TABLE[]` y incrementos fijos (#13/#14/#15). Inventario en combate documentado como miembro `unique_ptr` reutilizable (#19); arte ASCII ya no depende de `generateEnemyArt()`.
+
+##### 3. `docs/Sistemas/Plataforma.md`
+- API ampliada con `clearScreen()` y `clearInputBuffer()` y sección dedicada a la limpieza de terminal/buffer (#20).
+
+##### 4. `docs/Sistemas/Inventario.md`
+- Integración desde combate reescrita con `invUI` como miembro y forward declaration (#19); overworld y tabla de overlay usan `Platform::clearScreen()` / `Platform::clearInputBuffer()` (#20).
+
+##### 5. `docs/Arquitectura.md`
+- Diagrama de dependencias (nuevo nodo `EnemyBehavior`, `batalla.cpp` con `Inventario.hpp`/`Platform.hpp`), jerarquía de `Enemigo` (miembro `comportamiento`) y tabla de managers actualizados con #12/#16.
+
+#### Validación
+- Solo cambios de documentación; sin cambios de código (build sin afectación).
+
+### Log 14/09/2026 - Sprint 4: Dar personalidad (P4 - Nice to have)
+#### Cambios realizados
+
+##### 1. Comportamiento de enemigos por patrón Strategy (`EnemyBehavior`)
+- Se creó `lib/EnemyBehavior.hpp` y `src/EnemyBehavior.cpp` con la clase abstracta `EnemyBehavior` y tres estrategias concretas: `AgresivoBehavior` (ataca siempre), `DefensivoBehavior` (se cura 12.5% bajo el 50% de vida, sacrificando el ataque) y `SanadorBehavior` (se cura 10% mientras le falte vida). Son inmutables y sin estado (#12).
+- `Enemigo` ahora posee `std::shared_ptr<EnemyBehavior> comportamiento` con `setComportamiento()` y `ejecutarComportamiento()`; el copy-constructor propaga la estrategia (compartida, no clonada).
+- `EnemyFactory` lee el campo opcional `"behavior"` del JSON (default `"aggressive"`), lo almacena en `EnemyTemplate` y lo aplica en los 4 puntos de creación (`crearEnemigo`, `crearPorId`, `crearEnemigo(entries, mult)` y `crearJefe`).
+- `BattleSystem::doEnemyTurn()` reemplazó el ataque fijo por `ejecutarComportamiento()`, mostrando el mensaje del comportamiento en el log de combate.
+
+##### 2. Factor de nivel en encuentros aleatorios (#16)
+- `ZoneMetadata` expone `nivelSugerido`, leído del campo opcional `"level"` del `.meta` de cada zona (default 1).
+- `EncounterManager::ajustarPorNivel(nivelJugador, nivelZona)` calcula un factor 0.5..1: cada nivel de ventaja del jugador sobre la zona resta 0.15 del multiplicador.
+- `verificarEncuentro()` aplica el factor a la probabilidad final (clamp a [1,100]). `GameManager::moverJugador()` lo alimenta cada paso con el nivel del jugador y el nivel sugerido de la zona.
+
+##### 3. Inventario reutilizable en combate (#19)
+- `BattleSystem` ahora posee `std::unique_ptr<InventoryUI> invUI` como miembro, inicializado una sola vez en el constructor en lugar de instanciarse en cada turno dentro de `doPlayerAction()`.
+- Forward declaration `class InventoryUI;` en `lib/Batalla.hpp` para evitar el include circular con `Inventario.hpp`; `Batalla.cpp` incluye `Inventario.hpp` (único sitio donde el tipo es completo). Destructor declarado en el header.
+
+##### 4. Limpieza de terminal y buffer en `Platform::` (#20)
+- Se agregaron `Platform::clearScreen()` y `Platform::clearInputBuffer()` a `lib/Platform.hpp`.
+- Se eliminaron las funciones libres `limpiarBuffer()` y `limpiarPantalla()` de `batalla.cpp` y sus declaraciones de `lib/Batalla.hpp`.
+- `GameManager` (menú, inventario y ciclo OVERWORLD) y `batalla()` ahora usan las versiones de `Platform`.
+
+#### Validación
+- `make` compila sin errores ni warnings (`-Wall -Wextra -Wpedantic`, C++17).
+
 ### Log 14/09/2026 - Sprint 3: Pulir balance y UX (P3 - Mejora)
 #### Cambios realizados
 

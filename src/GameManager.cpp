@@ -88,7 +88,7 @@ const ZoneMetadata* GameManager::zonaJefeActual() const {
  */
 void GameManager::mostrarMenuPrincipal() {
     while (true) {
-        limpiarPantalla();
+        Platform::clearScreen();
         auto arte = ArtLoader::cargarArte("assets/title.txt");
 
         for (const auto& linea : arte)
@@ -112,7 +112,7 @@ void GameManager::mostrarMenuPrincipal() {
                     return;
                 std::cout << "\033[91mNo hay partida guardada.\033[0m\n";
                 std::cout << "Presiona Enter para volver al menu...";
-                limpiarBuffer();
+                Platform::clearInputBuffer();
                 std::cin.get();
                 break;
             case 3:
@@ -265,6 +265,7 @@ void GameManager::moverJugador(int dx, int dy) {
                                     (zone ? zone->encounterMultiplier : 1.0f),
                                     metadata.encounterGrowthCap, metadata.encounterGraceSteps,
                                     zone ? zone->safe : false);
+            encounterMgr.ajustarPorNivel(jugador.getNivel(), zone ? zone->nivelSugerido : nivelActual);
             encounterMgr.registrarPaso();
             if (encounterMgr.verificarEncuentro()) {
                 iniciarCombate();
@@ -351,7 +352,7 @@ void GameManager::mostrarInventario() {
     invUI.run();
     // Al salir, la pantalla tiene basura del inventario
     // asi que limpias y re-renderizas el mapa
-    limpiarPantalla();
+    Platform::clearScreen();
     renderMapa();
 }
 
@@ -445,7 +446,7 @@ void GameManager::run() {
 
             case GameState::OVERWORLD:
                 while (jugador.estaVivo() && !jugador.getHaGanado()){
-                    limpiarPantalla();
+                    Platform::clearScreen();
                     renderMapa();
 
                     std::cout << "\nWASD para mover, I inventario, Q salir: ";

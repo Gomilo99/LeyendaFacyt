@@ -39,6 +39,7 @@ bool MapMetadata::load(const std::string& path) {
         z.terrainColor = value.value("color", 32);
         z.safe = value.value("safe", false);
         z.encounterMultiplier = value.value("encounter_multiplier", 1.0f);
+        z.nivelSugerido = value.value("level", 1); // nivel recomendado de la zona (#16)
         z.statMultiplier = value.value("stat_multiplier", 1.0f);
         z.bossId = value.value("boss_id", "");
         const std::string restoreTile = value.value("restore_tile", "");

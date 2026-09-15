@@ -1,5 +1,6 @@
 #include "../lib/Enemigo.hpp"
 #include "../lib/GameBalance.hpp"
+#include "../lib/EnemyBehavior.hpp"
 #include <iostream>
 #include <cstring>
 #include <algorithm>
@@ -28,9 +29,14 @@ Enemigo::Enemigo(std::string id, std::string nom, int hp, int atk, int def, int 
  * Constructor copia. Útil para instanciar un Enemigo desde
  * una plantilla almacenada en EnemyFactory.
  */
+/**
+ * Constructor copia. Copia stats heredadas, id, botín, tier y comportamiento
+ * (Strategy). El comportamiento se comparte por `shared_ptr`, no se clona.
+ */
 Enemigo::Enemigo(const Enemigo& copia)
     : Personaje(copia), id(copia.id), botin(copia.botin),
-    exp_base(copia.exp_base), tier(copia.tier) {
+    exp_base(copia.exp_base), tier(copia.tier),
+    comportamiento(copia.comportamiento) {
     for (int i = 0; i < 6; i++) asciiArt[i] = copia.asciiArt[i];
 }
 void Enemigo::aplicarMultiplicadorStats(float value) {
@@ -55,4 +61,19 @@ int Enemigo::experienciaCalculada() const {
  */
 void Enemigo::atacar(Personaje* objetivo) {
     objetivo->recibirDano(ataque);
+}
+
+/**
+ * Ejecuta la acción de la estrategia `comportamiento` (Strategy #12).
+ * Si el enemigo no tiene comportamiento asignado, usa el ataque base.
+ *
+ * @param objetivo Personaje atacado por el enemigo
+ * @return Mensaje del log de combate producido por la estrategia
+ */
+std::string Enemigo::ejecutarComportamiento(Personaje* objetivo){
+    if(!comportamiento) {   // seguridad: nunca null
+        atacar(objetivo);
+        return nombre + " te ataca!";
+    }
+    return comportamiento->ejecutar(*this, objetivo);
 }

@@ -29,7 +29,7 @@ public:
      * @throws std::runtime_error si un objeto del botín no existe
      */
     void cargarDesdeJSON(const std::string& path,
-                         const std::map<std::string, std::shared_ptr<Objeto>>& objetos);
+                        const std::map<std::string, std::shared_ptr<Objeto>>& objetos);
 
     /**
      * Crea un enemigo aleatorio del nivel indicado.
@@ -40,7 +40,7 @@ public:
      */
     Enemigo crearEnemigo(int nivel);
     Enemigo crearEnemigo(const std::vector<std::pair<std::string, int>>& entries,
-                         float statMultiplier = 1.0f);
+                        float statMultiplier = 1.0f);
     Enemigo crearPorId(const std::string& id) const;
 
     /**
@@ -75,7 +75,8 @@ private:
         std::vector<Drop> botin; ///< Array de objetos con probabilidad
         bool boss;              ///< true si es el jefe del nivel
         int exp_base;           ///< Experiencia Base del enemigo
-        int tier;
+        int tier;               ///< nivel de peligrosidad del enemigo
+        std::string behavior = "aggressive"; ///< Estrategia de combate (Strategy #12): "aggressive", "defensivo" o "sanador"
     };
 
     /// Almacén principal: nivel -> vector de plantillas

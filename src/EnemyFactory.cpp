@@ -5,6 +5,7 @@
 #include <fstream>
 #include <random>
 #include <stdexcept>
+#include "../lib/EnemyBehavior.hpp"
 
 using json = nlohmann::json;
 
@@ -50,6 +51,7 @@ void EnemyFactory::cargarDesdeJSON(
             t.boss = item.value("boss", false);
             t.exp_base = item.value("exp", 0);
             t.tier = item.value("tier", 1);
+            t.behavior = item.value("behavior", "aggressive");
 
             // Copia las 6 líneas de arte ASCII
             std::size_t maxWidth = 0;
@@ -121,6 +123,7 @@ Enemigo EnemyFactory::crearEnemigo(int nivel) {
     const auto& t = seleccionarPlantilla(nivel);
     Enemigo result(t.id, t.nombre, t.salud, t.ataque, t.defensa, t.nivel, t.asciiArt, t.botin, t.exp_base);
     result.setTier(t.tier);
+    result.setComportamiento(crearBehavior(t.behavior));
     return result;
 }
 Enemigo EnemyFactory::crearPorId(const std::string& id) const {
@@ -130,6 +133,7 @@ Enemigo EnemyFactory::crearPorId(const std::string& id) const {
                 Enemigo result(t.id, t.nombre, t.salud, t.ataque, t.defensa, t.nivel,
                             t.asciiArt, t.botin, t.exp_base);
                 result.setTier(t.tier);
+                result.setComportamiento(crearBehavior(t.behavior));
                 return result;
             }
     throw std::runtime_error("Enemigo no encontrado: " + id);
@@ -166,6 +170,7 @@ Enemigo EnemyFactory::crearJefe(int nivel) {
                 Enemigo result(t.id, t.nombre, t.salud, t.ataque, t.defensa,
                             t.nivel, t.asciiArt, t.botin, t.exp_base);
                 result.setTier(t.tier);
+                result.setComportamiento(crearBehavior(t.behavior));
                 return result;
             }
         }

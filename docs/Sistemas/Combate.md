@@ -4,7 +4,7 @@ acción de escape. Los enemigos se muestran con el color de su tier configurado
 en la metadata del nivel.
 ---
 creado: 22/07/2026
-modificado: 23/07/2026
+modificado: 14/09/2026
 tipo: Avance
 tags:
 titulo: Combate
@@ -32,7 +32,7 @@ ScreenBuffer ← Renderer ← BattleSystem
              InputHandler   Jugador / [[Enemigos|Enemigo]]
 ```
 
-Ver también: [[Inventario]] (se integra como acción en combate), [[Guardado]] (se guarda tras cada victoria), [[Plataforma]] (detección de terminal y input).
+Ver también: [[Inventario]] (se integra como acción en combate, auditoría #19), [[Guardado]] (se guarda tras cada victoria), [[Plataforma]] (detección de terminal, input y limpieza de pantalla/buffer, #20).
 
 ## Clases
 
@@ -79,7 +79,7 @@ Máquina de estados que orquesta el combate completo.
 |--------|-------------|
 | `PLAYER_TURN` | Esperando entrada del jugador (W/S/SPACE) |
 | `PLAYER_ACTION` | Ejecutando la acción seleccionada |
-| `ENEMY_TURN` | Turno del enemigo (con pausa de 300ms) |
+| `ENEMY_TURN` | Turno del enemigo: `Enemigo::ejecutarComportamiento()` (Strategy #12) con pausa de 400ms |
 | `ANIMATION` | Reservado para animaciones futuras |
 | `VICTORY` | Enemigo derrotado |
 | `DEFEAT` | Jugador sin HP |
@@ -98,7 +98,7 @@ Variables constantes iniciales BASE para los cálculos (entendiendo que podrían
 | ------------------ | ------------------------------------------------------------------------------------ |
 | **Atacar**         | Ataque físico: `jugador.atacar(enemigo)` usando ataque base + daño del arma equipada |
 | **Magia**          | Hechizo que cuesta 10 MP. Daño = `ataque * 2 + nivel * 5`. Requiere mínimo 10 MP     |
-| **[[Inventario]]** | Abre `InventoryUI` con navegación W/S/A/D/SPACE/Q. Overlay sobre el frame de combate |
+| **[[Inventario]]** | Abre `invUI` (instancia `unique_ptr` reutilizable de `BattleSystem`; auditoría #19) con navegación W/S/A/D/SPACE/Q. Overlay sobre el frame de combate |
 | **Huir**           | 50% de probabilidad de éxito. Si falla, el enemigo ataca                             |
 
 ## Estadísticas del jugador
@@ -112,45 +112,48 @@ Variables constantes iniciales BASE para los cálculos (entendiendo que podrían
 
 ## Sistema de nivelación
 
-- Por batalla ganada: XP = `nivel * 50`
-- Al alcanzar la XP necesaria: sube de nivel
-- Al subir: 
-	- HP_max += SALUD_POR_NIVEL * (nivel+1) -> HP se restaura al máximo, 
-	- ataque += ATAQUE_POR_NIVEL * (nivel+1), 
-	- defensa += DEFENSA_POR_NIVEL * (nivel+1), 
-	- XP_necesaria += EXP_INCREMENTO
-- Caso especial: en nivel 3, XP_necesaria se fija en 700
+- La XP total de cada batalla la calcula el enemigo vía
+  `Enemigo::experienciaCalculada()`: `exp_base × factor_nivel × tier`
+  (ver [[Enemigos#8. Ruta de dificultad de cinco niveles]], auditoría #13).
+- `Jugador::obtenerExperiencia()` acumula la XP; al superar el umbral actual
+  sube de nivel.
+- La XP requerida por nivel sale de la tabla `EXP_TABLE[]` de `GameBalance.hpp`
+  (curva de costes por nivel, auditoría #15), no de una fórmula cuadrática.
+- Al subir de nivel los incrementos son fijos (`SALUD_POR_NIVEL`,
+  `ATAQUE_POR_NIVEL`, `DEFENSA_POR_NIVEL`), el HP se restaura al máximo y el
+  costo del siguiente nivel avanza según `EXP_TABLE` (auditoría #14).
 
-> **Deuda técnica**: Estos valores son magic numbers hardcodeados. Ver [[Registro/Decisiones#Magic Numbers]] para el plan de reemplazo por `constexpr`.
+## Escritura a `std::cout` durante las acciones
 
-## suppressCout
+Tras la refactorización de acciones (auditoría #3) ya no existe
+`suppressCout()`/`restoreCout()`. `Jugador::atacar()` y `Jugador::usarMagia()`
+retornan `ActionResult`, y `Personaje` envía sus mensajes a una abstracción
+`Output` (por defecto `NullOutput` dentro del combate). Ningún `cout` directo
+desincroniza el `ScreenBuffer`.
 
-Durante el combate, las funciones `Jugador::atacar()`, `Jugador::usarMagia()`, `Enemigo::atacar()` y `Personaje::recibirDano()` escriben directamente a `std::cout`. Estos mensajes desincronizarían el ScreenBuffer.
+## Turno del enemigo y comportamiento (auditoría #12)
 
-1. `BattleSystem::suppressCout()` redirige `cout.rdbuf()` a un `ostringstream` interno
-2. Se ejecuta la acción de combate — los cout se descartan
-3. `BattleSystem::restoreCout()` restaura el buffer original
+`BattleSystem::doEnemyTurn()` delega la decisión en `Enemigo::ejecutarComportamiento()`,
+que invoca la estrategia `EnemyBehavior` asignada por `EnemyFactory` desde el
+JSON (campo `behavior`). La curación se aplica con `recibirDano(-cantidad)` y
+descarta el ataque del turno cuando procede.
 
-Esto permite que las clases de personaje no necesiten saber si hay un BattleSystem activo.
+| Estrategia | Condición de curación | Importe |
+|-----------|----------------------|---------|
+| `AgresivoBehavior` | nunca | — (siempre ataca) |
+| `DefensivoBehavior` | HP < 50% del máximo | 12.5% de HP máximo |
+| `SanadorBehavior` | HP < HP máximo | 10% de HP máximo |
+
+Ver [[Enemigos#Comportamiento de combate (patrón Strategy, auditoría #12)]] para
+reglas, JSON y wiring en `EnemyFactory`.
 
 ## Arte ASCII de enemigos
 
-El arte proviene del campo `ascii` (array de 6 strings) en `json/enemigos.json`. Si un enemigo no tiene `ascii` definido, `BattleSystem::generateEnemyArt()` genera arte por keywords:
-
-| Keyword | Arte |
-|---------|------|
-| `dragon`/`admin` | Dragón/BOSS |
-| `golem`/`ogro` | Golem |
-| `fantasma`/`espectro` | Fantasma |
-| `esqueleto` | Esqueleto |
-| `cajero` | Cajero automático |
-| `gargola`/`caballero` | Gárgola |
-| `ciclope` | Cíclope |
-| `slime` | Slime |
-| `goblin`/`duende` | Goblin |
-| `orco` | Orco |
-| `zombie`/`bruja` | Zombie |
-| otro | Forma genérica |
+El arte proviene del campo `ascii` (array de 6 strings) de `json/enemigos.json`,
+se almacena en `Enemigo::asciiArt[]` al instanciar desde `EnemyFactory` y
+`Renderer::drawEnemy()` lo dibuja con el color del `tier`. Ya no existe
+`generateEnemyArt()`: el arte viaja con la instancia y el fallback por keywords
+quedó obsoleto. Ver [[Enemigos#4. Formato JSON (json/enemigos.json)]] para el campo.
 
 ## Sistema de loot
 
@@ -171,6 +174,8 @@ Ver [[Enemigos#Formato JSON]] para el formato del botín.
 ## Dependencias
 
 ```
-Batalla.hpp → Enemigo.hpp, Jugador.hpp, CacheManager.hpp
-batalla.cpp → ... Inventario.hpp, Platform.hpp, DataManager.hpp, GameBalance.hpp
+Batalla.hpp  → Enemigo.hpp, Jugador.hpp (forward de InventoryUI: el include de
+               Inventario.hpp va solo en batalla.cpp, #19)
+batalla.cpp  → Batalla.hpp, Inventario.hpp (#19), Platform.hpp (clearScreen, #20),
+               DataManager.hpp, CacheManager.hpp, GameBalance.hpp
 ```

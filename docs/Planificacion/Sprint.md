@@ -42,10 +42,10 @@ Trabajo planificado para el sprint actual. Al terminar una tarea, marcar como `[
 - [x] #18 Extraer `OverworldRenderer` utilizando `ScreenBuffer` para renderizar el mapa 📅 2026-09-25 🔽 #refactor #ui [completion:: 2026-09-14]
 
 ## Sprint 4 — Dar personalidad (P4 - Nice to have)
-- [ ] #12 Implementar patrón Strategy `EnemyBehavior` para variedad de comportamiento 📅 2026-09-30 🔽 #sistema/enemigos
-- [ ] #16 Agregar factor de nivel del jugador a la probabilidad de encuentros aleatorios 📅 2026-09-30 🔽 #balance
-- [ ] #19 Mover `InventoryUI` como miembro re-usable de `BattleSystem` 📅 2026-09-30 🔽 #refactor
-- [ ] #20 Mover `limpiarBuffer()` y `limpiarPantalla()` a `Platform::` 📅 2026-09-30 🔽 #limpieza
+- [x] #12 Implementar patrón Strategy `EnemyBehavior` para variedad de comportamiento 📅 2026-09-30 🔽 #sistema/enemigos [completion:: 2026-09-14]
+- [x] #16 Agregar factor de nivel del jugador a la probabilidad de encuentros aleatorios 📅 2026-09-30 🔽 #balance [completion:: 2026-09-14]
+- [x] #19 Mover `InventoryUI` como miembro re-usable de `BattleSystem` 📅 2026-09-30 🔽 #refactor [completion:: 2026-09-14]
+- [x] #20 Mover `limpiarBuffer()` y `limpiarPantalla()` a `Platform::` 📅 2026-09-30 🔽 #limpieza [completion:: 2026-09-14]
 
 ## Completado este sprint
 

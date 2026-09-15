@@ -1,6 +1,6 @@
 ---
 creado: 22/07/2026
-modificado: 22/07/2026
+modificado: 14/09/2026
 tipo: Avance
 tags: # deuda-tecnica, idea-loca, bug-critico, bug, refactor
 titulo: Inventario
@@ -116,36 +116,43 @@ L21: [W/S] Navegar [A/D] Categoria [SPACE] OK [Q] Salir
 ## Integración desde [[Combate|combate]]
 
 ```cpp
-// batalla.cpp — case 2 (Inventario):
-InventoryUI invUI(*player);
-invUI.run();
-screenBuffer.forceRedraw();  // restaurar frame de combate
+// batalla.cpp — case 2 (Inventario), auditoría #19:
+invUI->run();               // invUI: unique_ptr<InventoryUI> miembro de BattleSystem
+screenBuffer.forceRedraw(); // restaurar frame de combate
 currentState = BattleState::PLAYER_TURN;
 ```
 
-No usa `suppressCout()`. El ScreenBuffer del inventario escribe directamente a `std::cout` mediante ANSI — es independiente del buffer de combate.
+`BattleSystem` conserva la instancia como miembro
+(`std::unique_ptr<InventoryUI> invUI`) e incluye `Inventario.hpp` solo en
+`batalla.cpp`; el header declara `class InventoryUI;` a futuro para no acoplar
+`Batalla.hpp` con el inventario.
+
+Ya no existe `suppressCout()` (auditoría #3). El ScreenBuffer del inventario
+escribe directamente a `std::cout` mediante ANSI — es independiente del buffer
+de combate.
 
 ## Integración desde overworld
 
 ```cpp
-// GameManager.cpp:
+// GameManager.cpp, auditoría #20:
 void GameManager::mostrarInventario() {
     InventoryUI invUI(jugador);
     invUI.run();
-    limpiarPantalla();
+    Platform::clearScreen();   // reemplaza a limpiarPantalla() libre (global #20)
     renderMapa();
 }
 ```
 
-Se requiere `std::cin.ignore(numeric_limits<streamsize>::max(), '\n')` antes de abrir porque `std::cin >>` deja `\n` residual.
+Se requiere `Platform::clearInputBuffer()` (auditoría #20) antes de abrir porque
+`std::cin >>` deja `\n` residual.
 
 ### Diferencia clave: overlay en combate vs overworld
 
 | Aspecto | En combate | En overworld |
 |---------|-----------|--------------|
 | Qué hay debajo | Frame de combate (ScreenBuffer) | Mapa renderizado con `std::cout` directo |
-| Cómo se restaura | `screenBuffer.forceRedraw()` → BattleSystem redibuja todo | `limpiarPantalla()` + `renderMapa()` desde cero |
-| Input fantasma | No hay `\n` residual | Sí, requiere `cin.ignore()` |
+| Cómo se restaura | `screenBuffer.forceRedraw()` → BattleSystem redibuja todo | `Platform::clearScreen()` + `renderMapa()` desde cero |
+| Input fantasma | No hay `\n` residual | Sí, requiere `Platform::clearInputBuffer()` |
 
 ### Salida de acciones
 

@@ -1,6 +1,6 @@
 ---
 creado: 22/07/2026
-modificado: 22/07/2026
+modificado: 14/09/2026
 tipo: Avance
 tags: # deuda-tecnica, idea-loca, bug-critico, bug, refactor
 titulo: Arquitectura del Sistema
@@ -24,8 +24,8 @@ Visión general de la arquitectura técnica de [[LeyendaFacyt]]. Para detalles d
 | **GameManager** | Orquestador del juego con FSM. Menú principal, loop de exploración, renderizado del mapa, movimiento WASD, eventos de tiles, inicio de combate | [[Sistemas/Mapa]] |
 | **DataManager** | Carga datos desde JSON (`objetos.json`, `enemigos.json`). Solo lectura | [[Sistemas/Guardado]] |
 | **CacheManager** | Capa de persistencia en `cache/`. Guarda/carga héroe (14 campos + inventario), mapa y flag de partida | [[Sistemas/Guardado]] |
-| **EnemyFactory** | Carga `json/enemigos.json`, crea enemigos con selección ponderada por `peso` | [[Sistemas/Enemigos]] |
-| **EncounterManager** | Decide encuentros aleatorios al moverse usando probabilidad por terreno | [[Sistemas/Enemigos]] |
+| **EnemyFactory** | Carga `json/enemigos.json`, crea enemigos con selección ponderada por `peso` y les asigna su `EnemyBehavior` desde el campo `behavior` (Strategy, #12) | [[Sistemas/Enemigos]] |
+| **EncounterManager** | Decide encuentros aleatorios al moverse usando probabilidad por terreno, modulada por la diferencia de nivel jugador vs zona (#16) | [[Sistemas/Enemigos]] |
 | **MapMetadata** | Carga configuración `.meta`: sección, zonas, terrenos, estilos, enemigos y modificadores | [[Sistemas/Mapa]] |
 
 ## Diagrama de dependencias
@@ -36,9 +36,11 @@ GameManager   → DataManager, CacheManager, batalla.hpp, mapa.hpp,
                 MapMetadata.hpp
 DataManager   → Config, json.hpp, objeto.hpp, enemigo.hpp, jugador.hpp
 CacheManager  → Config, json.hpp, jugador.hpp, mapa.hpp
-EnemyFactory  → Config, json.hpp, enemigo.hpp, objeto.hpp
+EnemyFactory  → Config, json.hpp, enemigo.hpp, objeto.hpp, EnemyBehavior.hpp
 EncounterManager → (standalone, solo random)
-batalla.hpp   → enemigo.hpp, jugador.hpp, CacheManager.hpp
+EnemyBehavior → enemigo.hpp (Strategy del turno; impl. en EnemyBehavior.cpp)
+batalla.hpp   → enemigo.hpp, jugador.hpp, CacheManager.hpp (InventoryUI forward, #19)
+batalla.cpp   → batalla.hpp, Inventario.hpp, Platform.hpp, DataManager.hpp, GameBalance.hpp
 Jugador       → Personaje, Objeto
 Mapa          → (standalone, solo iostream/fstream)
 Platform.hpp  → (standalone, includes del SO)
@@ -57,7 +59,8 @@ Personaje (abstracta)
   └── Enemigo
         ├── id (string)
         ├── asciiArt[6] (string)
-        └── botin (vector<Drop>)
+        ├── botin (vector<Drop>)
+        └── comportamiento (shared_ptr<EnemyBehavior>)
 
 Objeto
   ├── Arma (dano)

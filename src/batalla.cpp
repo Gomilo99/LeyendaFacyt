@@ -5,23 +5,14 @@
 #include <random>
 #include <thread>
 #include <chrono>
+#include <memory>
 #include "../lib/Platform.hpp"
 #include "../lib/batalla.hpp"
 #include "../lib/DataManager.hpp"
 #include "../lib/CacheManager.hpp"
-#include "../lib/Inventario.hpp"
 #include "../lib/GameBalance.hpp"
+#include "../lib/Inventario.hpp"
 
-// Limpia el buffer de entrada: descarta hasta encontrar \n
-void limpiarBuffer() {
-    std::cin.clear();
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-}
-
-// Limpia la terminal usando codigo ANSI
-void limpiarPantalla() {
-    std::cout << "\033[2J\033[1;1H";
-}
 
 // ==================== SCREEN BUFFER ====================
 
@@ -356,9 +347,21 @@ void InputHandler::moveDown() {
 
 // ==================== BATTLE SYSTEM ====================
 
+/**
+ * @brief Construye el sistema de combate.
+ *
+ * Inicializa el `ScreenBuffer`, el `Renderer` y el `InputHandler`, y crea el
+ * `InventoryUI` reutilizable (#19) con una copia por `unique_ptr`. Prepara el
+ * arte ASCII del enemigo para el renderer.
+ *
+ * @param p          Jugador que combate (no owned)
+ * @param e          Enemigo que combate (no owned)
+ * @param allowFlee  true si se permite huir (false en combates de jefe)
+ */
 BattleSystem::BattleSystem(Jugador& p, Enemigo& e, bool allowFlee)
     : currentState(BattleState::PLAYER_TURN), currentEnemy(&e), player(&p),
-    screenBuffer(), renderer(screenBuffer), inputHandler(),
+    screenBuffer(), renderer(screenBuffer), inputHandler(), 
+    invUI(std::make_unique<InventoryUI>(p)),
     battleOver(false), victory(false), fled(false), canFlee(allowFlee) {
     renderer.setCanFlee(canFlee);
     const std::string* art = e.getAsciiArt();
@@ -390,7 +393,6 @@ void BattleSystem::processInput() {
 // Ejecuta la accion correspondiente segun la opcion seleccionada (0-3)
 void BattleSystem::doPlayerAction() {
     int opt = inputHandler.getSelectedOption();
-    InventoryUI invUI(*player);
     switch (opt) {
         case 0: // Atacar
             setLog(player->getNombre() + " ataca a " + currentEnemy->getNombre() + "!");
@@ -433,8 +435,8 @@ void BattleSystem::doPlayerAction() {
             currentState = BattleState::ENEMY_TURN;
             break;
 
-        case 2: // Inventario: muestra estado e inventario, permite usar objetos por nombre
-            invUI.run();
+        case 2: // Inventario: overlay reutilizable (#19), restaura el frame al salir
+            invUI->run();
             screenBuffer.forceRedraw();
             currentState = BattleState::PLAYER_TURN;
             break;
@@ -468,21 +470,26 @@ void BattleSystem::doPlayerAction() {
     }
 }
 
-// Turno del enemigo: muestra mensaje de ataque, pausa animada, ejecuta ataque
+/**
+ * Turno del enemigo.
+ *
+ * Ejecuta la estrategia `EnemyBehavior` asignada al enemigo (Strategy #12),
+ * muestra su mensaje en el log con pausa animada y evalúa si el jugador cayó.
+ * Si el enemigo no tiene comportamiento, `ejecutarComportamiento` cae en el
+ * ataque base (comportamiento previo a la auditoría).
+ */
 void BattleSystem::doEnemyTurn() {
-    setLog(currentEnemy->getNombre() + " te ataca!");
+    std::string msg = currentEnemy->ejecutarComportamiento(player);
+    setLog(msg);
     render();
     std::this_thread::sleep_for(std::chrono::milliseconds(400));
-
-    currentEnemy->atacar(player);
-
     if (!player->estaVivo()) {
         setLog("Has sido derrotado!");
         render();
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         battleOver = true;
         currentState = BattleState::DEFEAT;
-    } else {
+    }else{
         currentState = BattleState::PLAYER_TURN;
     }
 }
@@ -548,7 +555,7 @@ void BattleSystem::run() {
 // 2. Instancia y ejecuta BattleSystem
 // 3. Post-batalla: maneja huida, derrota, victoria, experiencia y loot
 void batalla(Jugador& jugador, Enemigo& enemigo, bool esJefe, bool esJefeFinal) {
-    limpiarPantalla();
+    Platform::clearScreen();
 
     if (esJefeFinal) {
         std::cout << "Estas en una oscura cueva, sientes una presencia extrana...\n";
@@ -579,7 +586,7 @@ void batalla(Jugador& jugador, Enemigo& enemigo, bool esJefe, bool esJefeFinal) 
     }
 
     // Victoria
-    limpiarPantalla();
+    Platform::clearScreen();
     std::cout << "\n\nHAS DERROTADO A '" << enemigo.getNombre() << "' !\n";
 std::cout << "Has ganado " << res.expObtenida << " de experiencia!\n";
 

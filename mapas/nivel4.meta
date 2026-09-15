@@ -1,6 +1,7 @@
 {
   "section": 4,
   "level_cap": 4,
+  "level": 4,
   "encounter": {
     "base": 16, 
     "multiplier": 1.0, 

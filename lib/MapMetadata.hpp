@@ -9,6 +9,7 @@ struct ZoneMetadata {
     std::string id;
     char tile = '\0';
     std::string terrain = "plain";
+    int nivelSugerido = 1; ///< Nivel recomendado de la zona; el jugador muy fuerte encuentra menos combates (#16)
     int terrainColor = 32;
     bool safe = false;
     float encounterMultiplier = 1.0f;

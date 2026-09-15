@@ -1,6 +1,7 @@
 {
   "section": 3,
   "level_cap": 3,
+  "level": 3,
   "encounter": 
   {
     "base": 12, 

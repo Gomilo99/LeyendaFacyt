@@ -66,6 +66,14 @@ public:
         resetear();
     }
 
+    /**
+     * Ajusta la frecuencia de encuentros según la ventaja de nivel.
+     * Ver `EncounterManager::verificarEncuentro` para más detalle.
+     * @param nivelJugador  Nivel actual del jugador
+     * @param nivelZone     Nivel sugerido de la zona actual
+     */
+    void ajustarPorNivel(int nivelJugador, int nivelZone);
+
 private:
     Terreno terrenoActual;    ///< Terreno donde se mueve el jugador
     int pasosDesdeUltimo;     ///< Pasos desde el último encuentro
@@ -74,6 +82,7 @@ private:
     float topeCrecimiento;
     int pasosGracia;
     bool terrenoSeguro;
+    float factorNivel = 1.0f; ///< Multiplicador por nivel del jugador (0.5..1)
 
     /// Devuelve la probabilidad base según el terreno actual
     int getProbabilidadBase() const;

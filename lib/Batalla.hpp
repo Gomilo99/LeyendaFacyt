@@ -4,8 +4,11 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <memory>
 #include "Enemigo.hpp"
 #include "Jugador.hpp"
+
+class InventoryUI; // forward decl (evita el include circular con Inventario.hpp)
 
 // Dimensiones fijas del buffer de pantalla de combate
 const int SCREEN_WIDTH = 84;
@@ -142,12 +145,16 @@ enum class BattleState {
 
 // Maquina de estados del combate. Coordina ScreenBuffer, Renderer e InputHandler.
 class BattleSystem {
+    private:
     BattleState currentState;
     Enemigo* currentEnemy;  // puntero al enemigo (no owned, referencia externa)
     Jugador* player;        // puntero al jugador (no owned, referencia externa)
     ScreenBuffer screenBuffer;
     Renderer renderer;
     InputHandler inputHandler;
+    /// Inventario reutilizable (#19): se crea UNA vez con el jugador y se
+    /// comparte entre turnos en vez de instanciarse en cada `doPlayerAction`.
+    std::unique_ptr<InventoryUI> invUI;
     bool battleOver;
     bool victory;
     bool fled;
@@ -166,7 +173,15 @@ class BattleSystem {
     // Actualiza el mensaje de log que se muestra en pantalla
     void setLog(const std::string& msg);
 public:
+    /**
+     * @brief Construye el sistema de combate.
+     * @param p          Jugador que combate (referencia externa, no owned)
+     * @param e          Enemigo que combate (referencia externa, no owned)
+     * @param allowFlee  true si el jugador puede huir (false contra jefes)
+     */
     BattleSystem(Jugador& p, Enemigo& e, bool allowFlee = true);
+    /// Destructor (liberar `invUI`; requiere tipo completo en Batalla.cpp)
+    ~BattleSystem() = default;
     BattleState getState() const { return currentState; }
     bool isOver() const { return battleOver; }
     bool isVictory() const { return victory; }
@@ -176,11 +191,6 @@ public:
     // Bucle principal del combate: PLAYER_TURN → accion → ENEMY_TURN → loop
     void run();
 };
-
-// Limpia el buffer de entrada (cin.clear + ignore hasta \n)
-void limpiarBuffer();
-// Limpia la terminal (\033[2J\033[1;1H)
-void limpiarPantalla();
 
 // Punto de entrada al combate: muestra intro, instancia BattleSystem, maneja loot/exp post-batalla
 void batalla(Jugador& jugador, Enemigo& enemigo, bool esJefe = false, bool esJefeFinal = false);

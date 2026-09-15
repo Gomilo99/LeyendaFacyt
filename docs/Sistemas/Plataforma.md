@@ -1,6 +1,6 @@
 ---
 creado: 22/07/2026
-modificado: 22/07/2026
+modificado: 14/09/2026
 tipo: Avance
 tags: # deuda-tecnica, idea-loca, bug-critico, bug, refactor
 titulo: Capa de Abstraccion Multiplataforma
@@ -17,7 +17,7 @@ version: 1.0.0
 
 `Platform.hpp` abstrae diferencias entre Windows (Win32 Console API) y Linux/POSIX (termios, ioctl) para terminal, input y detección de tamaño. El resto del código no necesita `#ifdef _WIN32`.
 
-Ver también: [[Mapa]] (GameManager usa Platform para input), [[Combate]] (ScreenBuffer usa Platform para tamaño de terminal), [[Inventario]] (InventoryUI usa Platform para input).
+Ver también: [[Mapa]] (GameManager usa Platform para input), [[Combate]] (ScreenBuffer usa Platform para tamaño de terminal y `clearScreen()` en su loop), [[Inventario]] (InventoryUI usa Platform para input y `clearInputBuffer()`).
 
 ---
 
@@ -32,6 +32,8 @@ Ver también: [[Mapa]] (GameManager usa Platform para input), [[Combate]] (Scree
 | `getKey()` | `_getch()` | `read()` con raw mode activo |
 | `echoOn()` | no-op | `tcsetattr(ECHO |= ...)` |
 | `echoOff()` | no-op | `tcsetattr(ECHO &= ~...)` |
+| `clearScreen()` | ANSI `\x1b[2J\x1b[H` (con pausa corta) | idéntico (independiente del SO) |
+| `clearInputBuffer()` | `std::cin.clear()` + `ignore(max)` | idéntico (sin `#ifdef`) |
 
 ---
 
@@ -149,3 +151,13 @@ Batalla.cpp   → Platform.hpp, ..., Inventario.hpp
 GameManager.cpp → ..., Platform.hpp
 Inventario.cpp → ..., Platform.hpp
 ```
+
+### clearScreen() y clearInputBuffer() (auditoría #20)
+
+- `clearScreen()` reemplazó a las funciones globales libres `limpiarPantalla()`
+  que antes vivían en cada sistema (GameManager y Batalla lo invocaban cada una
+  con su propia versión). Ahora hay una sola implementación en `Platform.hpp`.
+- `clearInputBuffer()` encapsula el `std::cin.clear()` + `ignore(max, '\n')` que
+  los sistemas hacían a mano (ej. inventario tras un `std::cin >>`).
+- Ambos son idénticos en Windows y Linux: solo aplican ANSI o `std::cin`, sin
+  necesidad de `#ifdef _WIN32`.

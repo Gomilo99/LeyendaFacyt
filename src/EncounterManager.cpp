@@ -1,6 +1,7 @@
 #include "../lib/EncounterManager.hpp"
 #include "../lib/DataManager.hpp"
 #include <random>
+#include <algorithm>
 
 /**
  * Inicializa el gestor con terreno LLANURA (probabilidad base 10%)
@@ -8,8 +9,8 @@
  */
 EncounterManager::EncounterManager()
     : terrenoActual(Terreno::LLANURA), pasosDesdeUltimo(0),
-      probabilidadBase(10), multiplicador(1.0f), topeCrecimiento(0.20f),
-      pasosGracia(4), terrenoSeguro(false) {}
+    probabilidadBase(10), multiplicador(1.0f), topeCrecimiento(0.20f),
+    pasosGracia(4), terrenoSeguro(false) {}
 
 void EncounterManager::setTerreno(Terreno t) {
     terrenoActual = t;
@@ -23,7 +24,7 @@ void EncounterManager::resetear() {
     pasosDesdeUltimo = 0;
 }
 void EncounterManager::configurar(int base, float multiplier, float growthCap,
-                                  int graceSteps, bool safe) {
+                                int graceSteps, bool safe) {
     probabilidadBase = base;
     multiplicador = multiplier;
     topeCrecimiento = growthCap;
@@ -53,11 +54,13 @@ int EncounterManager::getProbabilidadBase() const {
  * Verifica si debe ocurrir un encuentro aleatorio.
  *
  * Reglas:
- * 1. No hay encuentros en los primeros 3 pasos (gracia).
+ * 1. No hay encuentros en los primeros pasos (gracia).
  * 2. Probabilidad base según terreno.
- * 3. Aumenta +3% por cada paso extra después del paso 3.
- * 4. Tope máximo de 40%.
- * 5. Si el RNG acierta, resetea el contador y devuelve true.
+ * 3. Aumenta +3% por cada paso extra después del periodo de gracia.
+ * 4. Tope máximo de crecimiento (growth_cap de la metadata).
+ * 5. Se aplica `factorNivel`: menos encuentros si el jugador es más
+ *    fuerte que la zona (#16).
+ * 6. Si el RNG acierta, resetea el contador y devuelve true.
  */
 bool EncounterManager::verificarEncuentro() {
     if (terrenoSeguro || pasosDesdeUltimo <= pasosGracia) return false;
@@ -71,10 +74,32 @@ bool EncounterManager::verificarEncuentro() {
     if (prob > static_cast<int>(probBase * multiplicador) + growth)
         prob = static_cast<int>(probBase * multiplicador) + growth;
 
+    // Factor de nivel (0.5..1): el jugador muy fuerte por encima de la zona
+    // encuentra menos enemigos. Rango clamp a [1, 100] por seguridad.
+    prob = std::min(100, std::max(1, static_cast<int>(prob * factorNivel)));
+
     std::uniform_int_distribution<int> dist(0, 99);
     if (dist(DataManager::rng()) < prob) {
         resetear();
         return true;
     }
     return false;
+}
+
+/**
+ * Ajusta la frecuencia de encuentros según la ventaja de nivel del jugador.
+ *
+ * Si el jugador es más fuerte que la zona, la probabilidad se reduce
+ * linealmente: cada nivel de ventaja resta 15 puntos porcentuales del
+ * multiplicador, con un piso de 0.5 (nunca menos de la mitad).
+ *
+ * @param nivelJugador  Nivel actual del jugador
+ * @param nivelZona     Nivel sugerido de la zona (ZoneMetadata::nivelSugerido)
+ *
+ * Ejemplo: jugador nivel 7 en zona de nivel 4 → factor 0.55.
+ */
+void EncounterManager::ajustarPorNivel(int nivelJugador, int nivelZona){
+    int dif = nivelJugador - nivelZona;
+    factorNivel = 1.0f;
+    if (dif > 0) factorNivel = std::max(0.5f, 1.0f - 0.15f * dif);
 }

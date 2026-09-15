@@ -3,6 +3,7 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <limits>
 
 #ifdef _WIN32
 #include <conio.h>
@@ -30,6 +31,28 @@
  * @endcode
  */
 namespace Platform {
+
+/**
+ * @brief Limpia la terminal mediante códigos ANSI.
+ *
+ * Emite `\033[2J\033[1;1H` (borra toda la pantalla y posiciona el cursor
+ * en la esquina superior izquierda). Reemplaza a la antigua función libre
+ * `limpiarPantalla()` de `batalla.cpp` (#20).
+ */
+inline void clearScreen(){ std::cout << "\033[2J\033[1;1H"; }
+
+/**
+ * @brief Descarta el contenido pendiente del buffer de entrada estándar.
+ *
+ * Restaura los flags de error de `std::cin` e ignora todo lo que quede
+ * hasta el final de línea (incluido el `\n`). Se usa antes de `std::cin.get()`
+ * para que la lectura no consuma basura residual. Reemplaza a la antigua
+ * función libre `limpiarBuffer()` de `batalla.cpp` (#20).
+ */
+inline void clearInputBuffer() {
+    std::cin.clear();
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+}
 
 #ifndef _WIN32
 static termios orig_termios;

@@ -1,6 +1,6 @@
 ---
 creado: 22/07/2026
-modificado: 08/09/2026
+modificado: 14/09/2026
 tipo: Avance
 tags: # deuda-tecnica, idea-loca, bug-critico, bug, refactor
 titulo: Enemigos, Factoria y Encuentros
@@ -13,7 +13,7 @@ version: 1.0.0
 ---
 # Sistema de Enemigos, Factoría y Encuentros
 
-> Archivos: `lib/Enemigo.hpp`, `src/Enemigo.cpp`, `lib/EnemyFactory.hpp`, `src/EnemyFactory.cpp`, `lib/EncounterManager.hpp`, `src/EncounterManager.cpp`
+> Archivos: `lib/Enemigo.hpp`, `src/Enemigo.cpp`, `lib/EnemyFactory.hpp`, `src/EnemyFactory.cpp`, `lib/EncounterManager.hpp`, `src/EncounterManager.cpp`, `lib/EnemyBehavior.hpp`, `src/EnemyBehavior.cpp`
 
 Tres sistemas independientes que se integran en [[Mapa|GameManager]]:
 
@@ -80,7 +80,8 @@ Personaje (clase base abstracta)
   └── Enemigo
         ├── id         : string  (clave única, ej. "goblin", "admin_servidor")
         ├── asciiArt[6]: string  (6 líneas de arte ASCII)
-        └── botin      : vector<Drop>  (array extensible de objetos+probabilidad)
+        ├── botin      : vector<Drop>  (array extensible de objetos+probabilidad)
+        └── comportamiento : shared_ptr<EnemyBehavior>  (Strategy, auditoría #12)
 ```
 
 ### Constructor
@@ -199,6 +200,31 @@ si random(0, 99) < resultado → ENCUENTRO!
 - El crecimiento nunca supera `growth_cap`.
 - El contador se resetea al ocurrir un encuentro o al entrar en terreno seguro.
 
+### Factor de nivel del jugador (auditoría #16)
+
+`encounterMgr.ajustarPorNivel(nivelJugador, nivelSugeridoZona)` — llamado desde
+`GameManager::moverJugador()` (L268) — modula la probabilidad del encuentro según
+la diferencia entre el nivel del jugador y el de la zona:
+
+```
+dif        = nivelJugador - nivelSugeridoZona
+factorNivel = max(0.5f, 1.0f - 0.15f × dif)
+```
+
+`verificarEncuentro()` aplica el factor sobre la probabilidad calculada,
+ajustada al rango `[1, 100]`:
+
+```
+prob = clamp(prob × factorNivel, 1, 100)
+```
+
+- `nivelSugeridoZona` proviene del campo `"level"` de la zona en el `.meta`
+  (`ZoneMetadata::nivelSugerido`, default 1). Sin el campo, el factor queda en
+  1.0 y no altera encuentros.
+- Jugador más fuerte que la zona → menor encontrabilidad (factor < 1).
+- Jugador por debajo del nivel sugerido → factor > 1 (hasta 0.5 de piso igual
+  favorece al jugador por diferencia positiva).
+
 ### Curación porcentual
 
 El arte y el nombre de cada enemigo se dibujan con el color configurado para
@@ -207,6 +233,28 @@ recursos de mapa de un solo uso. Su porcentaje se
 define en la metadata para que cada sección tenga una economía de curación
 distinta. La curación se calcula sobre la vida máxima actual, nunca sobre un
 valor fijo.
+
+### Comportamiento de combate (patrón Strategy, auditoría #12)
+
+La clase `EnemyBehavior` (lib/EnemyBehavior.hpp + src/EnemyBehavior.cpp) encapsula
+la decisión de qué hace el enemigo en su turno. `Enemigo` guarda su estrategia como
+`shared_ptr<EnemyBehavior>` y `BattleSystem::doEnemyTurn()` la ejecuta vía
+`Enemigo::ejecutarComportamiento()`, eliminando el `if` hardcodeado en el estado
+`ENEMY_TURN`.
+
+| Estrategia | Regla | Origen |
+|-----------|-------|--------|
+| `AgresivoBehavior` | Ataca siempre (comportamiento por defecto) | Campo faltante o `"behavior": "aggressive"` |
+| `DefensivoBehavior` | Si HP < 50% de su máximo, se cura 12.5% de vida máx y **no ataca**; si no, ataca | `"behavior": "defensivo"` |
+| `SanadorBehavior` | Si HP < máximo, se cura 10% de vida máx y **no ataca**; si no, ataca | `"behavior": "sanador"` |
+
+- `EnemyFactory` asigna la estrategia desde el JSON en los 4 puntos de creación
+  (`crearPorId`, `crearJefe` y los que pasan por `crearEnemigo` → plantilla).
+  El turno las ejecuta en `BattleSystem::doEnemyTurn()` — ver [[Combate]].
+- Las estrategias son inmutables y sin estado; el copy-constructor de `Enemigo`
+  comparte el mismo `shared_ptr` (no clona).
+- La curación usa `recibirDano(-cantidad)`, por lo que no puede superar la vida
+  máxima pero respeta el cálculo sobre el HP actual.
 
 ## 8. Ruta de dificultad de cinco niveles
 
@@ -256,6 +304,7 @@ if (es transitable) {
       "ataque": 8,
       "defensa": 3,
       "peso": 10,
+      "behavior": "defensivo",
       "ascii": ["     /\\", "    /  \\", "   | <> |", "   | <> |", "   /    \\", "  /______\\"],
       "botin": [
         { "nombre": "Pocion Milagrosa", "prob": 70 },
@@ -277,6 +326,7 @@ if (es transitable) {
 | `ataque` | int | Daño base |
 | `defensa` | int | Reducción de daño |
 | `peso` | int | Probabilidad relativa de aparición (más alto = más común) |
+| `behavior` | string | Estrategia de combate: `"aggressive"` (default), `"defensivo"` o `"sanador"` (auditoría #12) |
 | `ascii` | string[6] | Arte ASCII de 6 líneas |
 | `botin` | array | Lista de drops con nombre del objeto y probabilidad |
 | `boss` | bool | `true` si es el jefe del nivel |
@@ -312,6 +362,7 @@ Jugador presiona W
   │       └─ encounterMgr.verificarEncuentro()
   │           ├─ pasosDesdeUltimo < 4? → No
   │           ├─ calcula base × multiplicadores y crecimiento
+  │           ├─ aplica factorNivel (verificarEncuentro #16)
   │           ├─ respeta growth_cap de la metadata
   │           └─ 7 < probabilidad → VERDADERO
   │
@@ -346,6 +397,7 @@ Jugador pisa tile 'B'
 | `json/objetos.json` | Objetos referenciados por `botin` |
 | `lib/Enemigo.hpp` / `src/Enemigo.cpp` | Clase entidad enemigo |
 | `lib/EnemyFactory.hpp` / `src/EnemyFactory.cpp` | Fábrica: carga, almacena, crea |
+| `lib/EnemyBehavior.hpp` / `src/EnemyBehavior.cpp` | Strategy de comportamiento de turno (#12) |
 | `lib/EncounterManager.hpp` / `src/EncounterManager.cpp` | Gestor de encuentros aleatorios |
 | `lib/GameManager.hpp` / `src/GameManager.cpp` | [[Mapa|FSM]] + integración |
 | `lib/Batalla.hpp` / `src/batalla.cpp` | [[Combate]] (lee botín y arte) |
